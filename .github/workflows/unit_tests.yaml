@@ -5,9 +5,11 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
+
 jobs:
   ruff:
     runs-on: ubuntu-latest
@@ -25,6 +27,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13]
       fail-fast: false
+    defaults:
+      run:
+        shell: bash -l {0}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -41,9 +46,14 @@ jobs:
       - name: Set up Conda environment from environment.yaml
         uses: conda-incubator/setup-miniconda@v3
         with:
-          environment-file: environment.yaml
-          auto-activate-base: false
+          activate-environment: rascal2
+          python-version: 3.12
       - name: Install RasCAL2
-        run: pip install .
+        run: |
+          conda init bash
+          conda activate rascal2
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install .
       - name: Run pytest
         run: pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
