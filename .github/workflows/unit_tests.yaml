@@ -22,7 +22,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13]
-    
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v4      
       - name: Set up Conda environment from environment.yaml
@@ -30,6 +32,15 @@ jobs:
         with:
           environment-file: environment.yaml
           auto-activate-base: false
+      - name: Install OMP (MacOS) 
+        if: runner.os == 'macOS'
+        run: |
+          brew install llvm libomp
+          echo "export CC=/usr/local/opt/llvm/bin/clang" >> ~/.bashrc
+          echo "export CFLAGS=\"$CFLAGS -I/usr/local/opt/libomp/include\"" >> ~/.bashrc
+          echo "export CXXFLAGS=\"$CXXFLAGS -I/usr/local/opt/libomp/include\"" >> ~/.bashrc
+          echo "export LDFLAGS=\"$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp\"" >> ~/.bashrc
+          source ~/.bashrc
       - name: Install RasCAL2
         run: pip install .
       - name: Run pytest
