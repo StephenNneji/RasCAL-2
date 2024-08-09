@@ -36,6 +36,7 @@ jobs:
           echo "export CXXFLAGS=\"$CXXFLAGS -I/usr/local/opt/libomp/include\"" >> ~/.bashrc
           echo "export LDFLAGS=\"$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp\"" >> ~/.bashrc
           source ~/.bashrc
+          pip install RATapi @ git+https://github.com/RascalSoftware/python-RAT.git@main
       - name: Set up Conda environment from environment.yaml
         uses: conda-incubator/setup-miniconda@v3
         with:
