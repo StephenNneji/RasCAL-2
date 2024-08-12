@@ -31,6 +31,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Conda environment from environment.yaml
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: rascal2
+          python-version: 3.12
       - name: Install OMP (MacOS) 
         if: runner.os == 'macOS'
         run: |
@@ -40,12 +45,12 @@ jobs:
           echo "export CXXFLAGS=\"$CXXFLAGS -I/usr/local/opt/libomp/include\"" >> ~/.bashrc
           echo "export LDFLAGS=\"$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp\"" >> ~/.bashrc
           source ~/.bashrc
-      - name: Set up Conda environment from environment.yaml
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          activate-environment: rascal2
-          python-version: 3.12
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install .
+
       - name: Install RasCAL2
+        if: runner.os != 'macOS'
         run: |
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
@@ -54,7 +59,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install libgl1
+          sudo apt-get install libgl1-mesa-dev
           python -m pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
       - name: Run pytest (Windows and MacOS)
         if: runner.os != 'Linux'
