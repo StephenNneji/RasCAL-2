@@ -48,8 +48,7 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
           pip install .
-
-      - name: Install RasCAL2
+      - name: Install RasCAL2 (Windows and Linux)
         if: runner.os != 'macOS'
         run: |
           pip install -r requirements.txt
@@ -59,7 +58,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install libgl1-mesa-dev
+          sudo apt-get install libgl1-mesa-devb '^libxcb.*-dev'
           python -m pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
       - name: Run pytest (Windows and MacOS)
         if: runner.os != 'Linux'
