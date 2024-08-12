@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   ruff:
     runs-on: ubuntu-latest
@@ -22,15 +26,40 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13]
-    
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
     steps:
-      - uses: actions/checkout@v4      
+      - uses: actions/checkout@v4
       - name: Set up Conda environment from environment.yaml
         uses: conda-incubator/setup-miniconda@v3
         with:
-          environment-file: environment.yaml
-          auto-activate-base: false
-      - name: Install RasCAL2
-        run: pip install .
-      - name: Run pytest
-        run: pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
+          activate-environment: rascal2
+          python-version: 3.12
+      - name: Install OMP (MacOS) 
+        if: runner.os == 'macOS'
+        run: |
+          brew install llvm libomp
+          echo "export CC=/usr/local/opt/llvm/bin/clang" >> ~/.bashrc
+          echo "export CFLAGS=\"$CFLAGS -I/usr/local/opt/libomp/include\"" >> ~/.bashrc
+          echo "export CXXFLAGS=\"$CXXFLAGS -I/usr/local/opt/libomp/include\"" >> ~/.bashrc
+          echo "export LDFLAGS=\"$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp\"" >> ~/.bashrc
+          source ~/.bashrc
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install .
+      - name: Install RasCAL2 (Windows and Linux)
+        if: runner.os != 'macOS'
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install .
+      - name: Run unit-tests (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install libgl1-mesa-dev '^libxcb.*-dev'
+          xvfb-run --auto-servernum python -m pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
+      - name: Run pytest (Windows and MacOS)
+        if: runner.os != 'Linux'
+        run: python -m pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
