@@ -27,9 +27,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13]
       fail-fast: false
-    defaults:
-      run:
-        shell: bash -l {0}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -50,8 +47,6 @@ jobs:
           python-version: 3.12
       - name: Install RasCAL2
         run: |
-          conda init bash
-          conda activate rascal2
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
           pip install .
