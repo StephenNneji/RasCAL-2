@@ -58,9 +58,8 @@ jobs:
       - name: Run unit-tests (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
-          sudo apt-get install xvfb
-          xvfb-run --auto-servernum python -m pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
+          apt-get update && apt-get install libgl1
+          python -m pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
       - name: Run pytest (Windows and MacOS)
         if: runner.os != 'Linux'
         run: python -m pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
