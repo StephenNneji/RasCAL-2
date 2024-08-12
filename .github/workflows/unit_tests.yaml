@@ -56,4 +56,4 @@ jobs:
           pip install -r requirements-dev.txt
           pip install .
       - name: Run pytest
-        run: pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
+        run: python -m pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
