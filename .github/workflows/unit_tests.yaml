@@ -58,7 +58,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install libgl1-mesa-devb '^libxcb.*-dev'
+          sudo apt-get install libgl1-mesa-dev '^libxcb.*-dev'
           python -m pytest -s tests/ -m "not slow" --cov=rascal2 --cov-report=term
       - name: Run pytest (Windows and MacOS)
         if: runner.os != 'Linux'
