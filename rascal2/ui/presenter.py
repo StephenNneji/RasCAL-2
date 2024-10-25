@@ -185,6 +185,7 @@ class MainWindowPresenter:
         updated_project : RAT.Project
             The updated project.
         """
+        # Create a edit project command so this operation can be undone
         self.model.edit_project(updated_project)
 
 

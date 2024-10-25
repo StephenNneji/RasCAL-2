@@ -20,10 +20,18 @@ class ProjectWidget(QtWidgets.QWidget):
         """
         super().__init__(parent)
         self.parent = parent
-        self.presenter = self.parent.presenter
-        self.model = self.parent.presenter.model
+        self.parent_model = self.parent.presenter.model
+        self.parent_model.project_updated.connect(self.update_project_view)
 
-        self.presenter.model.project_updated.connect(self.update_project_view)
+        self.tab_names = [
+            "Parameters",
+            "Experimental Parameters",
+            "Layers",
+            "Data",
+            "Backgrounds",
+            "Domains",
+            "Contrasts",
+        ]
 
         self.create_project_view()
         self.create_edit_view()
@@ -38,15 +46,15 @@ class ProjectWidget(QtWidgets.QWidget):
 
     def update_project_view(self) -> None:
         """Updates the project view."""
-        self.modified_project = self.presenter.model.project.model_copy(deep=True)
+        self.modified_project = self.parent_model.project.model_copy(deep=True)
 
-        self.calculation_type.setText(self.model.project.calculation)
-        self.model_type.setText(self.model.project.model)
-        self.geometry_type.setText(self.model.project.geometry)
+        self.calculation_type.setText(self.parent_model.project.calculation)
+        self.model_type.setText(self.parent_model.project.model)
+        self.geometry_type.setText(self.parent_model.project.geometry)
 
-        self.calculation_combobox.setCurrentText(self.model.project.calculation)
-        self.model_combobox.setCurrentText(self.model.project.model)
-        self.geometry_combobox.setCurrentText(self.model.project.geometry)
+        self.calculation_combobox.setCurrentText(self.parent_model.project.calculation)
+        self.model_combobox.setCurrentText(self.parent_model.project.model)
+        self.geometry_combobox.setCurrentText(self.parent_model.project.geometry)
 
         self.handle_domains_tab()
 
@@ -57,7 +65,7 @@ class ProjectWidget(QtWidgets.QWidget):
         main_layout.setVerticalSpacing(20)
 
         self.edit_project_button = QtWidgets.QPushButton(
-            " Edit Project", self, objectName="bluebutton", icon=QtGui.QIcon(path_for("edit.png"))
+            "Edit Project", self, objectName="bluebutton", icon=QtGui.QIcon(path_for("edit.png"))
         )
         self.edit_project_button.clicked.connect(self.show_edit_view)
         main_layout.addWidget(self.edit_project_button, 0, 5)
@@ -93,28 +101,23 @@ class ProjectWidget(QtWidgets.QWidget):
 
         # Replace QtWidgets.QWidget() with methods to create
         # the tabs in project view.
-        self.project_tab.addTab(QtWidgets.QWidget(), "Parameters")
-        self.project_tab.addTab(QtWidgets.QWidget(), "Backgrounds")
-        self.project_tab.addTab(QtWidgets.QWidget(), "Experimental Parameters")
-        self.project_tab.addTab(QtWidgets.QWidget(), "Layers")
-        self.project_tab.addTab(QtWidgets.QWidget(), "Data")
-        self.project_tab.addTab(QtWidgets.QWidget(), "Contrasts")
-
+        for name in self.tab_names:
+            self.project_tab.addTab(QtWidgets.QWidget(), name)
         main_layout.addWidget(self.project_tab, 2, 0, 1, 6)
         self.project_widget.setLayout(main_layout)
 
     def create_edit_view(self) -> None:
-        """Creates the project edit veiw"""
+        """Creates the project edit view"""
 
         self.edit_project_widget = QtWidgets.QWidget()
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.setSpacing(20)
 
-        self.save_project_button = QtWidgets.QPushButton(" Save Project", self, objectName="greybutton")
+        self.save_project_button = QtWidgets.QPushButton("Save Project", self, objectName="greybutton")
         self.save_project_button.setIcon(QtGui.QIcon(path_for("save-project.png")))
         self.save_project_button.clicked.connect(self.save_changes)
 
-        self.cancel_button = QtWidgets.QPushButton(" Cancel", self, objectName="redbutton")
+        self.cancel_button = QtWidgets.QPushButton("Cancel", self, objectName="redbutton")
         self.cancel_button.setIcon(QtGui.QIcon(path_for("cancel-dark.png")))
         self.cancel_button.clicked.connect(self.cancel_changes)
 
@@ -128,6 +131,7 @@ class ProjectWidget(QtWidgets.QWidget):
 
         self.calculation_combobox = QtWidgets.QComboBox(self)
         self.calculation_combobox.addItems([calc for calc in Calculations])
+        self.calculation_combobox.currentTextChanged.connect(self.handle_domains_tab)
 
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.edit_calculation_label)
@@ -146,9 +150,9 @@ class ProjectWidget(QtWidgets.QWidget):
         self.geometry_combobox = QtWidgets.QComboBox(self)
         self.geometry_combobox.addItems([geo for geo in Geometries])
 
-        self.calculation_combobox.currentTextChanged.connect(lambda s: self.process_combobox_update("calculation", s))
-        self.model_combobox.currentTextChanged.connect(lambda s: self.process_combobox_update("model", s))
-        self.geometry_combobox.currentTextChanged.connect(lambda s: self.process_combobox_update("geometry", s))
+        self.calculation_combobox.currentTextChanged.connect(lambda s: self.update_project_attr("calculation", s))
+        self.model_combobox.currentTextChanged.connect(lambda s: self.update_project_attr("model", s))
+        self.geometry_combobox.currentTextChanged.connect(lambda s: self.update_project_attr("geometry", s))
 
         layout.addWidget(self.edit_geometry_label)
         layout.addWidget(self.geometry_combobox)
@@ -158,18 +162,14 @@ class ProjectWidget(QtWidgets.QWidget):
 
         # Replace QtWidgets.QWidget() with methods to create
         # the tabs in edit view.
-        self.edit_project_tab.addTab(QtWidgets.QWidget(), "Parameters")
-        self.edit_project_tab.addTab(QtWidgets.QWidget(), "Backgrounds")
-        self.edit_project_tab.addTab(QtWidgets.QWidget(), "Experimental Parameters")
-        self.edit_project_tab.addTab(QtWidgets.QWidget(), "Layers")
-        self.edit_project_tab.addTab(QtWidgets.QWidget(), "Data")
-        self.edit_project_tab.addTab(QtWidgets.QWidget(), "Contrasts")
+        for name in self.tab_names:
+            self.edit_project_tab.addTab(QtWidgets.QWidget(), name)
 
         main_layout.addWidget(self.edit_project_tab)
 
         self.edit_project_widget.setLayout(main_layout)
 
-    def process_combobox_update(self, attr_name: str, selected_value: str) -> None:
+    def update_project_attr(self, attr_name: str, selected_value: str) -> None:
         """
         Updates the copy of the project.
 
@@ -184,19 +184,16 @@ class ProjectWidget(QtWidgets.QWidget):
 
     def handle_domains_tab(self) -> None:
         """Displays or hides the domains tab"""
-        domain_tab_ix = 6
-        if (
-            self.calculation_type.text() == Calculations.Domains
-            and self.project_tab.tabText(domain_tab_ix) != "Domains"
-            and self.edit_project_tab.tabText(domain_tab_ix) != "Domains"
-        ):
-            # Replace QtWidgets.QWidget() with methods to create
-            # the domains tab in project and edit view.
-            self.project_tab.insertTab(domain_tab_ix, QtWidgets.QWidget(), "Domains")
-            self.edit_project_tab.insertTab(domain_tab_ix, QtWidgets.QWidget(), "Domains")
-        elif self.calculation_type.text() != Calculations.Domains:
-            self.project_tab.removeTab(domain_tab_ix)
-            self.edit_project_tab.removeTab(domain_tab_ix)
+        domain_tab_index = 5
+
+        # Replace QtWidgets.QWidget() with methods to create
+        # the domains tab in project and edit view.
+        self.project_tab.setTabVisible(
+            domain_tab_index, self.calculation_combobox.currentText() == Calculations.Domains
+        )
+        self.edit_project_tab.setTabVisible(
+            domain_tab_index, self.calculation_combobox.currentText() == Calculations.Domains
+        )
 
     def show_project_view(self) -> None:
         """Show project view"""
@@ -205,12 +202,12 @@ class ProjectWidget(QtWidgets.QWidget):
 
     def show_edit_view(self) -> None:
         """Show edit view"""
-        self.setWindowTitle("Edit Project")
+        self.setWindowTitle("roject")
         self.stacked_widget.setCurrentIndex(1)
 
     def save_changes(self) -> None:
         """Save changes to the project."""
-        self.presenter.edit_project(self.modified_project)
+        self.parent.presenter.edit_project(self.modified_project)
         self.show_project_view()
 
     def cancel_changes(self) -> None:

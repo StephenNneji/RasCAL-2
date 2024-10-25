@@ -46,7 +46,7 @@ def test_project_widget_initial_state(setup_project_widget):
     assert project_widget.stacked_widget.currentIndex() == 0
 
     assert project_widget.edit_project_button.isEnabled()
-    assert project_widget.edit_project_button.text() == " Edit Project"
+    assert project_widget.edit_project_button.text() == "Edit Project"
 
     assert project_widget.calculation_label.text() == "Calculation:"
     assert project_widget.calculation_type.text() == Calculations.NonPolarised
@@ -62,10 +62,10 @@ def test_project_widget_initial_state(setup_project_widget):
 
     # Check the layout of the edit view
     assert project_widget.save_project_button.isEnabled()
-    assert project_widget.save_project_button.text() == " Save Project"
+    assert project_widget.save_project_button.text() == "Save Project"
 
     assert project_widget.cancel_button.isEnabled()
-    assert project_widget.cancel_button.text() == " Cancel"
+    assert project_widget.cancel_button.text() == "Cancel"
 
     assert project_widget.edit_calculation_label.text() == "Calculation:"
     assert project_widget.calculation_combobox.currentText() == Calculations.NonPolarised
@@ -82,9 +82,9 @@ def test_project_widget_initial_state(setup_project_widget):
     for ix, geometry in enumerate(Geometries):
         assert project_widget.geometry_combobox.itemText(ix) == geometry
 
-    for ix, tab in enumerate(["Parameters", "Backgrounds", "Experimental Parameters", "Layers", "Data", "Contrasts"]):
-        assert project_widget.project_tab.tabText(ix) == tab
-        assert project_widget.edit_project_tab.tabText(ix) == tab
+    for index, name in enumerate(project_widget.tab_names):
+        assert project_widget.project_tab.tabText(index) == name
+        assert project_widget.edit_project_tab.tabText(index) == name
 
     assert project_widget.project_tab.currentIndex() == 0
     assert project_widget.edit_project_tab.currentIndex() == 0
@@ -129,7 +129,7 @@ def test_save_changes_to_model_project(setup_project_widget):
     assert project_widget.modified_project.calculation == Calculations.Domains
 
     project_widget.save_project_button.click()
-    assert project_widget.presenter.edit_project.call_count == 1
+    assert project_widget.parent.presenter.edit_project.call_count == 1
 
 
 def test_cancel_changes_to_model_project(setup_project_widget):
@@ -150,7 +150,7 @@ def test_cancel_changes_to_model_project(setup_project_widget):
     assert project_widget.modified_project.calculation == Calculations.Domains
 
     project_widget.cancel_button.click()
-    assert project_widget.presenter.edit_project.call_count == 0
+    assert project_widget.parent.presenter.edit_project.call_count == 0
 
     assert project_widget.calculation_combobox.currentText() == Calculations.NonPolarised
     assert project_widget.calculation_type.text() == Calculations.NonPolarised
@@ -168,15 +168,9 @@ def test_domains_tab(setup_project_widget):
     project_widget.edit_project_button.click()
     project_widget.calculation_combobox.setCurrentText(Calculations.Domains)
     assert project_widget.modified_project.calculation == Calculations.Domains
-    project_widget.presenter.model.project.calculation = Calculations.Domains
+    project_widget.parent_model.project.calculation = Calculations.Domains
     project_widget.calculation_type.setText(Calculations.Domains)
     project_widget.handle_domains_tab()
-
-    for ix, tab in enumerate(
-        ["Parameters", "Backgrounds", "Experimental Parameters", "Layers", "Data", "Contrasts", "Domains"]
-    ):
-        assert project_widget.project_tab.tabText(ix) == tab
-        assert project_widget.edit_project_tab.tabText(ix) == tab
 
     assert project_widget.project_tab.currentIndex() == 0
     assert project_widget.edit_project_tab.currentIndex() == 0
