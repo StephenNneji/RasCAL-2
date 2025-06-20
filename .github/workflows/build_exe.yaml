@@ -1,0 +1,36 @@
+name: Build Exe
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Windows-installer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+            activate-environment: rascal2
+            environment-file: environment.yaml
+            auto-activate-base: false
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release:
+            R2024a
+      - name: Make exe
+        shell: powershell
+        run: |
+          conda init powershell
+          conda activate rascal2
+          pip install matlabengine==24.1.*
+          python packaging/build_exe.py
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows installer
+          path: packaging/bundle/*
