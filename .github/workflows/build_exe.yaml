@@ -23,13 +23,13 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           release:
-            R2024a
+            R2024b
       - name: Make exe
         shell: powershell
         run: |
           conda init powershell
           conda activate rascal2
-          pip install matlabengine~=24.1.0
+          pip install matlabengine==24.2.*
           python packaging/build_exe.py
       - name: Upload installer
         uses: actions/upload-artifact@v4
