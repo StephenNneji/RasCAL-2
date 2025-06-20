@@ -121,7 +121,7 @@ class MainWindowModel(QtCore.QObject):
             # TODO remove this when RascalSoftware/python-RAT/#126 is fixed
             # https://github.com/RascalSoftware/python-RAT/issues/126
             for file in project.custom_files:
-                file.path = Path(load_path, file.path)
+                file.path = load_path
         except JSONDecodeError as err:
             raise ValueError("The project.json file for this project contains invalid JSON.") from err
         except (KeyError, ValueError) as err:

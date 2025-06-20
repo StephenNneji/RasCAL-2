@@ -82,6 +82,7 @@ def build_exe():
 
     for exclude in EXCLUDED_IMPORT:
         pyi_args.extend(["--exclude-module", exclude])
+    pyi_args.extend(["--hidden-import", "numpy._core._exceptions"])
 
     if IS_WINDOWS:
         pyi_args.extend(["--icon", str(PACKAGING_PATH / "icons" / "logo.ico")])
