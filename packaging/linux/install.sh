@@ -108,7 +108,7 @@ echo "Building executable (This should take a few minutes) ..."
 python_exec="./envs/rascal_builder/bin/python"
 CFLAGS=$(./envs/rascal_builder/bin/python3-config --includes)
 export CFLAGS=$CFLAGS
-$python_exec -m pip install --no-cache-dir --no-index --find-links packages -r "./rascal/requirements.txt" --target "./envs/rascal/lib/python3.10/site-packages"
+$python_exec -m pip install --no-cache-dir --no-index --find-links packages -r "./rascal/requirements.txt" --target "./envs/rascal_builder/lib/python3.10/site-packages"
 $python_exec "./rascal/packaging/build_exe.py"
 
 echo "Copying executable and other files ..."
