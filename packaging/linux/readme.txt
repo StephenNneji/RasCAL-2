@@ -9,6 +9,10 @@ After the installer is completed, run the application by typing the following
 
    > rascal
 
+
+LD_PRELOAD=/usr/local/MATLAB/R2024b/sys/os/glnxa64/libstdc++.so.6 rascal
+
+
 Uninstall RasCAL 2
 -------------------------------------------
 To uninstall the RasCAL package, simply delete the installation folder, desktop entry and symbolic link.
