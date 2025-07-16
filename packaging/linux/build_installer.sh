@@ -120,6 +120,7 @@ echo "Downloading Miniconda"
 echo ""
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$TMP_DIR/miniconda.sh"
 bash ./miniconda.sh -b -p ./miniconda
+./miniconda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main --channel https://repo.anaconda.com/pkgs/r
 ./miniconda/bin/conda create -n rascal_builder -y python=3.10
 
 echo ""
