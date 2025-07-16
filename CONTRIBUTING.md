@@ -74,3 +74,17 @@ plugins
         python build_exe.py
         makensis windows/build_installer.nsi
       
+### Linux
+1. The installer can be built by running the **packaging/linux/build_installer.sh** bash script. The script requires 
+   that [makeself](https://makeself.io/) (version 2.4.0) is installed on the machine.
+
+        > ./build_installer.sh --remote --tag v1.0.0
+
+   or
+   
+        > ./build_installer.sh --local ../.. --tag v1.0.0
+   
+   The script above will download RasCAL-2 with tag "v1.0.0" from the remote or clone a local git repo (git required), 
+   download miniconda and required pip packages, then  bundle them all into a makeself archive (*.run) which serves 
+   as the installer. The installer would be created in the **packaging/linux** folder. If the tag option is omitted, 
+   the script will grab the latest version of RasCAL.

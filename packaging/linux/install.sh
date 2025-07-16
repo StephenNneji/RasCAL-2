@@ -1,6 +1,20 @@
 #!/bin/bash
 set -e
 
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    --show-build-output)
+    VERBOSE=YES
+    shift # past argument
+    ;;
+esac
+done
+
+
 echo ""
 echo "Welcome to the RasCAL-2 Installer"
 echo ""
@@ -27,8 +41,8 @@ else
       USER=$LOGNAME
     fi
 fi
-    
-# Show License	
+
+# Show License
 more < "./rascal/LICENSE"
 
 while true
@@ -40,20 +54,20 @@ do
   if [[ "$REPLY" != y && "$REPLY" != n ]]; then
       echo "        <Please answer y for yes or n for no>" > /dev/tty
   fi
-  
+
   if [ "$REPLY" == y ]; then
       break
   fi
-  
+
   if [ "$REPLY" == n ]; then
       echo "Aborting installation"
       exit 1
   fi
 done
- 
+
 echo ""
 echo "Please enter the directory to install in
- 
+
 (The default is \"$INSTALL_DIR\")"
 read -r DIR_NAME
 
@@ -78,7 +92,7 @@ do
 	    echo "Failed to remove old installation"
 	    echo "Aborting installation"
 	    exit 1
-	fi	
+	fi
 	break
     fi
     if [ "$REPLY" = n ]; then
@@ -105,11 +119,24 @@ fi
 echo ""
 echo "Building executable (This should take a few minutes) ..."
 
+
+if [[ -z $VERBOSE ]]; then
+    exec 3>&1
+    exec 4>&2
+    exec >/dev/null 2>&1
+fi
 python_exec="./envs/rascal_builder/bin/python"
 CFLAGS=$(./envs/rascal_builder/bin/python3-config --includes)
 export CFLAGS=$CFLAGS
 $python_exec -m pip install --no-cache-dir --no-index --find-links packages -r "./rascal/requirements.txt" --target "./envs/rascal_builder/lib/python3.10/site-packages"
 $python_exec "./rascal/packaging/build_exe.py"
+
+
+# restore output
+if [[ -z $VERBOSE ]]; then
+    exec 1>&3
+    exec 2>&4
+fi
 
 echo "Copying executable and other files ..."
 
