@@ -1,18 +1,14 @@
 #!/bin/bash
 set -e
 
+function on_error_log_and_exit() {
+  if (( $? )) ; then
+    cat $tmp_log
+    rm $tmp_log
+    exit 1
+  fi
+}
 
-while [[ $# -gt 0 ]]
-do
-key="$1"
-
-case $key in
-    --show-build-output)
-    VERBOSE=YES
-    shift # past argument
-    ;;
-esac
-done
 
 
 echo ""
@@ -119,24 +115,16 @@ fi
 echo ""
 echo "Building executable (This should take a few minutes) ..."
 
+EXIT_CODE=0
+tmp_log=$(mktemp)
 
-if [[ -z $VERBOSE ]]; then
-    exec 3>&1
-    exec 4>&2
-    exec >/dev/null 2>&1
-fi
 python_exec="./envs/rascal_builder/bin/python"
 CFLAGS=$(./envs/rascal_builder/bin/python3-config --includes)
 export CFLAGS=$CFLAGS
-$python_exec -m pip install --no-cache-dir --no-index --find-links packages -r "./rascal/requirements.txt" --target "./envs/rascal_builder/lib/python3.10/site-packages"
-$python_exec "./rascal/packaging/build_exe.py"
-
-
-# restore output
-if [[ -z $VERBOSE ]]; then
-    exec 1>&3
-    exec 2>&4
-fi
+($python_exec -m pip install --no-cache-dir --no-index --find-links packages -r "./rascal/requirements.txt" --target "./envs/rascal_builder/lib/python3.10/site-packages" || EXIT_CODE=$?) &>$tmp_log
+on_error_log_and_exit
+($python_exec "./rascal/packaging/build_exe.py" || EXIT_CODE=$?) &>$tmp_log
+on_error_log_and_exit
 
 echo "Copying executable and other files ..."
 
@@ -150,7 +138,7 @@ chown -R "$USER:$GROUP" "$INSTALL_DIR"
 # Create Desktop Entry for RasCAL-2
 if [ ! -d $MENU_DIR ]; then
     echo "Creating $MENU_DIR"
-    mkdir $MENU_DIR 
+    mkdir $MENU_DIR
 fi
 
 DESKTOP_ENTRY="[Desktop Entry]
@@ -178,4 +166,5 @@ echo "Installation complete."
 echo ""
 
 # Exit from the script with success (0)
+rm $tmp_log
 exit 0
