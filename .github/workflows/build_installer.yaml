@@ -1,6 +1,8 @@
 name: Installer
 
 on:
+  push:
+    branches: [ build_nightly ]
   workflow_dispatch:
 
 concurrency:
