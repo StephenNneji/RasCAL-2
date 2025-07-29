@@ -28,7 +28,7 @@ jobs:
           conda activate rascal2
           conda install -c nsis nsis=3.* accesscontrol
           python packaging/build_exe.py
-          makensis windows/build_installer.nsi
+          makensis packaging/windows/build_installer.nsi
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
