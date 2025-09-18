@@ -13,16 +13,16 @@ from rascal2.settings import Settings, get_global_settings
 if getattr(sys, "frozen", False):
     # we are running in a bundle
     SOURCE_PATH = pathlib.Path(sys.executable).parent.parent
+    SITE_PATH = SOURCE_PATH / "bin/_internal"
+    EXAMPLES_PATH = SOURCE_PATH / "examples"
 else:
     SOURCE_PATH = pathlib.Path(__file__).parent
+    SITE_PATH = site.getsitepackages()[-1]
+    EXAMPLES_PATH = SOURCE_PATH.parent / "examples"
+
 STATIC_PATH = SOURCE_PATH / "static"
 IMAGES_PATH = STATIC_PATH / "images"
-
-if not getattr(sys, "frozen", False):
-    site_path = site.getsitepackages()[-1]
-else:
-    site_path = SOURCE_PATH / "bin/_internal"
-MATLAB_ARCH_FILE = pathlib.Path(site_path) / "matlab/engine/_arch.txt"
+MATLAB_ARCH_FILE = pathlib.Path(SITE_PATH) / "matlab/engine/_arch.txt"
 
 
 def handle_scaling():
@@ -73,7 +73,7 @@ def setup_settings(project_path: str | os.PathLike) -> Settings:
     return Settings()
 
 
-def setup_logging(log_path: str | os.PathLike, terminal, level: int = logging.INFO) -> logging.Logger:
+def setup_logging(log_path: str | os.PathLike, terminal=None, level: int = logging.INFO) -> logging.Logger:
     """Set up logging for the project.
 
     The default logging path and level are defined in the settings.
@@ -82,7 +82,7 @@ def setup_logging(log_path: str | os.PathLike, terminal, level: int = logging.IN
     ----------
     log_path : str | PathLike
         The path to where the log file will be written.
-    terminal : TerminalWidget
+    terminal : Optional[TerminalWidget]
         The TerminalWidget instance which acts as an IO stream.
     level : int, default logging.INFO
         The debug level for the logger.
@@ -98,11 +98,12 @@ def setup_logging(log_path: str | os.PathLike, terminal, level: int = logging.IN
     log_filehandler.setFormatter(file_formatting)
     logger.addHandler(log_filehandler)
 
-    # handler that logs to terminal widget
-    log_termhandler = logging.StreamHandler(stream=terminal)
-    term_formatting = logging.Formatter("%(levelname)s - %(message)s")
-    log_termhandler.setFormatter(term_formatting)
-    logger.addHandler(log_termhandler)
+    if terminal is not None:
+        # handler that logs to terminal widget
+        log_termhandler = logging.StreamHandler(stream=terminal)
+        term_formatting = logging.Formatter("%(levelname)s - %(message)s")
+        log_termhandler.setFormatter(term_formatting)
+        logger.addHandler(log_termhandler)
 
     return logger
 
@@ -114,7 +115,7 @@ def get_logger():
         # Backup in case the crash happens before the local logger setup
         path = pathlib.Path(get_global_settings().fileName()).parent
         path.mkdir(parents=True, exist_ok=True)
-        logger.addHandler(logging.FileHandler(path / "rascal.log"))
+        setup_logging(path / "rascal.log")
 
     return logger
 

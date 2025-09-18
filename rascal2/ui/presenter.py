@@ -1,9 +1,11 @@
 import re
 import warnings
+from pathlib import Path
 from typing import Any
 
 import ratapi as rat
 
+from rascal2.config import EXAMPLES_PATH
 from rascal2.core import commands
 from rascal2.core.enums import UnsavedReply
 from rascal2.core.runner import LogData, RATRunner
@@ -52,7 +54,7 @@ class MainWindowPresenter:
         try:
             self.model.load_project(load_path)
         except ValueError as err:
-            self.view.logging.error(f"Failed to load project at path {load_path}:\n {err}")
+            self.view.logging.error(f"Failed to load project at path {load_path}.\n", exc_info=err)
             raise err  # so that it can be captured by the widget
         self.initialise_ui(self.model.project.name, load_path)
         self.model.update_results(self.model.results)
@@ -122,18 +124,23 @@ class MainWindowPresenter:
         save_as : bool
             Whether we are saving to the existing save path or to a specified folder.
 
+        Returns
+        -------
+         : bool
+            Indicates if the project was saved.
         """
         # we use this isinstance rather than `is not None`
         # because some PyQt signals will send bools and so on to this as a slot!
-        if save_as:
+        if save_as or Path(self.model.save_path).is_relative_to(EXAMPLES_PATH):
             to_path = self.view.get_project_folder()
             if not to_path:
-                return
+                return False
             self.model.save_path = to_path
 
         self.model.save_project()
         update_recent_projects(self.model.save_path)
         self.view.undo_stack.setClean()
+        return True
 
     def ask_to_save_project(self):
         """Warn the user of unsaved changes."""
@@ -143,7 +150,7 @@ class MainWindowPresenter:
             message = f'The project has been modified.\n\nDo you want to save changes to "{self.model.project.name}"?'
             reply = self.view.show_unsaved_dialog(message)
             if reply == UnsavedReply.Save:
-                self.save_project()
+                proceed = self.save_project()
             elif reply == UnsavedReply.Cancel:
                 proceed = False
 
@@ -160,7 +167,7 @@ class MainWindowPresenter:
             try:
                 self.model.results.save(save_file)
             except OSError as err:
-                self.view.logging.error(f"Failed to save project at path {save_file}:\n {err}")
+                self.view.logging.error(f"Failed to save project at path {save_file}.\n", exc_info=err)
 
     def interrupt_terminal(self):
         """Sends an interrupt signal to the RAT runner."""
@@ -218,7 +225,7 @@ class MainWindowPresenter:
         if self.runner.error is None:
             self.view.logging.info("RAT run interrupted!")
         else:
-            self.view.logging.error(f"RAT run failed with exception:\n{self.runner.error}")
+            self.view.logging.error("RAT run failed with exception.\n", exc_info=self.runner.error)
         self.view.reset_widgets()
 
     def handle_event(self):
