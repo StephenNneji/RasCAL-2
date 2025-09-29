@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Any
 
 import ratapi as rat
+import ratapi.wrappers
 
-from rascal2.config import EXAMPLES_PATH
+from rascal2.config import EXAMPLES_PATH, MATLAB_HELPER, get_matlab_engine
 from rascal2.core import commands
 from rascal2.core.enums import UnsavedReply
 from rascal2.core.runner import LogData, RATRunner
@@ -27,6 +28,7 @@ class MainWindowPresenter:
         self.view = view
         self.model = MainWindowModel()
         self.title = self.view.windowTitle()
+        self.worker = None
 
     def create_project(self, name: str, save_path: str):
         """Creates a new RAT project and controls object then initialise UI.
@@ -40,7 +42,7 @@ class MainWindowPresenter:
 
         """
         self.model.create_project(name, save_path)
-        self.initialise_ui(name, save_path)
+        self.initialise_ui()
 
     def load_project(self, load_path: str):
         """Load an existing RAT project then initialise UI.
@@ -51,13 +53,9 @@ class MainWindowPresenter:
             The path from which to load the project.
 
         """
-        try:
-            self.model.load_project(load_path)
-        except ValueError as err:
-            self.view.logging.error(f"Failed to load project at path {load_path}.\n", exc_info=err)
-            raise err  # so that it can be captured by the widget
-        self.initialise_ui(self.model.project.name, load_path)
-        self.model.update_results(self.model.results)
+        self.model.load_project(load_path)
+        if self.model.results is None:
+            self.model.results = self.quick_run()
 
     def load_r1_project(self, load_path: str):
         """Load a RAT project from a RasCAL-1 project file.
@@ -69,22 +67,16 @@ class MainWindowPresenter:
 
         """
         self.model.load_r1_project(load_path)
-        self.initialise_ui(self.model.project.name, self.model.save_path)
+        self.model.results = self.quick_run(self.model.project)
 
-    def initialise_ui(self, name: str, save_path: str):
-        """Initialise UI for a project.
-
-        Parameters
-        ----------
-        name : str
-            The name of the project.
-        save_path : str
-            The save path of the project.
-
-        """
-        self.view.setWindowTitle(self.title + " - " + name)
-        self.view.init_settings_and_log(save_path)
+    def initialise_ui(self):
+        """Initialise UI for a project."""
+        self.view.setWindowTitle(
+            self.title + " - " + self.model.project.name,
+        )
+        self.view.init_settings_and_log(self.model.save_path)
         self.view.setup_mdi()
+        self.view.plot_widget.update_plots(self.model.project, self.model.results)
         self.view.undo_stack.clear()
         self.view.enable_elements()
 
@@ -173,16 +165,24 @@ class MainWindowPresenter:
         """Sends an interrupt signal to the RAT runner."""
         self.runner.interrupt()
 
-    def run(self, procedure: rat.utils.enums.Procedures = None):
-        """Run rat.
+    def quick_run(self):
+        """Run rat calculation with calculate procedure.
 
-        Parameters
-        ----------
-        procedure : Procedures, optional
-            What procedure to run with. If None, will use the procedure
-            from the model controls.
-
+        Returns
+        -------
+        results : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
+            The calculation results.
         """
+        if ratapi.wrappers.MatlabWrapper.loader is None and any(
+            [file.language == "matlab" for file in self.model.project.custom_files]
+        ):
+            result = get_matlab_engine(MATLAB_HELPER.ready_event, MATLAB_HELPER.engine_output)
+            if isinstance(result, Exception):
+                raise result
+        return rat.run(self.model.project, rat.Controls(display="off"))[1]
+
+    def run(self):
+        """Run rat using multiprocessing."""
         # reset terminal
         self.view.terminal_widget.progress_bar.setVisible(False)
         if self.view.settings.clear_terminal:
@@ -190,12 +190,6 @@ class MainWindowPresenter:
 
         # hide bayes plots button so users can't open plots during run
         self.view.plot_widget.bayes_plots_button.setVisible(False)
-
-        # saving the old procedure, changing it, and setting it back at the end
-        # is cheaper than copying controls if procedure is not None
-        old_procedure = self.model.controls.procedure
-        if procedure is not None:
-            self.model.controls.procedure = procedure
 
         rat_inputs = rat.inputs.make_input(self.model.project, self.model.controls)
         display_on = self.model.controls.display != rat.utils.enums.Display.Off
@@ -205,8 +199,6 @@ class MainWindowPresenter:
         self.runner.stopped.connect(self.handle_interrupt)
         self.runner.event_received.connect(self.handle_event)
         self.runner.start()
-
-        self.model.controls.procedure = old_procedure
 
     def handle_results(self):
         """Handle a RAT run being finished."""
@@ -244,13 +236,15 @@ class MainWindowPresenter:
             case LogData():
                 self.view.logging.log(event.level, event.msg)
 
-    def edit_project(self, updated_project: dict) -> None:
+    def edit_project(self, updated_project: dict, preview: bool = False) -> None:
         """Edit the Project with a dictionary of attributes.
 
         Parameters
         ----------
         updated_project : dict
             The updated project attributes.
+        preview : bool
+            indicates if the result should be previewed after update.
 
         Raises
         ------
@@ -261,7 +255,7 @@ class MainWindowPresenter:
         project_dict = self.model.project.model_dump()
         project_dict.update(updated_project)
         self.model.project.model_validate(project_dict)
-        self.view.undo_stack.push(commands.EditProject(updated_project, self))
+        self.view.undo_stack.push(commands.EditProject(updated_project, self, preview=preview))
 
 
 # '\d+\.\d+' is the regex for

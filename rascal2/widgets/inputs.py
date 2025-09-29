@@ -335,8 +335,8 @@ class RangeWidget(QtWidgets.QWidget):
         self.min_box = AdaptiveDoubleSpinBox()
         self.max_box = AdaptiveDoubleSpinBox()
 
-        self.min_box.valueChanged.connect(lambda: self.data_changed.emit())
-        self.max_box.valueChanged.connect(lambda: self.data_changed.emit())
+        self.min_box.editingFinished.connect(lambda: self.data_changed.emit())
+        self.max_box.editingFinished.connect(lambda: self.data_changed.emit())
 
         layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -586,8 +586,12 @@ class MultiSelectComboBox(QtWidgets.QComboBox):
 class ProgressButton(QtWidgets.QPushButton):
     """Creates a custom button that displays a busy indicator
 
-    :param default_text: button text
-    :type default_text: str
+    Parameters
+    ----------
+    default_text : str
+        normal button text.
+    progress_text : str
+        text to display when showing progress.
     """
 
     def __init__(self, default_text, progress_text):
