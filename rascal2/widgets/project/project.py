@@ -150,7 +150,7 @@ class ProjectWidget(QtWidgets.QWidget):
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.setSpacing(20)
 
-        self.save_project_button = QtWidgets.QPushButton("Save Project", self, objectName="greybutton")
+        self.save_project_button = QtWidgets.QPushButton("Accept Changes", self, objectName="greybutton")
         self.save_project_button.setIcon(QtGui.QIcon(path_for("save-project.png")))
         self.save_project_button.clicked.connect(self.save_changes)
 
@@ -212,7 +212,7 @@ class ProjectWidget(QtWidgets.QWidget):
         )
         # when calculation type changed, update the draft project, show/hide the domains tab,
         # and change contrasts to have ratio
-        self.calculation_combobox.currentTextChanged.connect(lambda s: self.update_draft_project({"calculation": s}))
+        self.calculation_combobox.currentTextChanged.connect(lambda s: self.handle_model_update(s))
         self.calculation_combobox.currentTextChanged.connect(lambda: self.handle_tabs())
         self.calculation_combobox.currentTextChanged.connect(
             lambda s: self.edit_tabs["Contrasts"].tables["contrasts"].set_domains(s == Calculations.Domains)
@@ -232,8 +232,7 @@ class ProjectWidget(QtWidgets.QWidget):
         self.edit_absorption_checkbox.checkStateChanged.connect(
             lambda s: self.edit_tabs["Layers"].tables["layers"].set_absorption(s == QtCore.Qt.CheckState.Checked)
         )
-
-        for tab in ["Experimental Parameters", "Layers", "Backgrounds", "Domains"]:
+        for tab in ["Experimental Parameters", "Layers", "Backgrounds", "Resolutions", "Data", "Domains"]:
             for table in self.edit_tabs[tab].tables.values():
                 table.edited.connect(lambda: self.edit_tabs["Contrasts"].tables["contrasts"].update_item_view())
 
@@ -321,23 +320,29 @@ class ProjectWidget(QtWidgets.QWidget):
             self.view_tabs[tab].handle_controls_update(controls)
             self.edit_tabs[tab].handle_controls_update(controls)
 
-    def handle_model_update(self, new_type):
+    def handle_model_update(self, new_entry):
         """Handle updates to the model type.
 
         Parameters
         ----------
-        new_type : LayerModels
-            The new layer model.
+        new_entry : LayerModels | Calculations
+            The new layer model or calculation.
 
         """
         if self.draft_project is None:
             return
 
-        old_type = self.draft_project["model"]
-        self.update_draft_project({"model": new_type})
+        if new_entry in [Calculations.Normal.value, Calculations.Domains.value]:
+            old_entry = self.draft_project["calculation"]
+            self.update_draft_project({"calculation": new_entry})
+            contrast_invalid = self.draft_project["model"] == LayerModels.StandardLayers and old_entry != new_entry
+        else:
+            old_entry = self.draft_project["model"]
+            self.update_draft_project({"model": new_entry})
+            # we use 'xor' (^) as "if the old type was standard layers and the new type isn't, or vice versa"
+            contrast_invalid = (old_entry == LayerModels.StandardLayers) ^ (new_entry == LayerModels.StandardLayers)
 
-        # we use 'xor' (^) as "if the old type was standard layers and the new type isn't, or vice versa"
-        if (old_type == LayerModels.StandardLayers) ^ (new_type == LayerModels.StandardLayers):
+        if contrast_invalid:
             old_contrast_models = {}
             # clear contrasts as what the 'model' means has changed!
             for contrast in self.draft_project["contrasts"]:
@@ -345,7 +350,7 @@ class ProjectWidget(QtWidgets.QWidget):
                 contrast.model = self.old_contrast_models.get(contrast.name, [])
 
             self.old_contrast_models = old_contrast_models
-            self.edit_tabs["Contrasts"].tables["contrasts"].update_item_view()
+        self.edit_tabs["Contrasts"].tables["contrasts"].update_item_view()
 
     def show_project_view(self) -> None:
         """Show project view"""
