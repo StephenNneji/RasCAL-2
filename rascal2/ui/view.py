@@ -5,7 +5,6 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from rascal2.config import EXAMPLES_PATH, get_logger, path_for, setup_logging, setup_settings
 from rascal2.core.enums import UnsavedReply
 from rascal2.dialogs.about_dialog import AboutDialog
-from rascal2.dialogs.matlab_setup_dialog import MatlabSetupDialog
 from rascal2.dialogs.settings_dialog import SettingsDialog
 from rascal2.dialogs.startup_dialog import PROJECT_FILES, LoadDialog, LoadR1Dialog, NewProjectDialog, StartupDialog
 from rascal2.settings import MDIGeometries, Settings, get_global_settings
@@ -82,9 +81,20 @@ class MainWindowView(QtWidgets.QMainWindow):
             project_dlg = dialog(self)
             project_dlg.show()
 
-    def show_settings_dialog(self):
-        """Shows the settings dialog to adjust program settings"""
+    def show_settings_dialog(self, tab_name=""):
+        """Shows the settings dialog and makes tab with given name active.
+
+        Parameters
+        ----------
+        tab_name : str, default ""
+            The name of tab to make active.
+        """
         settings_dlg = SettingsDialog(self)
+        if tab_name:
+            for i in range(settings_dlg.tab_widget.count()):
+                if settings_dlg.tab_widget.tabText(i).lower() == tab_name.lower():
+                    settings_dlg.tab_widget.setCurrentIndex(i)
+                    break
         settings_dlg.show()
 
     def create_actions(self):
@@ -146,7 +156,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.settings_action = QtGui.QAction("Settings", self)
         self.settings_action.setStatusTip("Settings")
         self.settings_action.setIcon(QtGui.QIcon(path_for("settings.png")))
-        self.settings_action.triggered.connect(self.show_settings_dialog)
+        self.settings_action.triggered.connect(lambda: self.show_settings_dialog())
         self.settings_action.setEnabled(False)
         self.disabled_elements.append(self.settings_action)
 
@@ -193,7 +203,7 @@ class MainWindowView(QtWidgets.QMainWindow):
 
         self.setup_matlab_action = QtGui.QAction("Setup MATLAB", self)
         self.setup_matlab_action.setStatusTip("Set the path of the MATLAB executable")
-        self.setup_matlab_action.triggered.connect(self.open_matlab_setup)
+        self.setup_matlab_action.triggered.connect(lambda: self.show_settings_dialog(tab_name="Matlab"))
 
     def add_submenus(self, main_menu: QtWidgets.QMenuBar):
         """Add sub menus to the main menu bar"""
@@ -245,11 +255,6 @@ class MainWindowView(QtWidgets.QMainWindow):
         """Opens about menu containing information about RASCAL gui"""
         self.about_dialog.update_rascal_info(self)
         self.about_dialog.show()
-
-    def open_matlab_setup(self):
-        """Opens the MATLAB setup dialog"""
-        dialog = MatlabSetupDialog(self)
-        dialog.show()
 
     def show_undo_view(self):
         self.undo_view.showNormal()
