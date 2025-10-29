@@ -133,7 +133,7 @@ class MainWindowView(QtWidgets.QMainWindow):
 
         self.undo_view_action = QtGui.QAction("Undo &History", self)
         self.undo_view_action.setStatusTip("View undo history")
-        self.undo_view_action.triggered.connect(self.undo_view.show)
+        self.undo_view_action.triggered.connect(self.show_undo_view)
         self.undo_view_action.setEnabled(False)
         self.disabled_elements.append(self.undo_view_action)
 
@@ -250,6 +250,10 @@ class MainWindowView(QtWidgets.QMainWindow):
         """Opens the MATLAB setup dialog"""
         dialog = MatlabSetupDialog(self)
         dialog.show()
+
+    def show_undo_view(self):
+        self.undo_view.showNormal()
+        self.undo_view.raise_()
 
     def open_docs(self):
         """Opens the documentation"""
@@ -388,8 +392,8 @@ class MainWindowView(QtWidgets.QMainWindow):
         """
         self.controls_widget.fit_settings.setEnabled(enabled)
         self.controls_widget.procedure_dropdown.setEnabled(enabled)
-        self.undo_action.setEnabled(enabled)
-        self.redo_action.setEnabled(enabled)
+        self.undo_action.setEnabled(enabled and self.undo_stack.canUndo())
+        self.redo_action.setEnabled(enabled and self.undo_stack.canRedo())
         self.project_widget.set_editing_enabled(enabled)
 
     def get_project_folder(self) -> str | None:
