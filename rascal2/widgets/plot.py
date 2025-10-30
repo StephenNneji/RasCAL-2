@@ -297,7 +297,10 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         """Save the figure to a file."""
         filepath, accepted = QtWidgets.QFileDialog.getSaveFileName(self, "Export Plot", filter="Image File (*.png)")
         if accepted:
-            self.figure.savefig(filepath)
+            settings = self.parent.parent.settings
+            sx = self.figure.get_figwidth() * self.figure.dpi
+            dpi = self.figure.dpi if sx > 1920 else 1920 // self.figure.get_figwidth()
+            self.figure.savefig(filepath, facecolor=settings.export_background_colour, dpi=dpi)
 
 
 class RefSLDWidget(AbstractPlotWidget):
