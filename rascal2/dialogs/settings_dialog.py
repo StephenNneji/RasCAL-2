@@ -33,6 +33,7 @@ class SettingsDialog(QtWidgets.QDialog):
 
         self.tab_widget = QtWidgets.QTabWidget()
         self.tab_widget.addTab(SettingsTab(self, SettingsGroups.General), SettingsGroups.General)
+        self.tab_widget.addTab(SettingsTab(self, SettingsGroups.Plotting), SettingsGroups.Plotting)
         self.tab_widget.addTab(self.matlab_tab, "Matlab")
 
         self.reset_button = QtWidgets.QPushButton("Reset to Defaults", self)
