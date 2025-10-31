@@ -132,8 +132,9 @@ class Settings(BaseModel, validate_assignment=True, arbitrary_types_allowed=True
     mdi_defaults: MDIGeometries = Field(
         default=None, title=SettingsGroups.Windows, description="Default Window Geometries"
     )
-    export_background_colour: BackgroundColour = Field(default=BackgroundColour.White, title=SettingsGroups.Plotting,
-                                                       description="Background colour of exported plot")
+    export_background_colour: BackgroundColour = Field(
+        default=BackgroundColour.White, title=SettingsGroups.Plotting, description="Background colour of exported plot"
+    )
 
     def model_post_init(self, __context: Any):
         global_settings = get_global_settings()
