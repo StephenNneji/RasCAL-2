@@ -5,7 +5,7 @@ from inspect import isclass
 
 import matplotlib
 import ratapi
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from rascal2.config import path_for
@@ -22,20 +22,16 @@ class PlotWidget(QtWidgets.QWidget):
         self.parent.presenter.model.results_updated.connect(self.update_plots)
 
         layout = QtWidgets.QVBoxLayout()
+        self.reflectivity_plot = RefSLDWidget(self)
+        layout.addWidget(self.reflectivity_plot)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 5, 0, 5)
+        self.setLayout(layout)
 
-        button_layout = QtWidgets.QHBoxLayout()
         self.bayes_plots_button = QtWidgets.QPushButton("View Bayes plots")
         self.bayes_plots_button.setVisible(False)
         self.bayes_plots_button.pressed.connect(self.show_bayes_plots)
-
-        button_layout.addWidget(self.bayes_plots_button)
-        button_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
-        self.reflectivity_plot = RefSLDWidget(self)
-        layout.addLayout(button_layout)
-        layout.addWidget(self.reflectivity_plot)
-        layout.setSpacing(0)
-        layout.setContentsMargins(0, 5, 0, 20)
-        self.setLayout(layout)
+        self.reflectivity_plot.interaction_layout.addWidget(self.bayes_plots_button)
 
     def update_plots(self):
         """Update the plot widget to match the parent model."""
@@ -223,7 +219,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
 
         self.blit_plot = None
         self.figure = self.make_figure()
-        self.canvas = FigureCanvas(
+        self.canvas = FigureCanvasQTAgg(
             self.figure,
         )
         self.figure.set_facecolor("none")
@@ -236,9 +232,50 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         scroll_area.setWidget(self.canvas)
         scroll_area.setWidgetResizable(True)
 
+        central_layout = QtWidgets.QVBoxLayout()
+        central_layout.setContentsMargins(0, 0, 0, 0)
+        self.interaction_layout = self.make_interaction_layout()
+        if self.interaction_layout is not None:
+            central_layout.addLayout(self.interaction_layout)
+        central_layout.addWidget(scroll_area)
+
         main_layout.addLayout(sidebar, 0)
-        main_layout.addWidget(scroll_area, 4)
+        main_layout.addLayout(central_layout, 4)
         self.setLayout(main_layout)
+
+    def update_figure_size(self):
+        """Update figure size to match canvas size."""
+        sx = self.canvas.width() * self.canvas._device_pixel_ratio / self.figure.dpi
+        sy = self.canvas.height() * self.canvas._device_pixel_ratio / self.figure.dpi
+        self.figure.set_size_inches(sx, sy)
+
+    def make_interaction_layout(self):
+        """Make layout with pan, zoom, and reset button.
+
+        Returns
+        -------
+        QtWidgets.QLayout
+            The control panel layout for the plot.
+
+        """
+        self.toolbar = NavigationToolbar2QT(self.canvas)
+        self.toolbar.hide()
+        reset_button = QtWidgets.QToolButton()
+        reset_button.setToolTip("Reset plot")
+        reset_button.setIcon(QtGui.QIcon(path_for("refresh.png")))
+        reset_button.clicked.connect(lambda: self.toolbar.home())
+        pan_button = QtWidgets.QToolButton()
+        pan_button.setDefaultAction(self.toolbar._actions["pan"])
+        zoom_button = QtWidgets.QToolButton()
+        zoom_button.setDefaultAction(self.toolbar._actions["zoom"])
+        button_layout = QtWidgets.QHBoxLayout()
+        button_layout.setContentsMargins(0, 0, 0, 0)
+        button_layout.addWidget(reset_button)
+        button_layout.addWidget(pan_button)
+        button_layout.addWidget(zoom_button)
+        button_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+
+        return button_layout
 
     def toggle_settings(self, toggled_on: bool):
         """Toggles the visibility of the plot controls"""
@@ -417,6 +454,7 @@ class RefSLDWidget(AbstractPlotWidget):
             return
 
         show_legend = self.show_legend.isChecked() if self.current_plot_data.contrastNames else False
+        self.update_figure_size()
         ratapi.plotting.plot_ref_sld_helper(
             self.current_plot_data,
             self.figure,
@@ -428,7 +466,6 @@ class RefSLDWidget(AbstractPlotWidget):
             show_legend=show_legend,
             shift_value=self.slider.value(),
         )
-        self.figure.tight_layout(pad=1)
         self.canvas.draw()
 
     def plot_with_blit(self, data: ratapi.events.PlotEventData | None = None):
@@ -452,6 +489,7 @@ class RefSLDWidget(AbstractPlotWidget):
         show_legend = self.show_legend.isChecked() if self.current_plot_data.contrastNames else False
         shift_value = self.slider.value()
         if self.blit_plot is None:
+            self.update_figure_size()
             self.blit_plot = ratapi.plotting.BlittingSupport(
                 self.current_plot_data,
                 self.figure,
@@ -552,6 +590,9 @@ class AbstractPanelPlotWidget(AbstractPlotWidget):
 
         return layout
 
+    def make_interaction_layout(self):
+        """Make layout with pan, zoom, and reset button."""
+
     def plot(self, _, results):
         self.results = results
         self.draw_plot()
@@ -568,9 +609,7 @@ class AbstractPanelPlotWidget(AbstractPlotWidget):
 
     def resize_canvas(self):
         self.canvas.setMinimumSize(900, 600)
-        sx = self.canvas.width() * self.canvas._device_pixel_ratio / self.figure.dpi
-        sy = self.canvas.height() * self.canvas._device_pixel_ratio / self.figure.dpi
-        self.figure.set_size_inches(sx, sy)
+        self.update_figure_size()
 
     def clear(self):
         self.canvas.figure.clear()
