@@ -168,7 +168,13 @@ class MainWindowPresenter:
 
     def interrupt_terminal(self):
         """Send an interrupt signal to the RAT runner."""
-        self.runner.interrupt()
+        if self.model.controls.procedure in [rat.utils.enums.Procedures.Simplex, rat.utils.enums.Procedures.DE]:
+            self.model.controls.sendStopEvent()
+        else:
+            if not self.view.show_confirm_stop_calculation_dialog():
+                return
+            if self.runner.process.is_alive():
+                self.runner.interrupt()
 
     def quick_run(self, project=None):
         """Run rat calculation with calculate procedure on the given project.
@@ -206,6 +212,7 @@ class MainWindowPresenter:
         # hide bayes plots button so users can't open plots during run
         self.view.plot_widget.bayes_plots_button.setVisible(False)
 
+        self.model.controls.initialise_IPC()
         rat_inputs = rat.inputs.make_input(self.model.project, self.model.controls)
         display_on = self.model.controls.display != rat.utils.enums.Display.Off
 
@@ -226,6 +233,7 @@ class MainWindowPresenter:
             )
         )
         self.view.handle_results(self.runner.results)
+        self.model.controls.delete_IPC()
 
     def handle_interrupt(self):
         """Handle a RAT run being interrupted."""
@@ -234,6 +242,7 @@ class MainWindowPresenter:
         else:
             self.view.logging.error("RAT run failed with exception.\n", exc_info=self.runner.error)
         self.view.handle_results()
+        self.model.controls.delete_IPC()
 
     def handle_event(self):
         """Handle event data produced by the RAT run."""
