@@ -1,6 +1,7 @@
 import pathlib
 import platform
 import sys
+from contextlib import suppress
 
 from PyQt6 import QtCore, QtWidgets
 
@@ -35,6 +36,8 @@ class SettingsDialog(QtWidgets.QDialog):
         self.tab_widget.addTab(SettingsTab(self, SettingsGroups.General), SettingsGroups.General)
         self.tab_widget.addTab(SettingsTab(self, SettingsGroups.Plotting), SettingsGroups.Plotting)
         self.tab_widget.addTab(self.matlab_tab, "Matlab")
+        self.tab_widget.setTabVisible(0, parent.presenter.model.save_path != "")
+        self.tab_widget.setTabVisible(1, parent.presenter.model.save_path != "")
 
         self.reset_button = QtWidgets.QPushButton("Reset to Defaults", self)
         self.reset_button.clicked.connect(self.reset_default_settings)
@@ -58,7 +61,8 @@ class SettingsDialog(QtWidgets.QDialog):
     def update_settings(self) -> None:
         """Accept the changed settings"""
         self.parent().settings = self.settings
-        self.parent().settings.save(self.parent().presenter.model.save_path)
+        if self.parent().presenter.model.save_path:
+            self.parent().settings.save(self.parent().presenter.model.save_path)
         self.matlab_tab.set_matlab_paths()
         self.accept()
 
@@ -172,7 +176,7 @@ class MatlabSetupTab(QtWidgets.QWidget):
             return
 
         should_init = False
-        with open(MATLAB_ARCH_FILE, "r+") as path_file:
+        with suppress(FileNotFoundError), open(MATLAB_ARCH_FILE, "r+") as path_file:
             install_dir = pathlib.Path(self.matlab_path.text())
             if not getattr(sys, "frozen", False):
                 return
