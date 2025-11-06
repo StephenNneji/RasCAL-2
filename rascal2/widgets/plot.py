@@ -63,7 +63,7 @@ class BayesPlotsDialog(QtWidgets.QDialog):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.parent_model = parent.presenter.model
+        self.parent = parent
         self.resize_timer = 0
 
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
@@ -109,13 +109,13 @@ class BayesPlotsDialog(QtWidgets.QDialog):
 
         self.plot_tabs.addTab(plot_widget, plot_type)
 
-        if self.parent_model.results is not None:
-            plot_widget.plot(self.parent_model.project, self.parent_model.results)
-            plot_widget.show_result_summary(self.parent_model.results)
+        if self.parent.presenter.model.results is not None:
+            plot_widget.plot(self.parent.presenter.model.project, self.parent.presenter.model.results)
+            plot_widget.show_result_summary(self.parent.presenter.model.results)
 
     def sync_and_update_model(self):
         """Set panel plot parameter comboboxes to the same model so changing parameters in one updates the others."""
-        if self.parent_model.results is None:
+        if self.parent.presenter.model.results is None:
             return
 
         model = QtGui.QStandardItemModel()
@@ -124,8 +124,8 @@ class BayesPlotsDialog(QtWidgets.QDialog):
             widget = self.plot_tabs.widget(i)
             widget.param_combobox.setModel(model)
             widget.redraw_plot = i != 3
-        widget.param_combobox.addItems(self.parent_model.results.fitNames)
-        widget.param_combobox.select_items(self.parent_model.results.fitNames)
+        widget.param_combobox.addItems(self.parent.presenter.model.results.fitNames)
+        widget.param_combobox.select_items(self.parent.presenter.model.results.fitNames)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
