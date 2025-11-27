@@ -105,18 +105,19 @@ def build_exe():
     shutil.rmtree(work_path)
 
     # Copy resources into installer directory
-    resources = ["static/images", "static/style.css", "../examples"]
+    resources = ["static/images", "static/style.css"]
+    if IS_MAC:
+        # on macOS, examples have to go into resources
+        resources.append("../examples")
     shutil.copy(PROJECT_PATH / "LICENSE", dist_path / "LICENSE")
     for resource in resources:
-        if resource == "../examples" and not IS_MAC:
-            # on macOS, examples have to go into resources
-            continue
-
-        if IS_MAC:
-            dest_path = dist_path / "rascal.app" / "Contents" / "Resources" / resource
-        else:
-            dest_path = dist_path / resource
         src_path = PROJECT_PATH / "rascal2" / resource
+        dest_path = dist_path / resource
+        if IS_MAC:
+            if resource == "../examples":
+                resource = resource[3:]
+            dest_path = dist_path / "rascal.app" / "Contents" / "Resources" / resource
+
         if src_path.is_file():
             shutil.copy(src_path, dest_path)
         else:
