@@ -172,7 +172,7 @@ class MainWindowPresenter:
 
     def quick_run(self, project=None):
         """Run rat calculation with calculate procedure on the given project.
-        The main project is used if no project is provided.
+        The project in the MainWindowModel is used if no project is provided.
 
         Parameters
         ----------

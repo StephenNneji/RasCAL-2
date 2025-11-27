@@ -244,10 +244,10 @@ class LabeledSlider(QtWidgets.QFrame):
         """
 
         value_step = (self.param.max - self.param.min) / self._slider.maximum()
-        value = self.param.min + value * value_step
-        if value > self.param.max:  # This should not happen but do occur due to round-off errors
-            value = self.param.max
-        return value
+        param_value = self.param.min + value * value_step
+        if param_value > self.param.max:  # This should not happen but do occur due to round-off errors
+            param_value = self.param.max
+        return param_value
 
     def _update_value(self, value: int):
         """Update parameter value and plot when slider value is changed.

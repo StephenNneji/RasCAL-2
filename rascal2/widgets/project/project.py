@@ -250,6 +250,8 @@ class ProjectWidget(QtWidgets.QWidget):
     def show_slider_view(self):
         """Create slider view and make it visible."""
         if self.stacked_widget.count() == 3:
+            # 3 widgets means slider view already exist
+            # (with project view and edit view) so delete before replacing with new one
             old_slider_widget = self.stacked_widget.widget(2)
             self.stacked_widget.removeWidget(old_slider_widget)
             old_slider_widget.deleteLater()
@@ -258,8 +260,9 @@ class ProjectWidget(QtWidgets.QWidget):
         self.stacked_widget.setCurrentIndex(2)
 
     def update_slider_view(self):
-        """Update the draft project if it changes."""
+        """Update the slider view if the project changes when it is opened."""
         if self.stacked_widget.currentIndex() == 2:
+            # slider view is the 3rd widget in the layout
             widget = self.stacked_widget.widget(2)
             widget.draft_project = create_draft_project(self.parent_model.project)
             widget.initialize()

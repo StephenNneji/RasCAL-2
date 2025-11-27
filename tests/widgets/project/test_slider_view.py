@@ -49,7 +49,7 @@ def draft_project():
         ]
     )
 
-    yield draft
+    return draft
 
 
 def test_no_sliders_creation():
