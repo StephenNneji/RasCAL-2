@@ -7,7 +7,7 @@ from PyQt6 import QtWidgets
 from rascal2.ui.view import MainWindowView
 from rascal2.widgets.project.project import create_draft_project
 from rascal2.widgets.project.tables import ParameterFieldWidget
-from rascal2.widgets.project.sliders_view import EmptySlider, LabeledSlider
+from rascal2.widgets.project.slider_view import EmptySlider, LabeledSlider
 
 
 class MockFigureCanvas(QtWidgets.QWidget):

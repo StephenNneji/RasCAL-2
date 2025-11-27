@@ -4,7 +4,7 @@ import ratapi
 from PyQt6 import QtCore, QtWidgets
 
 from rascal2.widgets.project.tables import ParametersModel
-from rascal2.widgets.project.sliders_view import LabeledSlider, SliderChangeHolder
+from rascal2.widgets.project.slider_view import LabeledSlider, SliderChangeHolder
 
 
 class ParametersModelMock(ParametersModel):
