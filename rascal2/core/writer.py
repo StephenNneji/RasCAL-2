@@ -49,9 +49,7 @@ def write_result_to_zipped_csvs(filename, results):
         if not isinstance(results, BayesResults):
             return
 
-        procedure_field = (
-            "nestedSamplerOutput" if results.nestedSamplerOutput.nestSamples.shape != (1, 2) else "dreamOutput"
-        )
+        procedure_field = "nestedSamplerOutput" if results.from_procedure() == "ns" else "dreamOutput"
         for inner_class in ["predictionIntervals", "confidenceIntervals", procedure_field]:
             subclass = getattr(results, inner_class)
 
