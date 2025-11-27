@@ -171,7 +171,13 @@ class MainWindowPresenter:
         self.runner.interrupt()
 
     def quick_run(self, project=None):
-        """Run rat calculation with calculate procedure.
+        """Run rat calculation with calculate procedure on the given project.
+        The main project is used if no project is provided.
+
+        Parameters
+        ----------
+        project : Optional[ratapi.Project]
+            The project to use for run
 
         Returns
         -------

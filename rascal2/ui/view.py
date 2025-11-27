@@ -162,7 +162,9 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.open_help_action.setIcon(QtGui.QIcon(path_for("help.png")))
         self.open_help_action.triggered.connect(self.open_docs)
 
-        self.toggle_slider_action = QtGui.QAction("Show Sliders", self)
+        self.toggle_slider_action = QtGui.QAction("Show &Sliders", self)
+        self.toggle_slider_action.setProperty("show_text", "Show &Sliders")
+        self.toggle_slider_action.setProperty("hide_text", "Hide &Sliders")
         self.toggle_slider_action.setStatusTip("Show or Hide Sliders")
         self.toggle_slider_action.triggered.connect(self.toggle_sliders)
         self.toggle_slider_action.setEnabled(False)
@@ -220,7 +222,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         file_menu.addAction(self.save_project_action)
         file_menu.addAction(self.save_as_action)
         file_menu.addSeparator()
-        file_menu.addAction(self.export_results_action)
+        file_menu.addAction(self.export_fits_action)
         file_menu.addSeparator()
         file_menu.addAction(self.settings_action)
         file_menu.addSeparator()
@@ -250,19 +252,14 @@ class MainWindowView(QtWidgets.QMainWindow):
         help_menu.addAction(self.open_help_action)
 
     def toggle_sliders(self):
-        """Toggles sliders for the fitted parameters in project class view.
-
-        Parameters:
-        -----------
-
-        show_sliders: bool, default False
-            indicates if slider widget is visible.
-        """
-        if self.toggle_slider_action.text() == "Show Sliders":
-            self.toggle_slider_action.setText("Hide Sliders")
+        """Toggles sliders for the fitted parameters in project class view."""
+        show_text = self.toggle_slider_action.property("show_text")
+        if self.toggle_slider_action.text() == show_text:
+            hide_text = self.toggle_slider_action.property("hide_text")
+            self.toggle_slider_action.setText(hide_text)
             self.project_widget.show_slider_view()
         else:
-            self.toggle_slider_action.setText("Show Sliders")
+            self.toggle_slider_action.setText(show_text)
             self.project_widget.show_project_view()
 
     def open_about_info(self):

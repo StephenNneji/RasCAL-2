@@ -170,7 +170,7 @@ def test_menu_element_present(test_view, submenu_name):
                 "&Save",
                 "Save To &Folder...",
                 "",
-                "Export Results",
+                "Export Fits",
                 "",
                 "Settings",
                 "",
@@ -179,7 +179,7 @@ def test_menu_element_present(test_view, submenu_name):
         ),
         ("&Edit", ["&Undo", "&Redo", "Undo &History"]),
         ("&Windows", ["Tile Windows", "Reset to Default", "Save Current Window Positions"]),
-        ("&Tools", ["Show Sliders", "", "Clear Terminal", "", "Setup MATLAB"]),
+        ("&Tools", ["Show &Sliders", "", "Clear Terminal", "", "Setup MATLAB"]),
         ("&Help", ["&About", "&Help"]),
     ],
 )
@@ -200,16 +200,18 @@ def test_help_menu_actions_present(test_view, submenu_name, action_names_and_lay
 
 def test_toggle_slider():
     mw = MainWindowView()
-    with patch.object(mw, 'project_widget') as project_mock:
-        assert mw.toggle_slider_action.text() == "Show Sliders"
+    with patch.object(mw, "project_widget") as project_mock:
+        show_text = mw.toggle_slider_action.property("show_text")
+        hide_text = mw.toggle_slider_action.property("hide_text")
+        assert mw.toggle_slider_action.text() == show_text
         project_mock.show_slider_view.assert_not_called()
         project_mock.show_project_view.assert_not_called()
 
         mw.toggle_sliders()
 
-        assert mw.toggle_slider_action.text() == "Hide Sliders"
+        assert mw.toggle_slider_action.text() == hide_text
         project_mock.show_slider_view.assert_called_once()
 
         mw.toggle_sliders()
-        assert mw.toggle_slider_action.text() == "Show Sliders"
+        assert mw.toggle_slider_action.text() == show_text
         project_mock.show_project_view.assert_called_once()

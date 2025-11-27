@@ -1,4 +1,4 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 import ratapi
@@ -9,20 +9,13 @@ from rascal2.widgets.project.project import create_draft_project
 from rascal2.widgets.project.slider_view import LabeledSlider, SliderViewWidget
 
 
-class MockFigureCanvas(QtWidgets.QWidget):
-    """A mock figure canvas."""
-
-    def draw(*args, **kwargs):
-        pass
-
-
 @pytest.fixture
 def draft_project():
     draft = create_draft_project(ratapi.Project())
     draft["parameters"] = ratapi.ClassList(
         [
             ratapi.models.Parameter(name="Param 1", min=1, max=10, value=2.1, fit=True),
-            ratapi.models.Parameter(name="Param 2", min=10, max=100, value=20, fit=True)
+            ratapi.models.Parameter(name="Param 2", min=10, max=100, value=20, fit=True),
         ]
     )
     draft["bulk_in"] = ratapi.ClassList(
@@ -79,13 +72,13 @@ def test_sliders_creation(draft_project):
     assert len(slider_view.parameters) == 8
     assert len(slider_view._sliders) == 8
 
-    for param_name, slider_name in zip(slider_view.parameters, slider_view._sliders.keys(), strict=True):
+    for param_name, slider_name in zip(slider_view.parameters, slider_view._sliders, strict=True):
         assert param_name == slider_name
 
     draft_project["parameters"][0].fit = False
     slider_view = SliderViewWidget(draft_project, mw)
     assert len(slider_view.parameters) == 7
-    assert draft_project["parameters"][0].name not in slider_view._sliders.keys()
+    assert draft_project["parameters"][0].name not in slider_view._sliders
 
 
 def test_slider_buttons():
