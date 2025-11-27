@@ -27,15 +27,15 @@ class SliderViewWidget(QtWidgets.QWidget):
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
 
-        accept_button = QtWidgets.QPushButton("Accept", self)
-        accept_button.clicked.connect(self._apply_changes_from_sliders)
+        self.accept_button = QtWidgets.QPushButton("Accept", self)
+        self.accept_button.clicked.connect(self._apply_changes_from_sliders)
 
         cancel_button = QtWidgets.QPushButton("Cancel", self)
         cancel_button.clicked.connect(self._cancel_changes_from_sliders)
 
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addStretch(1)
-        button_layout.addWidget(accept_button)
+        button_layout.addWidget(self.accept_button)
         button_layout.addWidget(cancel_button)
         main_layout.addLayout(button_layout)
 
@@ -66,11 +66,16 @@ class SliderViewWidget(QtWidgets.QWidget):
 
     def _add_sliders_widgets(self):
         """Add sliders to the layout."""
-        # We are adding new sliders, so delete all previous ones. Update is done in another branch.
+        # We are adding new sliders, so delete all previous ones.
         for slider in self._sliders.values():
             self.slider_content_layout.removeWidget(slider)
             slider.deleteLater()
+        for _ in range(self.slider_content_layout.count()):
+            w = self.slider_content_layout.takeAt(0).widget()
+            if w is not None:
+                w.deleteLater()
         self._sliders.clear()
+        self.accept_button.setDisabled(not self.parameters)
 
         if not self.parameters:
             no_label = QtWidgets.QLabel(
@@ -86,6 +91,7 @@ class SliderViewWidget(QtWidgets.QWidget):
 
                 self._sliders[name] = slider
                 self.slider_content_layout.addWidget(slider)
+            self.slider_content_layout.addStretch(1)
 
     def update_result_and_plots(self):
         project = ratapi.Project()
@@ -154,7 +160,7 @@ class LabeledSlider(QtWidgets.QFrame):
 
         self._slider.valueChanged.connect(self._update_value)
         self.setFrameShape(QtWidgets.QFrame.Shape.Box)
-        self.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding, QtWidgets.QSizePolicy.Policy.Fixed)
 
     def paintEvent(self, event):
         # Draws tick labels
