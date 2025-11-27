@@ -170,14 +170,22 @@ class MainWindowPresenter:
         """Sends an interrupt signal to the RAT runner."""
         self.runner.interrupt()
 
-    def quick_run(self):
-        """Run rat calculation with calculate procedure.
+    def quick_run(self, project=None):
+        """Run rat calculation with calculate procedure on the given project.
+        The project in the MainWindowModel is used if no project is provided.
+
+        Parameters
+        ----------
+        project : Optional[ratapi.Project]
+            The project to use for run
 
         Returns
         -------
         results : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
             The calculation results.
         """
+        if project is None:
+            project = self.model.project
         if ratapi.wrappers.MatlabWrapper.loader is None and any(
             [file.language == "matlab" for file in self.model.project.custom_files]
         ):
@@ -185,7 +193,7 @@ class MainWindowPresenter:
             result = get_matlab_engine(matlab_helper.ready_event, matlab_helper.engine_output)
             if isinstance(result, Exception):
                 raise result
-        return rat.run(self.model.project, rat.Controls(display="off"))[1]
+        return rat.run(project, rat.Controls(display="off"))[1]
 
     def run(self):
         """Run rat using multiprocessing."""
@@ -242,7 +250,7 @@ class MainWindowPresenter:
             case LogData():
                 self.view.logging.log(event.level, event.msg)
 
-    def edit_project(self, updated_project: dict, preview: bool = False) -> None:
+    def edit_project(self, updated_project: dict, preview: bool = True) -> None:
         """Edit the Project with a dictionary of attributes.
 
         Parameters
