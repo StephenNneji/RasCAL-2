@@ -254,39 +254,58 @@ def test_parameter_flags(param_model, prior_type, protected):
                         assert item_flags & QtCore.Qt.ItemFlag.ItemIsEditable
 
 
-def test_param_item_delegates(param_classlist):
+@pytest.fixture
+def widget_with_delegates():
+    widget = ParameterFieldWidget("Test", parent)
+    widget.parent = MagicMock()
+
+    param = [ratapi.models.Parameter() for i in [0, 1, 2]]
+    class_list = ratapi.ClassList(param)
+    widget.update_model(class_list)
+
+    return widget
+
+
+def test_param_item_delegates(widget_with_delegates):
     """Test that parameter models have the expected item delegates."""
-    widget = ParameterFieldWidget("Test", parent)
-    widget.parent = MagicMock()
-    widget.update_model(param_classlist([]))
 
-    for column, header in enumerate(widget.model.headers, start=1):
+    for column, header in enumerate(widget_with_delegates.model.headers, start=1):
         if header in ["min", "value", "max"]:
-            assert isinstance(widget.table.itemDelegateForColumn(column), delegates.ValueSpinBoxDelegate)
+            assert isinstance(widget_with_delegates.table.itemDelegateForColumn(column), delegates.ValueSpinBoxDelegate)
         else:
-            assert isinstance(widget.table.itemDelegateForColumn(column), delegates.ValidatedInputDelegate)
+            assert isinstance(
+                widget_with_delegates.table.itemDelegateForColumn(column), delegates.ValidatedInputDelegate
+            )
 
 
-def test_hidden_bayesian_columns(param_classlist):
+def test_param_item_delegates_exposed_to_sliders(widget_with_delegates):
+    """Test that parameter models provides the item delegates related to slides"""
+
+    delegates_list = widget_with_delegates.get_item_delegates(["min", "max", "value"])
+    assert len(delegates_list) == 3
+
+    for delegate in delegates_list:
+        assert isinstance(delegate, delegates.ValueSpinBoxDelegate)
+
+
+def test_hidden_bayesian_columns(widget_with_delegates):
     """Test that Bayes columns are hidden when procedure is not Bayesian."""
-    widget = ParameterFieldWidget("Test", parent)
-    widget.parent = MagicMock()
-    widget.update_model(param_classlist([]))
-    mock_controls = widget.parent.parent.parent_model.controls = MagicMock()
+
+    mock_controls = widget_with_delegates.parent.parent.parent_model.controls = MagicMock()
     mock_controls.procedure = "calculate"
     bayesian_columns = ["prior_type", "mu", "sigma"]
 
-    widget.handle_bayesian_columns("calculate")
+    widget_with_delegates.handle_bayesian_columns("calculate")
 
     for item in bayesian_columns:
-        index = widget.model.headers.index(item)
-        assert widget.table.isColumnHidden(index + 1)
+        index = widget_with_delegates.model.headers.index(item)
+        assert widget_with_delegates.table.isColumnHidden(index + 1)
 
-    widget.handle_bayesian_columns("dream")
+    widget_with_delegates.handle_bayesian_columns("dream")
 
     for item in bayesian_columns:
-        index = widget.model.headers.index(item)
-        assert not widget.table.isColumnHidden(index + 1)
+        index = widget_with_delegates.model.headers.index(item)
+        assert not widget_with_delegates.table.isColumnHidden(index + 1)
 
 
 def test_layer_model_init():
@@ -383,7 +402,7 @@ def test_layer_widget_delegates(init_list):
         "hydrate_with": delegates.ValidatedInputDelegate,
     }
 
-    widget = LayerFieldWidget("test", parent)
+    widget = LayerFieldWidget("Test", parent)
     widget.update_model(init_list)
 
     for i, header in enumerate(widget.model.headers):

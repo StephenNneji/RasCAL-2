@@ -6,6 +6,7 @@ import ratapi
 from PyQt6 import QtCore, QtWidgets
 from ratapi.utils.enums import Calculations, Geometries, LayerModels
 
+from rascal2.widgets import SlidersViewWidget
 from rascal2.widgets.project.project import ProjectTabWidget, ProjectWidget, create_draft_project
 from rascal2.widgets.project.tables import (
     ClassListTableModel,
@@ -36,6 +37,22 @@ class MockMainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.presenter = MockPresenter()
         self.controls_widget = MagicMock()
+        self.project_widget = None
+        self.sliders_view_widget = SlidersViewWidget(self)
+
+    def show_or_hide_sliders(self, do_show_sliders=True):
+        if do_show_sliders:
+            self.sliders_view_widget.show()
+        else:
+            self.sliders_view_widget.hide()
+
+    def sliders_view_enabled(self, is_enabled: bool, prev_call_vis_sliders_state: bool = False):
+        self.sliders_view_widget.setEnabled(is_enabled)
+        # hide sliders when disabled or else
+        if is_enabled:
+            self.show_or_hide_sliders(do_show_sliders=prev_call_vis_sliders_state)
+        else:
+            self.show_or_hide_sliders(do_show_sliders=False)
 
 
 class DataModel(pydantic.BaseModel, validate_assignment=True):

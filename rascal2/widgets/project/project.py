@@ -72,22 +72,27 @@ class ProjectWidget(QtWidgets.QWidget):
         self.stacked_widget = QtWidgets.QStackedWidget()
         self.stacked_widget.addWidget(project_view)
         self.stacked_widget.addWidget(project_edit)
+        self.stacked_widget.addWidget(self.parent.sliders_view_widget)
 
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.stacked_widget)
         self.setLayout(layout)
 
-    def create_project_view(self) -> None:
+    def create_project_view(self) -> QtWidgets.QWidget:
         """Creates the project (non-edit) view"""
         project_widget = QtWidgets.QWidget()
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.setSpacing(20)
 
+        show_sliders_button = QtWidgets.QPushButton("Show sliders", self, objectName="ShowSliders")
+        show_sliders_button.clicked.connect(lambda: self.parent.show_or_hide_sliders(True))
+
         self.edit_project_button = QtWidgets.QPushButton("Edit Project", self, icon=QtGui.QIcon(path_for("edit.png")))
         self.edit_project_button.clicked.connect(self.show_edit_view)
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+        button_layout.addWidget(show_sliders_button)
         button_layout.addWidget(self.edit_project_button)
 
         main_layout.addLayout(button_layout)
@@ -142,7 +147,7 @@ class ProjectWidget(QtWidgets.QWidget):
 
         return project_widget
 
-    def create_edit_view(self) -> None:
+    def create_edit_view(self) -> QtWidgets.QWidget:
         """Creates the project edit view"""
 
         edit_project_widget = QtWidgets.QWidget()
@@ -360,6 +365,8 @@ class ProjectWidget(QtWidgets.QWidget):
 
     def show_edit_view(self) -> None:
         """Show edit view"""
+
+        # will be updated according to edit changes
         self.update_project_view(0)
         self.setWindowTitle("Edit Project")
         self.parent.controls_widget.run_button.setEnabled(False)
@@ -540,6 +547,7 @@ class ProjectTabWidget(QtWidgets.QWidget):
                 self.tables[field] = DataWidget(field, self)
             else:
                 self.tables[field] = ProjectFieldWidget(field, self)
+            self.tables[field].setObjectName(field)
             layout.addWidget(self.tables[field])
 
         scroll_area = QtWidgets.QScrollArea()
