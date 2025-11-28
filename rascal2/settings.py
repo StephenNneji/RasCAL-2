@@ -41,7 +41,7 @@ def delete_local_settings(path: str | PathLike) -> None:
 
 
 class SettingsGroups(StrEnum):
-    """The groups of the RasCAL-2 settings, used to set tabs in the dialog"""
+    """The groups of the RasCAL-2 settings, used to set tabs in the dialog."""
 
     General = "General"
     Logging = "Logging"

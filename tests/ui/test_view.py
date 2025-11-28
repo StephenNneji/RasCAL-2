@@ -148,8 +148,7 @@ def test_get_project_folder(mock_get_dir: MagicMock):
 
 @pytest.mark.parametrize("submenu_name", ["&File", "&Edit", "&Windows", "&Tools", "&Help"])
 def test_menu_element_present(test_view, submenu_name):
-    """Test requested menu items are present"""
-
+    """Test requested menu items are present."""
     main_menu = test_view.menuBar()
 
     elements = main_menu.children()
@@ -184,8 +183,7 @@ def test_menu_element_present(test_view, submenu_name):
     ],
 )
 def test_help_menu_actions_present(test_view, submenu_name, action_names_and_layout):
-    """Test if menu actions are available and their layouts are as specified in parameterize"""
-
+    """Test if menu actions are available and their layouts are as specified in parameterize."""
     main_menu = test_view.menuBar()
     submenus = main_menu.findChildren(QtWidgets.QMenu)
     for menu in submenus:

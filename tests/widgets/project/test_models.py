@@ -464,7 +464,6 @@ def test_file_model_set_filename(filename, expected_lang, expected_filenames):
 @pytest.mark.parametrize("filename", ["file.m", "file.py", "file.dll", ""])
 def test_file_widget_edit(filename):
     """Test that the correct index widget is created in edit mode."""
-
     with tempfile.TemporaryDirectory() as tmp:
         Path(tmp, "file.py").touch()
         init_list = ratapi.ClassList([ratapi.models.CustomFile(filename="")])

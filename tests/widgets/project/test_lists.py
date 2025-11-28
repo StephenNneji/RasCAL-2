@@ -148,7 +148,6 @@ def test_project_list_widget_empty_model():
 @pytest.mark.parametrize("edit_mode, expected_labels", ([False, ["a", "b", "c"]], [True, ["1", "2", "3"]]))
 def test_project_list_widget_build(mock_project_widget, edit_mode, expected_labels):
     """Test that the project list widget builds correctly when given a model."""
-
     widget = mock_project_widget(edit_mode)
 
     assert widget.view_stack.count() == 3
@@ -162,7 +161,6 @@ def test_project_list_widget_build(mock_project_widget, edit_mode, expected_labe
 @pytest.mark.parametrize("edit_mode, expected_labels", ([False, ["a", "b", "c"]], [True, ["1", "2", "3"]]))
 def test_project_list_widget_choose(mock_project_widget, edit_mode, expected_labels):
     """Test that the current widget changes when the item is selected."""
-
     widget = mock_project_widget(edit_mode)
 
     for i, label in enumerate(expected_labels):
@@ -174,7 +172,6 @@ def test_project_list_widget_choose(mock_project_widget, edit_mode, expected_lab
 @pytest.mark.parametrize("edit_mode, expected_label", ([False, "New Item"], [True, "0"]))
 def test_project_list_widget_append(mock_project_widget, edit_mode, expected_label):
     """Test that items are correctly appended to a project list widget."""
-
     widget = mock_project_widget(edit_mode)
 
     widget.append_item()
@@ -187,7 +184,6 @@ def test_project_list_widget_append(mock_project_widget, edit_mode, expected_lab
 
 def test_project_list_widget_delete(mock_project_widget):
     """Test that items are correctly deleted from a project list widget."""
-
     widget = mock_project_widget()
 
     sel_mod = widget.list.selectionModel()
@@ -204,7 +200,6 @@ def test_project_list_widget_delete(mock_project_widget):
 
 def test_standard_layer_widget_init():
     """Test that the StandardLayerModelWidget initialises as expected."""
-
     widget = StandardLayerModelWidget(["a", "b", "c"], parent)
 
     assert widget.layer_list.model().stringList() == ["a", "b", "c"]

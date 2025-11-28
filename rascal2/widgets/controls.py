@@ -104,7 +104,7 @@ class ControlsWidget(QtWidgets.QWidget):
         self.procedure_dropdown.setCurrentIndex(init_procedure)
 
     def update_ui(self):
-        """Updates UI without firing signals to avoid recursion"""
+        """Updates UI without firing signals to avoid recursion."""
         init_procedure = [p.value for p in Procedures].index(self.presenter.model.controls.procedure)
         self.procedure_dropdown.blockSignals(True)
         self.procedure_dropdown.setCurrentIndex(init_procedure)

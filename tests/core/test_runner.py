@@ -25,7 +25,6 @@ def make_progress_event(percent):
 
 def mock_rat_main(*args, **kwargs):
     """Mock of RAT main that produces some signals."""
-
     rat.events.notify(rat.events.EventTypes.Progress, make_progress_event(0.2))
     rat.events.notify(rat.events.EventTypes.Progress, make_progress_event(0.5))
     rat.events.notify(rat.events.EventTypes.Message, "test message")

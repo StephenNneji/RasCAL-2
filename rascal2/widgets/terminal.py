@@ -104,4 +104,4 @@ class TerminalWidget(QtWidgets.QWidget):
         self.progress_bar.setValue(int(event.percent * 100))
 
     def flush(self):
-        """Added to make TerminalWidget an IO stream"""
+        """Added to make TerminalWidget an IO stream."""

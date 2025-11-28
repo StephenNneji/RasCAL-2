@@ -27,13 +27,12 @@ class StartupDialog(QtWidgets.QDialog):
     folder_selector = QtWidgets.QFileDialog.getExistingDirectory
 
     def __init__(self, parent):
-        """
-        Initialize dialog.
+        """Initialize dialog.
 
         Parameters
         ----------
         parent: MainWindowView
-                An instance of the MainWindowView
+            An instance of the MainWindowView
         """
         super().__init__(parent)
 
@@ -67,7 +66,7 @@ class StartupDialog(QtWidgets.QDialog):
         self.setLayout(main_layout)
 
     def create_loading_bar(self):
-        """Creates non-deterministic progress bar"""
+        """Creates non-deterministic progress bar."""
         self.loading_bar = QtWidgets.QProgressBar()
         self.loading_bar.setMinimum(0)
         self.loading_bar.setMaximum(0)
@@ -245,7 +244,7 @@ class NewProjectDialog(StartupDialog):
 
 
 class DisplayWidget(QtWidgets.QWidget):
-    """Fancy display widget for title and description items in a list"""
+    """Fancy display widget for title and description items in a list."""
 
     def __init__(self, title, desc):
         super().__init__()
@@ -280,7 +279,7 @@ class LoadDialog(StartupDialog):
         self.setLayout(main_layout)
 
     def create_load_tab(self):
-        """Creates the load project widget"""
+        """Creates the load project widget."""
         layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(20)
 
@@ -304,7 +303,7 @@ class LoadDialog(StartupDialog):
         self.tabs.addTab(load_tab, "Load Project")
 
     def create_list_widget_tab(self, tab_name: str):
-        """Create the list widget and add it to tab with given name
+        """Create the list widget and add it to tab with given name.
 
         Parameters
         ----------
@@ -328,7 +327,7 @@ class LoadDialog(StartupDialog):
         return list_widget
 
     def create_example_tab(self):
-        """Creates the example widget"""
+        """Creates the example widget."""
         self.example_list_widget = self.create_list_widget_tab("Examples")
 
         for name, desc in EXAMPLES.items():
@@ -341,7 +340,7 @@ class LoadDialog(StartupDialog):
             item.setSizeHint(item_widget.sizeHint())
 
     def create_recent_tab(self):
-        """Creates the recent project widget"""
+        """Creates the recent project widget."""
         recent_projects = update_recent_projects()
         recent_projects = recent_projects[:6]
         self.recent_list_widget = self.create_list_widget_tab("Recent Projects")
@@ -396,7 +395,7 @@ class LoadDialog(StartupDialog):
         self.block_for_worker(True)
 
     def block_for_worker(self, disabled: bool):
-        """Disable UI while worker is completing
+        """Disable UI while worker is completing.
 
         Parameters
         ----------

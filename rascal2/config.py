@@ -26,7 +26,7 @@ MATLAB_ARCH_FILE = pathlib.Path(SITE_PATH) / "matlab/engine/_arch.txt"
 
 
 def handle_scaling():
-    """Changes settings to handle UI scaling"""
+    """Changes settings to handle UI scaling."""
     if platform.system() == "Windows":
         from ctypes import windll
 
@@ -121,7 +121,7 @@ def get_logger():
 
 
 def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
-    """Qt slots swallows exceptions but this ensures exceptions are logged"""
+    """Qt slots swallows exceptions but this ensures exceptions are logged."""
     logger = get_logger()
     logger.addHandler(logging.StreamHandler(stream=sys.stderr))  # print emergency crashes to terminal
     logger.critical("An unhandled exception occurred!", exc_info=(exc_type, exc_value, exc_traceback))
@@ -130,7 +130,7 @@ def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
 
 
 def run_matlab(ready_event, close_event, engine_output):
-    """Start a new matlab engine instance and waits until closed
+    """Start a new matlab engine instance and waits until closed.
 
     Parameters
     ----------
@@ -162,7 +162,7 @@ def run_matlab(ready_event, close_event, engine_output):
 
 
 def get_matlab_engine(engine_ready, engine_output, is_local=False):
-    """Get a MATLAB engine from the MatlabHelper or exception if no engine is available
+    """Get a MATLAB engine from the MatlabHelper or exception if no engine is available.
 
     Parameters
     ----------
@@ -204,7 +204,7 @@ def get_matlab_engine(engine_ready, engine_output, is_local=False):
 
 
 class MatlabHelper:
-    """Helper to start MATLAB on another process"""
+    """Helper to start MATLAB on another process."""
 
     _instance = None
 
@@ -220,7 +220,7 @@ class MatlabHelper:
         return cls._instance
 
     def async_start(self):
-        """Start MATLAB on a new process"""
+        """Start MATLAB on a new process."""
         self.manager = mp.Manager()
         self.engine_output = self.manager.list()
 
@@ -257,7 +257,7 @@ class MatlabHelper:
         return self.__engine
 
     def get_matlab_path(self):
-        """Get MATLAB install directory
+        """Get MATLAB install directory.
 
         Returns
         -------

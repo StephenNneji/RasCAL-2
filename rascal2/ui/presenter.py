@@ -17,12 +17,12 @@ from .model import MainWindowModel
 
 
 class MainWindowPresenter:
-    """Facilitates interaction between View and Model
+    """Facilitates interaction between View and Model.
 
     Parameters
     ----------
     view : MainWindow
-        main window view instance.
+        An instance of the MainWindowView
     """
 
     def __init__(self, view):
@@ -151,7 +151,7 @@ class MainWindowPresenter:
         return proceed
 
     def export_fits(self):
-        """Export results into multiple csv files in a zip file"""
+        """Export results into multiple csv files in a zip file."""
         if self.model.results is None:
             return
 
@@ -172,6 +172,7 @@ class MainWindowPresenter:
 
     def quick_run(self, project=None):
         """Run rat calculation with calculate procedure on the given project.
+
         The project in the MainWindowModel is used if no project is provided.
 
         Parameters

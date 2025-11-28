@@ -29,9 +29,7 @@ view = MockParentWindow()
     ),
 )
 def test_project_dialog_initial_state(dialog, num_widgets):
-    """
-    Tests that each dialog has expected initial state.
-    """
+    """Tests that each dialog has expected initial state."""
     with patch("rascal2.dialogs.startup_dialog.update_recent_projects", return_value=[]):
         project_dialog = dialog(view)
 
@@ -58,9 +56,7 @@ def test_project_dialog_initial_state(dialog, num_widgets):
 @pytest.mark.parametrize("folder, folder_valid", [("", False), ("Folder", True)])
 @pytest.mark.parametrize("other_folder_error", [True, False])
 def test_create_button(name, name_valid, folder, folder_valid, other_folder_error):
-    """
-    Tests project creation on the NewProjectDialog class.
-    """
+    """Tests project creation on the NewProjectDialog class."""
     project_dialog = NewProjectDialog(view)
     mock_create = view.presenter.create_project = MagicMock()
 
@@ -84,10 +80,7 @@ def test_create_button(name, name_valid, folder, folder_valid, other_folder_erro
 @pytest.mark.parametrize("other_folder_error", [True, False])
 @patch("rascal2.dialogs.startup_dialog.Worker", autospec=True)
 def test_load_button(worker_mock, widget, folder, folder_valid, other_folder_error):
-    """
-    Tests project loading on the LoadDialog and LoadR1Dialog class.
-    """
-
+    """Tests project loading on the LoadDialog and LoadR1Dialog class."""
     with patch("rascal2.dialogs.startup_dialog.update_recent_projects", return_value=[]):
         project_dialog = widget(view)
     if widget == LoadDialog:
@@ -108,9 +101,7 @@ def test_load_button(worker_mock, widget, folder, folder_valid, other_folder_err
 
 @patch.object(StartupDialog, "reject")
 def test_cancel_button(mock_reject):
-    """
-    Tests cancel button on the StartupDialog class.
-    """
+    """Tests cancel button on the StartupDialog class."""
     view.startup_dlg = None
     project_dialog = StartupDialog(view)
 
@@ -121,9 +112,7 @@ def test_cancel_button(mock_reject):
 
 
 def test_folder_selector():
-    """
-    Tests the folder selector and verification on the StartupDialog class.
-    """
+    """Tests the folder selector and verification on the StartupDialog class."""
     project_dialog = StartupDialog(view)
     project_dialog.folder_selector = MagicMock()
     project_dialog.folder_selector.return_value = "/test/folder/path"
@@ -158,7 +147,6 @@ def test_folder_selector():
 )
 def test_recent_projects(recent):
     """Tests that the Recent Projects list is as expected."""
-
     with patch("rascal2.dialogs.startup_dialog.update_recent_projects", return_value=recent):
         project_dialog = LoadDialog(view)
 

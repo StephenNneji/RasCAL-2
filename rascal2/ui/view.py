@@ -18,7 +18,7 @@ MAIN_WINDOW_TITLE = "RasCAL-2"
 
 
 class MainWindowView(QtWidgets.QMainWindow):
-    """Creates the main view for the RasCAL app"""
+    """Creates the main view for the RasCAL application."""
 
     def __init__(self):
         super().__init__()
@@ -95,8 +95,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         settings_dlg.show()
 
     def create_actions(self):
-        """Creates the menu and toolbar actions"""
-
+        """Creates the menu and toolbar actions."""
         self.new_project_action = QtGui.QAction("&New Project", self)
         self.new_project_action.setStatusTip("Create a new project")
         self.new_project_action.setIcon(QtGui.QIcon(path_for("new-project.png")))
@@ -209,7 +208,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.setup_matlab_action.triggered.connect(lambda: self.show_settings_dialog(tab_name="Matlab"))
 
     def create_menus(self):
-        """Add sub menus to the main menu bar"""
+        """Add sub menus to the main menu bar."""
         main_menu = self.menuBar()
         main_menu.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.PreventContextMenu)
 
@@ -263,21 +262,22 @@ class MainWindowView(QtWidgets.QMainWindow):
             self.project_widget.show_project_view()
 
     def open_about_info(self):
-        """Opens about menu containing information about RASCAL gui"""
+        """Opens about dialog containing information about RASCAL."""
         self.about_dialog.update_rascal_info(self)
         self.about_dialog.show()
 
     def show_undo_view(self):
+        """Show and raise undo view to top of parent."""
         self.undo_view.showNormal()
         self.undo_view.raise_()
 
     def open_docs(self):
-        """Opens the documentation"""
+        """Opens the documentation."""
         url = QtCore.QUrl("https://rascalsoftware.github.io/RAT-Docs/dev/index.html")
         QtGui.QDesktopServices.openUrl(url)
 
     def create_toolbar(self):
-        """Creates the toolbar"""
+        """Creates the toolbar."""
         self.toolbar = self.addToolBar("ToolBar")
         self.toolbar.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.PreventContextMenu)
         self.toolbar.setMovable(False)
@@ -291,12 +291,12 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.toolbar.addAction(self.open_help_action)
 
     def create_status_bar(self):
-        """Creates the status bar"""
+        """Creates the status bar."""
         sb = QtWidgets.QStatusBar()
         self.setStatusBar(sb)
 
     def setup_mdi(self):
-        """Creates the multi-document interface"""
+        """Creates the multi-document interface."""
         # if windows are already created, don't set them up again,
         # just refresh the widget data
         if len(self.mdi.subWindowList()) == 4:
@@ -322,9 +322,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.setCentralWidget(self.mdi)
 
     def setup_mdi_widgets(self):
-        """
-        Performs initialization of MDI widgets that rely on the Project being defined.
-        """
+        """Performs initialization of MDI widgets that rely on the Project being defined."""
         self.controls_widget.setup_controls()
         self.project_widget.show_project_view()
         self.plot_widget.clear()

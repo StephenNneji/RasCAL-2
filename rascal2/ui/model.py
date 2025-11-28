@@ -7,7 +7,7 @@ from PyQt6 import QtCore
 
 
 class MainWindowModel(QtCore.QObject):
-    """Manages project data and communicates to view via signals
+    """Manages project data and communicates to view via signals.
 
     Emits
     -----
@@ -83,7 +83,6 @@ class MainWindowModel(QtCore.QObject):
 
     def save_project(self):
         """Save the project to the save path."""
-
         self.controls.save(Path(self.save_path, "controls.json"))
         self.project.save(Path(self.save_path, "project.json"))
         if self.results:

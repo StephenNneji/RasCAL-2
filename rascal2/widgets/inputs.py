@@ -187,6 +187,7 @@ class PathWidget(QtWidgets.QLabel):
             self.open_on_show = False
 
     def open(self):
+        """Open file dialog and get the selected filename."""
         file_dialog = QtWidgets.QFileDialog(parent=self)
         file = file_dialog.getOpenFileName()[0]
         if file:
@@ -395,8 +396,7 @@ class RangeWidget(QtWidgets.QWidget):
 
 
 class MultiSelectComboBox(QtWidgets.QComboBox):
-    """
-    A custom combo box widget that allows for multi-select functionality.
+    """A custom combo box widget that allows for multi-select functionality.
 
     This widget provides the ability to select multiple items from a
     dropdown list and display them in a comma-separated format in the
@@ -410,6 +410,8 @@ class MultiSelectComboBox(QtWidgets.QComboBox):
     selection_changed = QtCore.pyqtSignal()
 
     class Delegate(QtWidgets.QStyledItemDelegate):
+        """Styled Item Delegate for MultiSelectCombobox."""
+
         def sizeHint(self, option, index):
             size = super().sizeHint(option, index)
             size.setHeight(20)
@@ -490,7 +492,6 @@ class MultiSelectComboBox(QtWidgets.QComboBox):
             The associated data. Default is None.
 
         """
-
         self.model().appendRow(self.create_item(text, data))
 
     def create_item(self, text: str, data: str = None):
@@ -605,7 +606,7 @@ class MultiSelectComboBox(QtWidgets.QComboBox):
 
 
 class ProgressButton(QtWidgets.QPushButton):
-    """Creates a custom button that displays a busy indicator
+    """Creates a custom button that displays a busy indicator.
 
     progress_text : str
         text to display when showing progress.
@@ -623,12 +624,12 @@ class ProgressButton(QtWidgets.QPushButton):
 
     @default_text.setter
     def default_text(self, text):
-        """Setter for button text"""
+        """Setter for button text."""
         self._default_text = text
         self.setText(text)
 
     def show_progress(self):
-        """Shows busy indicator"""
+        """Shows busy indicator."""
         self.setEnabled(False)
         self.setText(f"{self.progress_text} ...")
 
@@ -636,14 +637,13 @@ class ProgressButton(QtWidgets.QPushButton):
         self.setText(f"{self.progress_text} - {current} of {total}")
 
     def hide_progress(self):
-        """Hides busy indicator"""
+        """Hides busy indicator."""
         self.setEnabled(True)
         self.setText(self.default_text)
 
 
 class MultiSelectList(QtWidgets.QWidget):
     """A custom widget that allows repeat selection from a list of options.
-
 
     Parameters
     ----------
@@ -699,7 +699,7 @@ class MultiSelectList(QtWidgets.QWidget):
             self.select_menu.addAction(add_item_action)
 
     def add_item(self, name):
-        """Add an item with given name to the list
+        """Add an item with given name to the list.
 
         Parameters
         ----------

@@ -5,13 +5,10 @@ from rascal2.dialogs.startup_dialog import LoadDialog, LoadR1Dialog, NewProjectD
 
 
 class StartUpWidget(QtWidgets.QWidget):
-    """
-    The Start Up widget
-    """
+    """The StartUp widget."""
 
     def __init__(self, parent):
-        """
-        Initialize widget.
+        """Initialize widget.
 
         Parameters
         ----------
@@ -27,9 +24,7 @@ class StartUpWidget(QtWidgets.QWidget):
         self.add_widgets_to_layout()
 
     def add_widgets_to_layout(self) -> None:
-        """
-        Add widgets to layout.
-        """
+        """Add widgets to layout."""
         startup_layout = QtWidgets.QVBoxLayout()
 
         startup_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -53,9 +48,7 @@ class StartUpWidget(QtWidgets.QWidget):
         self.setLayout(startup_layout)
 
     def create_banner_and_footer(self) -> None:
-        """
-        Create banner and footer.
-        """
+        """Create banner and footer."""
         self.banner_label = QtWidgets.QLabel()
         self.banner_label.setPixmap(QtGui.QPixmap(path_for("banner.png")))
         self.banner_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -65,9 +58,7 @@ class StartUpWidget(QtWidgets.QWidget):
         self.footer_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
     def create_buttons(self) -> None:
-        """
-        Create buttons.
-        """
+        """Create buttons."""
         self.new_project_button = QtWidgets.QToolButton(objectName="NewProjectButton")
         self.new_project_button.clicked.connect(lambda: self.parent().show_project_dialog(NewProjectDialog))
 
@@ -78,9 +69,7 @@ class StartUpWidget(QtWidgets.QWidget):
         self.import_r1_button.clicked.connect(lambda: self.parent().show_project_dialog(LoadR1Dialog))
 
     def create_labels(self) -> None:
-        """
-        Create labels.
-        """
+        """Create labels."""
         self.new_project_label = QtWidgets.QLabel("New\nProject")
         self.new_project_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 

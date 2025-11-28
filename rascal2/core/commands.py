@@ -12,7 +12,7 @@ from ratapi import ClassList
 
 @unique
 class CommandID(IntEnum):
-    """Unique ID for undoable commands"""
+    """Unique ID for undoable commands."""
 
     EditControls = 1000
     EditProject = 2000
@@ -76,8 +76,7 @@ class AbstractModelEdit(QtGui.QUndoCommand):
             self.new_result = self.old_result
 
     def mergeWith(self, command):
-        """Merges consecutive Edit controls commands if the attributes are the
-        same."""
+        """Merges consecutive Edit controls commands if the attributes are the same."""
         # We should think about if merging all Edit controls irrespective of
         # attribute is the way to go for UX
         if list(self.new_values.keys()) != list(command.new_values.keys()):
@@ -93,11 +92,13 @@ class AbstractModelEdit(QtGui.QUndoCommand):
         return True
 
     def id(self):
-        """Returns ID used for merging commands"""
+        """Returns ID used for merging commands."""
         raise NotImplementedError
 
 
 class EditControls(AbstractModelEdit):
+    """Command for editing an attribute of the controls model."""
+
     attribute = "controls"
 
     @property
@@ -109,6 +110,8 @@ class EditControls(AbstractModelEdit):
 
 
 class EditProject(AbstractModelEdit):
+    """Command for editing an attribute of the project model."""
+
     attribute = "project"
 
     @property
@@ -204,7 +207,7 @@ class SaveCalculationOutputs(QtGui.QUndoCommand):
         results: ratapi.outputs.Results | ratapi.outputs.BayesResults,
         log: str,
     ):
-        """Updates the project, results and log in the main window model
+        """Updates the project, results and log in the main window model.
 
         Parameters
         ----------

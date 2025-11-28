@@ -22,8 +22,7 @@ class Worker(QtCore.QThread):
         self.stopped = False
 
     def run(self):
-        """This function is executed on worker thread when the ``QThread.start``
-        method is called."""
+        """Execute function on worker thread when the start method is called."""
         if self.stopped:
             return
 

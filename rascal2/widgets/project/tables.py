@@ -43,7 +43,6 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
 
     def setup_classlist(self, classlist: ratapi.ClassList):
         """Setup the ClassList, type and headers for the model."""
-
         self.classlist = classlist
         self.item_type = classlist._class_handle
         if not issubclass(self.item_type, pydantic.BaseModel):
@@ -144,8 +143,8 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
     def index_header(self, index):
         """Get the header for an index.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         index : QModelIndex
             The model index for the header.
 
@@ -211,7 +210,7 @@ class ProjectFieldWidget(QtWidgets.QWidget):
         super().resizeEvent(event)
 
     def resize_columns(self):
-        """Resize the columns of the tableview to avoid truncating content"""
+        """Resize the columns of the tableview to avoid truncating content."""
         header = self.table.horizontalHeader()
         header.setStretchLastSection(False)
         main_col = "filename" if self.model.headers[1] == "filename" else "name"
@@ -609,6 +608,8 @@ class CustomFileModel(ClassListTableModel):
 
 
 class CustomFileWidget(ProjectFieldWidget):
+    """Subclass of field widgets for custom file."""
+
     classlist_model = CustomFileModel
 
     def edit(self):
