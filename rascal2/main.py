@@ -10,7 +10,7 @@ from rascal2.ui.view import MainWindowView
 
 
 def ui_execute():
-    """Creates main window and executes GUI event loop.
+    """Create main window and executes GUI event loop.
 
     Returns
     -------

@@ -64,7 +64,7 @@ class MainWindowView(QtWidgets.QMainWindow):
             event.ignore()
 
     def show_project_dialog(self, dialog: StartupDialog):
-        """Shows a startup dialog of a given type.
+        """Show a startup dialog of a given type.
 
         Parameters
         ----------
@@ -79,7 +79,7 @@ class MainWindowView(QtWidgets.QMainWindow):
             project_dlg.show()
 
     def show_settings_dialog(self, tab_name=""):
-        """Shows the settings dialog and makes tab with given name active.
+        """Show the settings dialog and makes tab with given name active.
 
         Parameters
         ----------
@@ -95,7 +95,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         settings_dlg.show()
 
     def create_actions(self):
-        """Creates the menu and toolbar actions."""
+        """Create the menu and toolbar actions."""
         self.new_project_action = QtGui.QAction("&New Project", self)
         self.new_project_action.setStatusTip("Create a new project")
         self.new_project_action.setIcon(QtGui.QIcon(path_for("new-project.png")))
@@ -251,7 +251,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         help_menu.addAction(self.open_help_action)
 
     def toggle_sliders(self):
-        """Toggles sliders for the fitted parameters in project class view."""
+        """Toggle sliders for the fitted parameters in project class view."""
         show_text = self.toggle_slider_action.property("show_text")
         if self.toggle_slider_action.text() == show_text:
             hide_text = self.toggle_slider_action.property("hide_text")
@@ -262,7 +262,7 @@ class MainWindowView(QtWidgets.QMainWindow):
             self.project_widget.show_project_view()
 
     def open_about_info(self):
-        """Opens about dialog containing information about RASCAL."""
+        """Open about dialog containing information about RASCAL."""
         self.about_dialog.update_rascal_info(self)
         self.about_dialog.show()
 
@@ -272,12 +272,12 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.undo_view.raise_()
 
     def open_docs(self):
-        """Opens the documentation."""
+        """Open the documentation."""
         url = QtCore.QUrl("https://rascalsoftware.github.io/RAT-Docs/dev/index.html")
         QtGui.QDesktopServices.openUrl(url)
 
     def create_toolbar(self):
-        """Creates the toolbar."""
+        """Create the toolbar."""
         self.toolbar = self.addToolBar("ToolBar")
         self.toolbar.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.PreventContextMenu)
         self.toolbar.setMovable(False)
@@ -291,12 +291,12 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.toolbar.addAction(self.open_help_action)
 
     def create_status_bar(self):
-        """Creates the status bar."""
+        """Create the status bar."""
         sb = QtWidgets.QStatusBar()
         self.setStatusBar(sb)
 
     def setup_mdi(self):
-        """Creates the multi-document interface."""
+        """Create the multi-document interface."""
         # if windows are already created, don't set them up again,
         # just refresh the widget data
         if len(self.mdi.subWindowList()) == 4:
@@ -322,7 +322,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.setCentralWidget(self.mdi)
 
     def setup_mdi_widgets(self):
-        """Performs initialization of MDI widgets that rely on the Project being defined."""
+        """Perform initialization of MDI widgets that rely on the Project being defined."""
         self.controls_widget.setup_controls()
         self.project_widget.show_project_view()
         self.plot_widget.clear()

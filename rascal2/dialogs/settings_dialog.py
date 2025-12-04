@@ -112,9 +112,9 @@ class SettingsTab(QtWidgets.QWidget):
         self.setLayout(tab_layout)
 
     def modify_setting(self, setting: str):
-        """A slot that updates the given setting in the dialog's copy of the Settings object.
+        """Update the given setting in the dialog's copy of the Settings object.
 
-        Connect this (via a lambda) to the "edited_signal" of the corresponding widget.
+        Connect this slot (via a lambda) to the "edited_signal" of the corresponding widget.
 
         Parameters
         ----------

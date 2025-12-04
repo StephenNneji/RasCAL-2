@@ -142,7 +142,7 @@ def test_run_error():
     """If RATMain produces an error, it should be added to the queue."""
 
     def erroring_ratmain(*args):
-        """A RATMain mock that raises an error."""
+        """RATMain mock that raises an error."""
         raise ValueError("RAT Main Error!")
 
     queue = Queue()

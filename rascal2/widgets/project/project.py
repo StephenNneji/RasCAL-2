@@ -78,7 +78,7 @@ class ProjectWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
     def create_project_view(self) -> QtWidgets.QWidget:
-        """Creates the project (non-edit) view."""
+        """Create the project (non-edit) view."""
         project_widget = QtWidgets.QWidget()
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.setSpacing(20)
@@ -146,7 +146,7 @@ class ProjectWidget(QtWidgets.QWidget):
         return project_widget
 
     def create_edit_view(self) -> QtWidgets.QWidget:
-        """Creates the project edit view."""
+        """Create the project edit view."""
         edit_project_widget = QtWidgets.QWidget()
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.setSpacing(20)
@@ -264,7 +264,7 @@ class ProjectWidget(QtWidgets.QWidget):
             widget.initialize()
 
     def update_project_view(self, update_tab_index=None) -> None:
-        """Updates the project view."""
+        """Update the project view."""
         if update_tab_index is None:
             update_tab_index = self.stacked_widget.currentIndex()
         tab_to_update = self.view_tabs if update_tab_index == 0 else self.edit_tabs
@@ -302,7 +302,7 @@ class ProjectWidget(QtWidgets.QWidget):
             )
 
     def update_draft_project(self, new_values: dict) -> None:
-        """Updates the draft project.
+        """Update the draft project.
 
         Parameters
         ----------
@@ -313,7 +313,7 @@ class ProjectWidget(QtWidgets.QWidget):
         self.draft_project.update(new_values)
 
     def handle_tabs(self) -> None:
-        """Displays or hides tabs as relevant."""
+        """Display or hide tabs as relevant."""
         # the domains tab should only be visible if calculating domains
         domain_tab_index = list(self.view_tabs).index("Domains")
         is_domains = self.calculation_combobox.currentText() == Calculations.Domains

@@ -255,7 +255,7 @@ class AdaptiveDoubleSpinBox(QtWidgets.QDoubleSpinBox):
         return float(text)
 
     def setValue(self, value: float):
-        """Hook into setValue that sets the decimals when the value is manually set.
+        """Hook into setValue to set the decimals when the value is manually set.
 
         Parameters
         ----------
@@ -629,7 +629,7 @@ class ProgressButton(QtWidgets.QPushButton):
         self.setText(text)
 
     def show_progress(self):
-        """Shows busy indicator."""
+        """Show busy indicator."""
         self.setEnabled(False)
         self.setText(f"{self.progress_text} ...")
 

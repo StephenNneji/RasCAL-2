@@ -66,7 +66,7 @@ class StartupDialog(QtWidgets.QDialog):
         self.setLayout(main_layout)
 
     def create_loading_bar(self):
-        """Creates non-deterministic progress bar."""
+        """Create a non-deterministic progress bar."""
         self.loading_bar = QtWidgets.QProgressBar()
         self.loading_bar.setMinimum(0)
         self.loading_bar.setMaximum(0)
@@ -279,7 +279,7 @@ class LoadDialog(StartupDialog):
         self.setLayout(main_layout)
 
     def create_load_tab(self):
-        """Creates the load project widget."""
+        """Create the load project widget."""
         layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(20)
 
@@ -327,7 +327,7 @@ class LoadDialog(StartupDialog):
         return list_widget
 
     def create_example_tab(self):
-        """Creates the example widget."""
+        """Create the example widget."""
         self.example_list_widget = self.create_list_widget_tab("Examples")
 
         for name, desc in EXAMPLES.items():
@@ -340,7 +340,7 @@ class LoadDialog(StartupDialog):
             item.setSizeHint(item_widget.sizeHint())
 
     def create_recent_tab(self):
-        """Creates the recent project widget."""
+        """Create the recent project widget."""
         recent_projects = update_recent_projects()
         recent_projects = recent_projects[:6]
         self.recent_list_widget = self.create_list_widget_tab("Recent Projects")

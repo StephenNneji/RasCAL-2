@@ -26,7 +26,7 @@ MATLAB_ARCH_FILE = pathlib.Path(SITE_PATH) / "matlab/engine/_arch.txt"
 
 
 def handle_scaling():
-    """Changes settings to handle UI scaling."""
+    """Change settings to handle UI scaling."""
     if platform.system() == "Windows":
         from ctypes import windll
 
@@ -34,7 +34,7 @@ def handle_scaling():
 
 
 def path_for(filename: str):
-    """Gets full path for the given image file.
+    """Get full path for the given image file.
 
     Parameters
     ----------

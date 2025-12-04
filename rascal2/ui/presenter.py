@@ -31,7 +31,7 @@ class MainWindowPresenter:
         self.worker = None
 
     def create_project(self, name: str, save_path: str):
-        """Creates a new RAT project and controls object then initialise UI.
+        """Create a new RAT project and controls object then initialise UI.
 
         Parameters
         ----------
@@ -167,7 +167,7 @@ class MainWindowPresenter:
             self.view.logging.error(f"Failed to save fits to {save_file}.\n", exc_info=err)
 
     def interrupt_terminal(self):
-        """Sends an interrupt signal to the RAT runner."""
+        """Send an interrupt signal to the RAT runner."""
         self.runner.interrupt()
 
     def quick_run(self, project=None):

@@ -35,7 +35,7 @@ class MainWindowModel(QtCore.QObject):
         self.save_path = ""
 
     def create_project(self, name: str, save_path: str):
-        """Creates a new RAT project and controls object.
+        """Create a new RAT project and controls object.
 
         Parameters
         ----------
@@ -70,7 +70,7 @@ class MainWindowModel(QtCore.QObject):
         self.results_updated.emit()
 
     def update_project(self, new_values: dict) -> None:
-        """Replaces the project with a new project.
+        """Replace the project with a new project.
 
         Parameters
         ----------

@@ -76,7 +76,7 @@ class AbstractModelEdit(QtGui.QUndoCommand):
             self.new_result = self.old_result
 
     def mergeWith(self, command):
-        """Merges consecutive Edit controls commands if the attributes are the same."""
+        """Merge consecutive Edit controls commands if the attributes are the same."""
         # We should think about if merging all Edit controls irrespective of
         # attribute is the way to go for UX
         if list(self.new_values.keys()) != list(command.new_values.keys()):
@@ -92,7 +92,7 @@ class AbstractModelEdit(QtGui.QUndoCommand):
         return True
 
     def id(self):
-        """Returns ID used for merging commands."""
+        """Return ID used for merging commands."""
         raise NotImplementedError
 
 
@@ -155,7 +155,7 @@ class SaveCalculationOutputs(QtGui.QUndoCommand):
         self.setText("Save calculation results")
 
     def get_parameter_values(self, problem: ratapi.rat_core.ProblemDefinition):
-        """Gets updated parameter values from problem definition.
+        """Get updated parameter values from problem definition.
 
         Parameters
         ----------
@@ -184,7 +184,7 @@ class SaveCalculationOutputs(QtGui.QUndoCommand):
         return values
 
     def set_parameter_values(self, values: dict):
-        """Updates the parameter values of the project in the main window model.
+        """Update the parameter values of the project in the main window model.
 
         Parameters
         ----------
@@ -207,7 +207,7 @@ class SaveCalculationOutputs(QtGui.QUndoCommand):
         results: ratapi.outputs.Results | ratapi.outputs.BayesResults,
         log: str,
     ):
-        """Updates the project, results and log in the main window model.
+        """Update the project, results and log in the main window model.
 
         Parameters
         ----------

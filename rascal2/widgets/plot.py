@@ -411,7 +411,7 @@ class RefSLDWidget(AbstractPlotWidget):
         self.resize_timer = 0
 
     def plot(self, project: ratapi.Project, results: ratapi.outputs.Results | ratapi.outputs.BayesResults):
-        """Plots the reflectivity and SLD profiles.
+        """Plot the reflectivity and SLD profiles.
 
         Parameters
         ----------
@@ -438,7 +438,7 @@ class RefSLDWidget(AbstractPlotWidget):
         self.plot_event(data)
 
     def plot_event(self, data: ratapi.events.PlotEventData | None = None):
-        """Updates the ref and SLD plots from a provided or cached plot event.
+        """Update the ref and SLD plots from a provided or cached plot event.
 
         Parameters
         ----------
@@ -472,7 +472,7 @@ class RefSLDWidget(AbstractPlotWidget):
         self.canvas.draw()
 
     def plot_with_blit(self, data: ratapi.events.PlotEventData | None = None):
-        """Updates the ref and SLD plots with blitting.
+        """Update the ref and SLD plots with blitting.
 
         Parameters
         ----------
@@ -538,7 +538,7 @@ class ShadedPlotWidget(AbstractPlotWidget):
         self.draw_plot()
 
     def draw_plot(self):
-        """Plots the shaded reflectivity and SLD profiles."""
+        """Plot the shaded reflectivity and SLD profiles."""
         self.clear()
 
         ratapi.plotting.plot_ref_sld(

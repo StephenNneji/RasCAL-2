@@ -42,7 +42,7 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
         self.col_offset = 1
 
     def setup_classlist(self, classlist: ratapi.ClassList):
-        """Setup the ClassList, type and headers for the model."""
+        """Set up the ClassList, type and headers for the model."""
         self.classlist = classlist
         self.item_type = classlist._class_handle
         if not issubclass(self.item_type, pydantic.BaseModel):
