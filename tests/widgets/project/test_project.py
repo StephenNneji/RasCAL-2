@@ -41,7 +41,7 @@ class MockMainWindow(QtWidgets.QMainWindow):
 
 
 class DataModel(pydantic.BaseModel, validate_assignment=True):
-    """A test Pydantic model."""
+    """Test Pydantic model."""
 
     name: str = "Test Model"
     value: int = 15
@@ -52,13 +52,13 @@ parent = MockMainWindow()
 
 @pytest.fixture
 def classlist():
-    """A test ClassList."""
+    """Test ClassList."""
     return ratapi.ClassList([DataModel(name="A", value=1), DataModel(name="B", value=6), DataModel(name="C", value=18)])
 
 
 @pytest.fixture
 def table_model(classlist):
-    """A test ClassListTableModel."""
+    """Test ClassListTableModel."""
     return ClassListTableModel(classlist, parent)
 
 
@@ -101,9 +101,7 @@ def param_model(param_classlist):
 
 
 def test_project_widget_initial_state(setup_project_widget):
-    """
-    Tests the inital state of the ProjectWidget class.
-    """
+    """Tests the inital state of the ProjectWidget class."""
     project_widget = setup_project_widget
 
     # Check the layout of the project view
@@ -155,9 +153,7 @@ def test_project_widget_initial_state(setup_project_widget):
 
 
 def test_edit_cancel_button_toggle(setup_project_widget):
-    """
-    Tests clicking the edit button causes the stacked widget to change state.
-    """
+    """Tests clicking the edit button causes the stacked widget to change state."""
     project_widget = setup_project_widget
 
     assert project_widget.stacked_widget.currentIndex() == 0
@@ -177,9 +173,7 @@ def test_edit_cancel_button_toggle(setup_project_widget):
 
 
 def test_save_changes_to_model_project(setup_project_widget):
-    """
-    Tests that making changes to the project settings
-    """
+    """Tests that making changes to the project settings."""
     project_widget = setup_project_widget
 
     project_widget.edit_project_button.click()
@@ -197,10 +191,7 @@ def test_save_changes_to_model_project(setup_project_widget):
 
 
 def test_cancel_changes_to_model_project(setup_project_widget):
-    """
-    Tests that making changes to the project settings and
-    not saving them reverts the changes.
-    """
+    """Tests that making changes to the project settings and not saving them reverts the changes."""
     project_widget = setup_project_widget
 
     project_widget.edit_project_button.click()
@@ -225,9 +216,7 @@ def test_cancel_changes_to_model_project(setup_project_widget):
 
 
 def test_domains_tab(setup_project_widget):
-    """
-    Tests that domain tab is visible.
-    """
+    """Tests that domain tab is visible."""
     project_widget = setup_project_widget
     project_widget.edit_project_button.click()
     project_widget.calculation_combobox.setCurrentText(Calculations.Domains)
@@ -255,7 +244,6 @@ def test_project_tab_init():
 @pytest.mark.parametrize("edit_mode", [True, False])
 def test_project_tab_update_model(classlist, param_classlist, edit_mode):
     """Test that updating a ProjectTabEditWidget produces the desired models."""
-
     new_model = {"my_field": classlist, "parameters": param_classlist([])}
 
     tab = ProjectTabWidget(list(new_model), parent, edit_mode=edit_mode)

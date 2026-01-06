@@ -30,8 +30,7 @@ def custom_file_dialog():
 
 @patch("rascal2.dialogs.custom_file_editor.CustomFileEditorDialog.exec")
 def test_edit_file(exec_mock):
-    """Test that the dialog is executed when edit_file() is called on a valid file"""
-
+    """Test that the dialog is executed when edit_file() is called on a valid file."""
     with tempfile.TemporaryDirectory() as tmp:
         file = Path(tmp, "testfile.py")
         file.touch()
@@ -44,7 +43,6 @@ def test_edit_file(exec_mock):
 @patch("rascal2.dialogs.custom_file_editor.CustomFileEditorDialog")
 def test_edit_incorrect_file(dialog_mock, filepath, caplog):
     """A logger error should be emitted if a directory or nonexistent file is given to the editor."""
-
     with tempfile.TemporaryDirectory() as tmp:
         file = Path(tmp, filepath)
         edit_file(file, Languages.Python, parent)
@@ -94,7 +92,6 @@ def test_edit_no_matlab_engine(mock_matlab, caplog):
 )
 def test_dialog_init(custom_file_dialog, language, expected_lexer):
     """Ensure the custom file editor is set up correctly."""
-
     with tempfile.TemporaryDirectory() as tmp:
         dialog = custom_file_dialog(language, tmp)
 

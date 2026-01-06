@@ -28,8 +28,15 @@ line-length = 120
 extend-exclude = ["examples/*", "doc/*"]
 
 [tool.ruff.lint]
-select = ["E", "F", "UP", "B", "SIM", "I", "N", "TD003", "A"]
-ignore = ["SIM108", "N817"]
+select = ["E", "F", "UP", "B", "SIM", "I", "N", "TD003", "A", "D"]
+ignore = ["SIM108", "N817", "D100", "D102", "D104", "D105", "D107", "D203"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+# ignore docstring lints in the tests and install script
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D101", "D103"]
 
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false

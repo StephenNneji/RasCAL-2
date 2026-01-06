@@ -53,7 +53,7 @@ def draft_project():
 
 
 def test_no_sliders_creation():
-    """Sliders should be created for fitted parameter only"""
+    """Slider view should show warning when there is no fitted parameter."""
     mw = MainWindowView()
     draft = create_draft_project(ratapi.Project())
     draft["parameters"][0].fit = False
@@ -65,7 +65,7 @@ def test_no_sliders_creation():
 
 
 def test_sliders_creation(draft_project):
-    """Sliders should be created for fitted parameter only"""
+    """Sliders should be created for fitted parameter only."""
     mw = MainWindowView()
     slider_view = SliderViewWidget(draft_project, mw)
 
@@ -81,7 +81,7 @@ def test_sliders_creation(draft_project):
     assert draft_project["parameters"][0].name not in slider_view._sliders
 
 
-def test_slider_buttons():
+def test_accept_and_cancel_slider_buttons():
     mw = MainWindowView()
     draft = create_draft_project(ratapi.Project())
     mw.toggle_sliders = MagicMock()
@@ -96,8 +96,8 @@ def test_slider_buttons():
     mw.presenter.edit_project.assert_called_once_with(draft)
 
     mw.toggle_sliders.reset_mock()
-    reject_button = buttons[1]
-    reject_button.click()
+    cancel_button = buttons[1]
+    cancel_button.click()
     mw.toggle_sliders.assert_called_once()
     mw.plot_widget.update_plots.assert_called_once()
 

@@ -17,12 +17,12 @@ from .model import MainWindowModel
 
 
 class MainWindowPresenter:
-    """Facilitates interaction between View and Model
+    """Facilitates interaction between View and Model.
 
     Parameters
     ----------
     view : MainWindow
-        main window view instance.
+        An instance of the MainWindowView
     """
 
     def __init__(self, view):
@@ -31,7 +31,7 @@ class MainWindowPresenter:
         self.worker = None
 
     def create_project(self, name: str, save_path: str):
-        """Creates a new RAT project and controls object then initialise UI.
+        """Create a new RAT project and controls object then initialise UI.
 
         Parameters
         ----------
@@ -151,7 +151,7 @@ class MainWindowPresenter:
         return proceed
 
     def export_fits(self):
-        """Export results into multiple csv files in a zip file"""
+        """Export results into multiple csv files in a zip file."""
         if self.model.results is None:
             return
 
@@ -167,11 +167,12 @@ class MainWindowPresenter:
             self.view.logging.error(f"Failed to save fits to {save_file}.\n", exc_info=err)
 
     def interrupt_terminal(self):
-        """Sends an interrupt signal to the RAT runner."""
+        """Send an interrupt signal to the RAT runner."""
         self.runner.interrupt()
 
     def quick_run(self, project=None):
         """Run rat calculation with calculate procedure on the given project.
+
         The project in the MainWindowModel is used if no project is provided.
 
         Parameters

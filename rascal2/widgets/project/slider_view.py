@@ -94,6 +94,7 @@ class SliderViewWidget(QtWidgets.QWidget):
             self.slider_content_layout.addStretch(1)
 
     def update_result_and_plots(self):
+        """Update and plot result when sliders are changed."""
         project = ratapi.Project()
         vars(project).update(self.draft_project)
         results = self._parent.presenter.quick_run(project)
@@ -105,16 +106,16 @@ class SliderViewWidget(QtWidgets.QWidget):
         self._parent.toggle_sliders()
 
     def _apply_changes_from_sliders(self):
-        """
-        Apply changes obtained from sliders to the project and close slider view.
-        """
+        """Apply changes obtained from sliders to the project and close slider view."""
         self._parent.presenter.edit_project(self.draft_project)
         self._parent.toggle_sliders()
 
 
 class LabeledSlider(QtWidgets.QFrame):
+    """Create a LabeledSlider widget."""
+
     def __init__(self, param, parent):
-        """Create a LabeledSlider for a given RAT parameter
+        """Create a LabeledSlider for a given RAT parameter.
 
         Parameters
         ----------
@@ -123,7 +124,6 @@ class LabeledSlider(QtWidgets.QFrame):
         parent : SliderViewWidget
             The container for the slider widget.
         """
-
         super().__init__()
         self.parent = parent
         self._value_label_format: str = "{:.3g}"
@@ -214,13 +214,13 @@ class LabeledSlider(QtWidgets.QFrame):
     def _param_value_to_slider_value(self, param_value: float) -> int:
         """Convert parameter value into slider value.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         param_value : float
             parameter value
 
-        Returns:
-        --------
+        Returns
+        -------
         value : int
             slider value that corresponds to the parameter value
         """
@@ -242,7 +242,6 @@ class LabeledSlider(QtWidgets.QFrame):
         param_value : float
             parameter value that corresponds to slider value
         """
-
         value_step = (self.param.max - self.param.min) / self._slider.maximum()
         param_value = self.param.min + value * value_step
         if param_value > self.param.max:  # This should not happen but do occur due to round-off errors

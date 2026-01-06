@@ -24,13 +24,10 @@ from rascal2.widgets.project.tables import (
 
 
 class ProjectWidget(QtWidgets.QWidget):
-    """
-    The Project MDI Widget
-    """
+    """The Project MDI Widget."""
 
     def __init__(self, parent):
-        """
-        Initialize widget.
+        """Initialize widget.
 
         Parameters
         ----------
@@ -81,7 +78,7 @@ class ProjectWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
     def create_project_view(self) -> QtWidgets.QWidget:
-        """Creates the project (non-edit) view"""
+        """Create the project (non-edit) view."""
         project_widget = QtWidgets.QWidget()
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.setSpacing(20)
@@ -149,8 +146,7 @@ class ProjectWidget(QtWidgets.QWidget):
         return project_widget
 
     def create_edit_view(self) -> QtWidgets.QWidget:
-        """Creates the project edit view"""
-
+        """Create the project edit view."""
         edit_project_widget = QtWidgets.QWidget()
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.setSpacing(20)
@@ -268,8 +264,7 @@ class ProjectWidget(QtWidgets.QWidget):
             widget.initialize()
 
     def update_project_view(self, update_tab_index=None) -> None:
-        """Updates the project view."""
-
+        """Update the project view."""
         if update_tab_index is None:
             update_tab_index = self.stacked_widget.currentIndex()
         tab_to_update = self.view_tabs if update_tab_index == 0 else self.edit_tabs
@@ -307,8 +302,7 @@ class ProjectWidget(QtWidgets.QWidget):
             )
 
     def update_draft_project(self, new_values: dict) -> None:
-        """
-        Updates the draft project.
+        """Update the draft project.
 
         Parameters
         ----------
@@ -319,7 +313,7 @@ class ProjectWidget(QtWidgets.QWidget):
         self.draft_project.update(new_values)
 
     def handle_tabs(self) -> None:
-        """Displays or hides tabs as relevant."""
+        """Display or hide tabs as relevant."""
         # the domains tab should only be visible if calculating domains
         domain_tab_index = list(self.view_tabs).index("Domains")
         is_domains = self.calculation_combobox.currentText() == Calculations.Domains
@@ -378,16 +372,14 @@ class ProjectWidget(QtWidgets.QWidget):
         self.edit_tabs["Contrasts"].tables["contrasts"].update_item_view()
 
     def show_project_view(self) -> None:
-        """Show project view"""
+        """Show project view."""
         self.update_project_view(1)
         self.setWindowTitle("Project")
         self.parent.controls_widget.run_button.setEnabled(True)
         self.stacked_widget.setCurrentIndex(0)
 
     def show_edit_view(self) -> None:
-        """Show edit view"""
-
-        # will be updated according to edit changes
+        """Show edit view."""
         self.update_project_view(0)
         self.setWindowTitle("Edit Project")
         self.parent.controls_widget.run_button.setEnabled(False)

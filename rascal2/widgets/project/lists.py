@@ -85,7 +85,6 @@ class ClassListItemModel(QtCore.QAbstractListModel, Generic[T]):
         item : T, optional
             The item to append. If None, will add a blank item.
         """
-
         self.classlist.append(item if item is not None else self.item_type())
         self.endResetModel()
 
@@ -172,7 +171,7 @@ class AbstractProjectListWidget(QtWidgets.QWidget):
         )
 
     def item_changed(self, index):
-        """Update widget when a new item is selected from list
+        """Update widget when a new item is selected from list.
 
         Parameters
         ----------
@@ -185,7 +184,6 @@ class AbstractProjectListWidget(QtWidgets.QWidget):
 
     def update_item_view(self):
         """Update the item views to correspond with the list model."""
-
         self.view_stack = QtWidgets.QStackedWidget(self)
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.view_stack)

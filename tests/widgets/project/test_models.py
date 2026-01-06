@@ -33,7 +33,7 @@ class MockMainWindow(QtWidgets.QMainWindow):
 
 
 class DataModel(pydantic.BaseModel, validate_assignment=True):
-    """A test Pydantic model."""
+    """Test Pydantic model."""
 
     name: str = "Test Model"
     value: int = 15
@@ -41,7 +41,7 @@ class DataModel(pydantic.BaseModel, validate_assignment=True):
 
 @pytest.fixture
 def classlist():
-    """A test ClassList."""
+    """Test ClassList."""
     return ratapi.ClassList(
         [
             DataModel(name="A", value=1),
@@ -53,7 +53,7 @@ def classlist():
 
 @pytest.fixture
 def table_model(classlist):
-    """A test ClassListTableModel."""
+    """Test ClassListTableModel."""
     return ClassListTableModel(classlist, parent)
 
 
@@ -464,7 +464,6 @@ def test_file_model_set_filename(filename, expected_lang, expected_filenames):
 @pytest.mark.parametrize("filename", ["file.m", "file.py", "file.dll", ""])
 def test_file_widget_edit(filename):
     """Test that the correct index widget is created in edit mode."""
-
     with tempfile.TemporaryDirectory() as tmp:
         Path(tmp, "file.py").touch()
         init_list = ratapi.ClassList([ratapi.models.CustomFile(filename="")])

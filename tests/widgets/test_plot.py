@@ -51,7 +51,7 @@ def shaded_plot_widget():
 
 @pytest.fixture
 def mock_bayes_results():
-    """A mock of Bayes results with given fit parameter names."""
+    """Mock of Bayes results with given fit parameter names."""
 
     def _mock_bayes(fitnames):
         bayes_results = MagicMock(spec=ratapi.outputs.BayesResults)

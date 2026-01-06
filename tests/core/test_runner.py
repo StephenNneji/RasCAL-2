@@ -25,7 +25,6 @@ def make_progress_event(percent):
 
 def mock_rat_main(*args, **kwargs):
     """Mock of RAT main that produces some signals."""
-
     rat.events.notify(rat.events.EventTypes.Progress, make_progress_event(0.2))
     rat.events.notify(rat.events.EventTypes.Progress, make_progress_event(0.5))
     rat.events.notify(rat.events.EventTypes.Message, "test message")
@@ -143,7 +142,7 @@ def test_run_error():
     """If RATMain produces an error, it should be added to the queue."""
 
     def erroring_ratmain(*args):
-        """A RATMain mock that raises an error."""
+        """RATMain mock that raises an error."""
         raise ValueError("RAT Main Error!")
 
     queue = Queue()

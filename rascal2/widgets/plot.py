@@ -141,20 +141,20 @@ class BayesPlotsDialog(QtWidgets.QDialog):
         self.resize_timer = 0
 
     def draw_current_panel_plot(self):
-        """Draw the current panel plot (if not corner) when resizing"""
+        """Draw the current panel plot (if not corner) when resizing."""
         if 0 < self.plot_tabs.currentIndex() < 3:
             self.plot_tabs.currentWidget().draw_plot()
         self.set_redraw_state()
         self.resize_timer = 0
 
     def set_redraw_state(self):
-        """Set the redraw state of not visible panel plots"""
+        """Set the redraw state of not visible panel plots."""
         index = self.plot_tabs.currentIndex()
         self.plot_tabs.widget(1).redraw_plot = index != 1
         self.plot_tabs.widget(2).redraw_plot = index != 2
 
     def redraw_panel_plot(self):
-        """Draw current panel plot if its redraw state is True"""
+        """Draw current panel plot if its redraw state is True."""
         widget = self.plot_tabs.currentWidget()
         if isinstance(widget, AbstractPanelPlotWidget) and widget.redraw_plot:
             widget.canvas.setVisible(False)
@@ -243,7 +243,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         self.figure.set_size_inches(sx, sy)
 
     def show_result_summary(self, results):
-        """Show log z and log z error in summary label"""
+        """Show log z and log z error in summary label."""
         if isinstance(results, ratapi.outputs.BayesResults) and results.from_procedure() == "ns":
             self.result_summary.setText(
                 f"log (Z) = {results.nestedSamplerOutput.logZ:.5f}\n"
@@ -280,7 +280,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         return button_layout
 
     def toggle_settings(self, toggled_on: bool):
-        """Toggles the visibility of the plot controls"""
+        """Toggles the visibility of the plot controls."""
         self.plot_controls.setVisible(toggled_on)
         if toggled_on:
             self.toggle_button.setIcon(QtGui.QIcon(path_for("hide-settings.png")))
@@ -343,7 +343,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
 
 
 class RefSLDWidget(AbstractPlotWidget):
-    """Creates a UI for displaying the path lengths from the simulation result"""
+    """Creates a UI for displaying the path lengths from the simulation result."""
 
     def make_control_layout(self):
         self.plot_controls = QtWidgets.QWidget()
@@ -411,7 +411,7 @@ class RefSLDWidget(AbstractPlotWidget):
         self.resize_timer = 0
 
     def plot(self, project: ratapi.Project, results: ratapi.outputs.Results | ratapi.outputs.BayesResults):
-        """Plots the reflectivity and SLD profiles.
+        """Plot the reflectivity and SLD profiles.
 
         Parameters
         ----------
@@ -438,7 +438,7 @@ class RefSLDWidget(AbstractPlotWidget):
         self.plot_event(data)
 
     def plot_event(self, data: ratapi.events.PlotEventData | None = None):
-        """Updates the ref and SLD plots from a provided or cached plot event
+        """Update the ref and SLD plots from a provided or cached plot event.
 
         Parameters
         ----------
@@ -472,7 +472,7 @@ class RefSLDWidget(AbstractPlotWidget):
         self.canvas.draw()
 
     def plot_with_blit(self, data: ratapi.events.PlotEventData | None = None):
-        """Updates the ref and SLD plots with blitting
+        """Update the ref and SLD plots with blitting.
 
         Parameters
         ----------
@@ -538,7 +538,7 @@ class ShadedPlotWidget(AbstractPlotWidget):
         self.draw_plot()
 
     def draw_plot(self):
-        """Plots the shaded reflectivity and SLD profiles."""
+        """Plot the shaded reflectivity and SLD profiles."""
         self.clear()
 
         ratapi.plotting.plot_ref_sld(
@@ -551,7 +551,7 @@ class ShadedPlotWidget(AbstractPlotWidget):
 
 
 class AbstractPanelPlotWidget(AbstractPlotWidget):
-    """Abstract base widget for plotting panels of parameters (corner plot, histograms, chains)
+    """Abstract base widget for plotting panels of parameters (corner plot, histograms, chains).
 
     These widgets all share a parameter multi-select box, so it is defined here.
 

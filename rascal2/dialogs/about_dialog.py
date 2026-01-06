@@ -10,9 +10,16 @@ from rascal2.settings import get_global_settings
 
 
 class AboutDialog(QtWidgets.QDialog):
+    """Dialog to display RasCAL about information.
+
+    Parameters
+    ----------
+    parent : MainWindowView
+        An instance of MainWindowView
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
-        # Define internal variables
 
         # Define main window
         self.setWindowTitle("About RasCAL 2")
@@ -62,10 +69,8 @@ class AboutDialog(QtWidgets.QDialog):
         main_layout.addStretch(1)
         self.setLayout(main_layout)
 
-    def update_rascal_info(self, parent):
-        """Obtain info about RASCAL (version, main settings etc.)
-        retrieved from general class information
-        """
+    def update_rascal_info(self):
+        """Obtain info about RASCAL (version, main settings etc.)."""
         matlab_path = MatlabHelper().get_matlab_path()
         if not matlab_path:
             matlab_path = "None"

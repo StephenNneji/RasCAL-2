@@ -57,7 +57,7 @@ IS_MAC = sys.platform == "darwin"
 
 
 def build_exe():
-    """Builds the executable for the rascal-2 application"""
+    """Build the executable for the rascal-2 application."""
     os.environ["DELAY_MATLAB_START"] = "1"
     work_path = PACKAGING_PATH / "temp"
     dist_path = PACKAGING_PATH / "bundle"

@@ -30,7 +30,6 @@ class MyEnum(StrEnum):
 )
 def test_editor_type(field_info, expected_type, example_data):
     """Test that the editor type is as expected, and can be read and written."""
-
     widget = get_validated_input(field_info)
     assert isinstance(widget.editor, expected_type)
     widget.set_data(example_data)
