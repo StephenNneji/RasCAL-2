@@ -255,7 +255,7 @@ class AdaptiveDoubleSpinBox(QtWidgets.QDoubleSpinBox):
         return float(text)
 
     def setValue(self, value: float):
-        """Hook into setValue to set the decimals when the value is manually set.
+        """Update the decimals when the spinbox value is set manually.
 
         Parameters
         ----------

@@ -29,7 +29,7 @@ extend-exclude = ["examples/*", "doc/*"]
 
 [tool.ruff.lint]
 select = ["E", "F", "UP", "B", "SIM", "I", "N", "TD003", "A", "D"]
-ignore = ["SIM108", "N817", "D100", "D102", "D104", "D105", "D107", "D203", "D401"]
+ignore = ["SIM108", "N817", "D100", "D102", "D104", "D105", "D107", "D203"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
