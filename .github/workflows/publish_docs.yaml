@@ -1,0 +1,42 @@
+name: Docs
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - 'doc/**'
+  release:
+    types: [published]
+
+jobs:
+  build:
+    env:
+      DOC_URL: "https://rascalsoftware.github.io/RasCAL-2/"
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        path: main
+    - name: Checkout gh-pages
+      uses: actions/checkout@v6
+      with:
+        ref: gh-pages
+        path: web
+    - name: Set up Python
+      uses: actions/setup-python@v6
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r main/requirements-dev.txt
+    - name: Build and Deploy Docs
+      run: |
+        cd main/doc
+        make html
+        python deploy.py ${{github.ref}}
+        cd ../../web
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add -A
+        git commit -m "Publish Documentation" || true
+        git push
