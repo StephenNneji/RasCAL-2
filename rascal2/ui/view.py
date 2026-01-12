@@ -508,7 +508,7 @@ class MainWindowView(QtWidgets.QMainWindow):
 
         message_box = QtWidgets.QMessageBox(self)
         message_box.setWindowTitle("Confirm Stop?")
-        message_box.setText("For calculate and Bayesian procedures, stopping will lose all progress. Confirm Stop?")
+        message_box.setText("For Bayesian procedures, stopping will lose all progress. Confirm Stop?")
         message_box.setIcon(QtWidgets.QMessageBox.Icon.Question)
 
         yes_button = message_box.addButton("Stop", QtWidgets.QMessageBox.ButtonRole.YesRole)
