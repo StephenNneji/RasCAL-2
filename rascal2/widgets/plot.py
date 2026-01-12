@@ -420,10 +420,6 @@ class RefSLDWidget(AbstractPlotWidget):
         results : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
             The calculation results.
         """
-        if project is None or results is None:
-            self.clear()
-            return
-
         data = ratapi.events.PlotEventData()
 
         data.modelType = project.model
@@ -456,6 +452,7 @@ class RefSLDWidget(AbstractPlotWidget):
             return
 
         show_legend = self.show_legend.isChecked() if self.current_plot_data.contrastNames else False
+        self.figure.clear()
         self.update_figure_size()
         self.figure.tight_layout()
         ratapi.plotting.plot_ref_sld_helper(

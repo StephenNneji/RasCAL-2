@@ -495,6 +495,36 @@ class MainWindowView(QtWidgets.QMainWindow):
 
         return reply == QtWidgets.QMessageBox.StandardButton.Ok
 
+    def show_confirm_stop_calculation_dialog(self) -> bool:
+        """Ask the user to confirm stopping the calculation.
+
+        Returns
+        -------
+        bool
+            Whether the confirmation was affirmative.
+        """
+        if not self.settings.show_stop_calculation_warning:
+            return True
+
+        message_box = QtWidgets.QMessageBox(self)
+        message_box.setWindowTitle("Confirm Stop?")
+        message_box.setText("For Bayesian procedures, stopping will lose all progress. Confirm Stop?")
+        message_box.setIcon(QtWidgets.QMessageBox.Icon.Question)
+
+        yes_button = message_box.addButton("Stop", QtWidgets.QMessageBox.ButtonRole.YesRole)
+        no_button = message_box.addButton(QtWidgets.QMessageBox.StandardButton.Cancel)
+        message_box.setDefaultButton(no_button)
+
+        no_show_check_box = QtWidgets.QCheckBox("Do not show this again")
+        message_box.setCheckBox(no_show_check_box)
+        no_show_check_box.toggled.connect(lambda val: setattr(self.settings, "show_stop_calculation_warning", not val))
+
+        # Make this save to general settings
+
+        message_box.exec()
+
+        return message_box.clickedButton() == yes_button
+
     def show_unsaved_dialog(self, message: str) -> UnsavedReply:
         """Warn the user of unsaved changes, and ask whether to save those changes.
 

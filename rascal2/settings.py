@@ -123,6 +123,9 @@ class Settings(BaseModel, validate_assignment=True, arbitrary_types_allowed=True
     live_recalculate: bool = Field(
         default=True, title=SettingsGroups.General, description="Auto-run simulation when parameter values change."
     )
+    show_stop_calculation_warning: bool = Field(
+        default=True, title=SettingsGroups.General, description="Warn when Bayesian calculation is stopped manually."
+    )
 
     clear_terminal: bool = Field(
         default=True, title=SettingsGroups.Terminal, description="Clear Terminal when Run Starts"
