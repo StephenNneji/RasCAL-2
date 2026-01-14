@@ -168,7 +168,7 @@ class MatlabSetupTab(QtWidgets.QWidget):
         if platform.system() == "Darwin":
             folder_name = QtWidgets.QFileDialog.getOpenFileName(self, "Select MATLAB Application", filter="(*.app)")[0]
         else:
-            folder_name = QtWidgets.QFileDialog.getExistingDirectory(self, "Select MATLAB Directory", ".")
+            folder_name = QtWidgets.QFileDialog.getExistingDirectory(self, "Select MATLAB Directory", self.matlab_path.text())
         if folder_name:
             self.matlab_path.setText(folder_name)
             self.changed = True
@@ -180,29 +180,33 @@ class MatlabSetupTab(QtWidgets.QWidget):
 
         should_init = False
         with suppress(FileNotFoundError), open(MATLAB_ARCH_FILE, "r+") as path_file:
-            install_dir = pathlib.Path(self.matlab_path.text())
-            if not getattr(sys, "frozen", False):
-                return
+            try:
+                install_dir = pathlib.Path(self.matlab_path.text())
+                if not getattr(sys, "frozen", False):
+                    return
 
-            if len(path_file.readlines()) == 0:
-                should_init = True
+                # if len(path_file.readlines()) == 0:
+                #     should_init = True
 
-            path_file.truncate(0)
+                path_file.seek(0)
+                if platform.system() == "Windows":
+                    arch = "win64"
+                elif platform.system() == "Darwin":
+                    arch = "maca64" if platform.mac_ver()[-1] == "arm64" else "maci64"
+                else:
+                    arch = "glnxa64"
 
-            if platform.system() == "Windows":
-                arch = "win64"
-            elif platform.system() == "Darwin":
-                arch = "maca64" if platform.mac_ver()[-1] == "arm64" else "maci64"
-            else:
-                arch = "glnxa64"
-
-            path_file.writelines(
-                [
-                    f"{arch}\n",
-                    str(install_dir / f"bin/{arch}\n"),
-                    str(install_dir / f"extern/engines/python/dist/matlab/engine/{arch}\n"),
-                    str(install_dir / f"extern/bin/{arch}\n"),
-                ]
-            )
-        if should_init:
-            MatlabHelper().async_start()
+                path_file.writelines(
+                    [
+                        f"{arch}\n",
+                        str(install_dir / f"bin/{arch}\n"),
+                        str(install_dir / f"extern/engines/python/dist/matlab/engine/{arch}\n"),
+                        str(install_dir / f"extern/bin/{arch}\n"),
+                    ]
+                )
+                path_file.truncate()
+            except Exception as ex:
+                import logging
+                logging.error("exception occurred", exc_info=ex)
+        # if should_init:
+        MatlabHelper().async_start()
