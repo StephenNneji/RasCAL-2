@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from PyQt6.QtCore import QSettings
 
 from rascal2.settings import Settings, delete_local_settings, update_recent_projects
 
@@ -72,22 +73,32 @@ def test_save(kwargs):
     assert settings == loaded_settings
 
 
-@patch("rascal2.settings.QtCore.QSettings.setValue")
-def test_set_global(mock):
+@patch("rascal2.settings.get_global_settings")
+def test_set_and_reset_global(mock_get_global):
     """Test that we can set manually-set project settings as global settings."""
-    settings = Settings()
-    settings.set_global_settings()
-    assert not mock.called
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        ini_file = Path(tmp_dir) / "settings.ini"
+        global_setting = QSettings(str(ini_file), QSettings.Format.IniFormat)
+        mock_get_global.return_value = global_setting
+        settings = Settings()
+        settings.set_global_settings()
+        assert global_setting.allKeys() == []
 
-    settings = Settings(editor_fontsize=9)
-    settings.set_global_settings()
-    mock.assert_called_once_with("General/editor_fontsize", 9)
+        settings = Settings(editor_fontsize=9)
+        settings.set_global_settings()
+        assert global_setting.value("General/editor_fontsize") == 9
+        settings.reset_global_settings()
+        assert settings.editor_fontsize == 12
+        assert global_setting.allKeys() == []
 
-    mock.reset_mock()
-    settings = Settings(editor_fontsize=18, terminal_fontsize=3)
-    settings.set_global_settings()
-    mock.assert_any_call("General/editor_fontsize", 18)
-    mock.assert_any_call("Terminal/terminal_fontsize", 3)
+        settings = Settings(editor_fontsize=18, terminal_fontsize=3)
+        settings.set_global_settings()
+        assert global_setting.value("General/editor_fontsize") == 18
+        assert global_setting.value("Terminal/terminal_fontsize") == 3
+        settings.reset_global_settings()
+        assert settings.editor_fontsize == 12
+        assert settings.terminal_fontsize == 12
+        assert global_setting.allKeys() == []
 
 
 @pytest.mark.parametrize(

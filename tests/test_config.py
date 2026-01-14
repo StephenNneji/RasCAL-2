@@ -1,34 +1,29 @@
 """Tests for configuration utilities."""
 
+import logging
 import tempfile
 from logging import CRITICAL, INFO, WARNING
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from rascal2.config import setup_logging, setup_settings
-from rascal2.settings import LogLevels, Settings
-
-
-def test_setup_settings():
-    """Test that settings are grabbed from JSON or made from scratch correctly."""
-    sets = setup_settings(".")
-    assert sets == Settings()
-    with tempfile.TemporaryDirectory() as tmp:
-        settings1 = Settings(editor_fontsize=21, log_level=LogLevels.Critical)
-        settings1.save(tmp)
-        sets_from_json = setup_settings(tmp)
-        assert sets_from_json == settings1
+from rascal2.config import setup_logging
 
 
 @pytest.mark.parametrize("level", [INFO, WARNING, CRITICAL])
-def test_setup_logging(level):
+@patch("rascal2.config.get_global_settings")
+def test_setup_logging(mock_get_global, level):
     """Test that the logger is set up correctly."""
-    tmp = tempfile.mkdtemp()
-    terminal = MagicMock()
-    log = setup_logging(Path(tmp, "rascal.log"), terminal, level)
-    assert Path(tmp, "rascal.log").is_file()
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        path = Path(tmp_dir) / "settings.ini"
+        global_setting = MagicMock()
+        global_setting.fileName.return_value = path
+        mock_get_global.return_value = global_setting
+        setup_logging(level)
+        assert Path(tmp_dir, "rascal.log").is_file()
 
-    assert log.level == level
-    assert log.hasHandlers()
+        log = logging.getLogger()
+        assert log.level == level
+        assert log.hasHandlers()
+        logging.shutdown()

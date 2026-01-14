@@ -12,6 +12,17 @@ from rascal2.config import path_for
 from rascal2.widgets.inputs import MultiSelectComboBox, ProgressButton
 
 
+class CanvasQT(FigureCanvasQTAgg):
+    """Workaround so plot window can be started minimised."""
+
+    def showEvent(self, event):
+        # Calling showMinimised in reset_mdi_layout causes a crash because window
+        # handle can be None.
+        window = self.window().windowHandle()
+        if window is not None:
+            super().showEvent(event)
+
+
 class PlotWidget(QtWidgets.QWidget):
     """The MDI plot widget."""
 
@@ -212,7 +223,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
 
         self.blit_plot = None
         self.figure = self.make_figure()
-        self.canvas = FigureCanvasQTAgg(
+        self.canvas = CanvasQT(
             self.figure,
         )
         self.figure.set_facecolor("none")

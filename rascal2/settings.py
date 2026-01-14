@@ -47,7 +47,6 @@ class SettingsGroups(StrEnum):
     Logging = "Logging"
     Plotting = "Plotting"
     Terminal = "Terminal"
-    Windows = "Windows"
 
 
 class Styles(StrEnum):
@@ -131,10 +130,6 @@ class Settings(BaseModel, validate_assignment=True, arbitrary_types_allowed=True
         default=True, title=SettingsGroups.Terminal, description="Clear Terminal when Run Starts"
     )
     terminal_fontsize: int = Field(default=12, title=SettingsGroups.Terminal, description="Terminal Font Size", gt=0)
-
-    mdi_defaults: MDIGeometries = Field(
-        default=None, title=SettingsGroups.Windows, description="Default Window Geometries"
-    )
     export_background_colour: BackgroundColour = Field(
         default=BackgroundColour.White, title=SettingsGroups.Plotting, description="Background colour of exported plot"
     )
@@ -145,7 +140,6 @@ class Settings(BaseModel, validate_assignment=True, arbitrary_types_allowed=True
         for setting in unset_settings:
             if global_name(setting) in global_settings.allKeys():
                 setattr(self, setting, global_settings.value(global_name(setting)))
-                self.model_fields_set.remove(setting)  # we don't want global defaults to count as manually set!
 
     def save(self, path: str | PathLike):
         """Save settings to a JSON file in the given path.
@@ -163,6 +157,17 @@ class Settings(BaseModel, validate_assignment=True, arbitrary_types_allowed=True
         global_settings = get_global_settings()
         for setting in self.model_fields_set:
             global_settings.setValue(global_name(setting), getattr(self, setting))
+        global_settings.sync()
+
+    def reset_global_settings(self):
+        """Reset the local and global settings to default."""
+        for field, field_info in self.model_fields.items():
+            setattr(self, field, field_info.default)
+
+        global_settings = get_global_settings()
+        for group in SettingsGroups:
+            global_settings.remove(group)
+        global_settings.sync()
 
 
 def global_name(key: str) -> str:
@@ -202,7 +207,7 @@ def update_recent_projects(path: str | None = None) -> list[str]:
 
     """
     settings = get_global_settings()
-    recent_projects: list[str] = settings.value("internal/recent_projects")
+    recent_projects: list[str] = settings.value("recent_projects")
     if not recent_projects:
         recent_projects = []
 
@@ -213,6 +218,6 @@ def update_recent_projects(path: str | None = None) -> list[str]:
 
     new_recent_projects = new_recent_projects[:10]
 
-    settings.setValue("internal/recent_projects", new_recent_projects)
+    settings.setValue("recent_projects", new_recent_projects)
     settings.sync()
     return new_recent_projects

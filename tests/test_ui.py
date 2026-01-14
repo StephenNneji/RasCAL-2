@@ -10,12 +10,12 @@ def make_main_window(request):
     def make():
         no_exceptions = True
 
-        def test_exception_hook(exc_type, exc_value, exc_traceback):
+        def exception_hook(exc_type, exc_value, exc_traceback):
             nonlocal no_exceptions
             no_exceptions = False
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
 
-        sys.excepthook = test_exception_hook
+        sys.excepthook = exception_hook
 
         window = MainWindowView()
 

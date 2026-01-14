@@ -37,8 +37,7 @@ def edit_file_matlab(filename: str):
     try:
         engine = MatlabHelper().get_local_engine()
     except Exception as ex:
-        logger = logging.getLogger("rascal_log")
-        logger.error("Attempted to edit a file in MATLAB engine" + repr(ex))
+        logging.error("Attempted to edit a file in MATLAB engine", exc_info=ex)
         return
 
     engine.edit(str(filename))
@@ -131,7 +130,6 @@ class CustomFileEditorDialog(QtWidgets.QDialog):
             self.file.write_text(self.editor.text())
             self.accept()
         except OSError as ex:
-            logger = logging.getLogger("rascal_log")
             message = f"Failed to save custom file to {self.file}.\n"
-            logger.error(message, exc_info=ex)
+            logging.error(message, exc_info=ex)
             QtWidgets.QMessageBox.critical(self, "Save File", message, QtWidgets.QMessageBox.StandardButton.Ok)
