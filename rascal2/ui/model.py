@@ -1,9 +1,40 @@
+import shutil
 from json import JSONDecodeError
 from pathlib import Path
 
 import ratapi as rat
 import ratapi.outputs
 from PyQt6 import QtCore
+
+from rascal2.config import EXAMPLES_PATH, EXAMPLES_TEMP_PATH
+
+
+def copy_example_project(load_path):
+    """Copy example project to temp directory so user does not modify original.
+
+    Non-example projects are not copied.
+
+    Parameters
+    ----------
+    load_path : str
+        The load path of the project.
+
+    Returns
+    -------
+    new_load_path: str
+        The path of the copied project if project is example otherwise the same as load_path.
+    """
+    load_path = Path(load_path)
+    if load_path.is_relative_to(EXAMPLES_PATH):
+        if load_path.is_file():
+            temp_dir = EXAMPLES_TEMP_PATH / load_path.parent.stem
+            shutil.copytree(load_path.parent, temp_dir, dirs_exist_ok=True)
+            load_path = temp_dir / load_path.name
+        else:
+            temp_dir = EXAMPLES_TEMP_PATH / load_path.name
+            shutil.copytree(load_path, temp_dir, dirs_exist_ok=True)
+            load_path = temp_dir
+    return str(load_path)
 
 
 class MainWindowModel(QtCore.QObject):
@@ -81,12 +112,22 @@ class MainWindowModel(QtCore.QObject):
         vars(self.project).update(new_values)
         self.project_updated.emit()
 
-    def save_project(self):
-        """Save the project to the save path."""
-        self.controls.save(Path(self.save_path, "controls.json"))
-        self.project.save(Path(self.save_path, "project.json"))
+    def save_project(self, save_path):
+        """Save the project to the save path.
+
+        Parameters
+        ----------
+        save_path : str
+            The save path of the project.
+        """
+        self.controls.save(Path(save_path, "controls.json"))
+        self.project.save(Path(save_path, "project.json"))
         if self.results:
-            self.results.save(Path(self.save_path, "results.json"))
+            self.results.save(Path(save_path, "results.json"))
+        self.save_path = save_path
+
+    def is_project_example(self):
+        return Path(self.save_path).is_relative_to(EXAMPLES_TEMP_PATH)
 
     def load_project(self, load_path: str):
         """Load a project from a project folder.
@@ -102,6 +143,8 @@ class MainWindowModel(QtCore.QObject):
             If the project files are not in a valid format.
 
         """
+        load_path = copy_example_project(load_path)
+
         results_file = Path(load_path, "results.json")
         try:
             results = rat.Results.load(results_file)
@@ -145,12 +188,8 @@ class MainWindowModel(QtCore.QObject):
             The path to the RasCAL-1 file.
 
         """
+        load_path = copy_example_project(load_path)
         self.project = rat.utils.convert.r1_to_project(load_path)
-
-        # TODO remove this when it is fixed in ratapi
-        # https://github.com/RascalSoftware/python-RAT/issues/183
-        for file in self.project.custom_files:
-            file.path = Path(load_path).parent
         self.controls = rat.Controls()
         self.save_path = str(Path(load_path).parent)
 

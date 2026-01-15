@@ -59,8 +59,7 @@ def test_save_project(empty_results):
     model.controls = Controls(procedure="dream", resampleMinAngle=0.5)
     model.results = empty_results
     with TemporaryDirectory() as tmpdir:
-        model.save_path = tmpdir
-        model.save_project()
+        model.save_project(tmpdir)
 
         results = Path(tmpdir, "results.json").read_text()
         controls = Path(tmpdir, "controls.json").read_text()

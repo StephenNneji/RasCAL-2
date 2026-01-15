@@ -6,7 +6,7 @@ from pathlib import Path
 from PyQt6 import Qsci, QtGui, QtWidgets
 from ratapi.utils.enums import Languages
 
-from rascal2.config import MatlabHelper
+from rascal2.config import EXAMPLES_PATH, MatlabHelper
 
 
 def edit_file(filename: str, language: Languages, parent: QtWidgets.QWidget):
@@ -122,5 +122,16 @@ class CustomFileEditorDialog(QtWidgets.QDialog):
 
     def save_file(self):
         """Save and close the file."""
-        self.file.write_text(self.editor.text())
-        self.accept()
+        if self.file.is_relative_to(EXAMPLES_PATH):
+            message = "Files cannot be saved into the examples directory, please copy the file to another directory."
+            QtWidgets.QMessageBox.warning(self, "Save File", message, QtWidgets.QMessageBox.StandardButton.Ok)
+            return
+
+        try:
+            self.file.write_text(self.editor.text())
+            self.accept()
+        except OSError as ex:
+            logger = logging.getLogger("rascal_log")
+            message = f"Failed to save custom file to {self.file}.\n"
+            logger.error(message, exc_info=ex)
+            QtWidgets.QMessageBox.critical(self, "Save File", message, QtWidgets.QMessageBox.StandardButton.Ok)

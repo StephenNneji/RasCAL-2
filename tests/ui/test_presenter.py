@@ -198,16 +198,17 @@ def test_load_project(model_mock, presenter, function):
 @patch("rascal2.ui.presenter.update_recent_projects")
 def test_save_project(recent_projects_mock, presenter):
     """Test that projects can be saved, optionally saved as a new folder."""
-    presenter.model.save_project = MagicMock()
+    presenter.model.project = MagicMock()
+    presenter.model.controls = MagicMock()
     presenter.save_project()
-    presenter.model.save_project.assert_called_once()
-
-    presenter.model.save_project.reset_mock()
+    presenter.model.project.save.assert_called_once()
+    presenter.model.controls.save.assert_called_once()
 
     presenter.save_project(save_as=True)
     assert presenter.model.save_path == "new path/"
     assert presenter.view.undo_stack.isClean()
-    presenter.model.save_project.assert_called_once()
+    assert presenter.model.project.save.call_count == 2
+    assert presenter.model.controls.save.call_count == 2
     recent_projects_mock.assert_called_with("new path/")
 
 
