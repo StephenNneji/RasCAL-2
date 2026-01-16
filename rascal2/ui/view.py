@@ -417,7 +417,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         """
         project_folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Folder")
         if project_folder:
-            while self.check_save_blacklist(project_folder, "Select Folder"):
+            while self.check_save_blacklist(project_folder):
                 project_folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Folder")
 
             if any(Path(project_folder, file).exists() for file in PROJECT_FILES):
