@@ -116,6 +116,7 @@ def test_set_enabled(test_view):
 def test_get_project_folder(mock_get_dir: MagicMock):
     """Test that getting a specified folder works as expected."""
     view = MainWindowView()
+    view.check_save_blacklist = MagicMock(return_value=False)
     mock_overwrite = MagicMock(return_value=True)
 
     tmp = tempfile.mkdtemp()

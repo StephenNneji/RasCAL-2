@@ -1,12 +1,11 @@
 import re
 import warnings
-from pathlib import Path
 from typing import Any
 
 import ratapi as rat
 import ratapi.wrappers
 
-from rascal2.config import EXAMPLES_PATH, MatlabHelper, get_matlab_engine
+from rascal2.config import MatlabHelper, get_matlab_engine
 from rascal2.core import commands
 from rascal2.core.enums import UnsavedReply
 from rascal2.core.runner import LogData, RATRunner
@@ -72,8 +71,9 @@ class MainWindowPresenter:
 
     def initialise_ui(self):
         """Initialise UI for a project."""
+        suffix = " [Example]" if self.model.is_project_example() else ""
         self.view.setWindowTitle(
-            self.view.windowTitle() + " - " + self.model.project.name,
+            self.view.windowTitle().split(" - ")[0] + " - " + self.model.project.name + suffix,
         )
         self.view.init_settings_and_log(self.model.save_path)
         self.view.setup_mdi()
@@ -98,13 +98,6 @@ class MainWindowPresenter:
             If the setting is changed to an invalid value.
 
         """
-        # FIXME: without proper logging,
-        # we have to check validation in advance because PyQt doesn't return
-        # the exception, it just falls over in C++
-        # also doing it this way stops bad changes being pushed onto the stack
-        # https://github.com/RascalSoftware/RasCAL-2/issues/26
-        # also suppress warnings (we get warning for setting params not matching
-        # procedure on initialisation) to avoid clogging stdout
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.model.controls.model_validate({setting: value})
@@ -123,17 +116,18 @@ class MainWindowPresenter:
          : bool
             Indicates if the project was saved.
         """
-        # we use this isinstance rather than `is not None`
-        # because some PyQt signals will send bools and so on to this as a slot!
-        if save_as or Path(self.model.save_path).is_relative_to(EXAMPLES_PATH):
+        to_path = self.model.save_path
+        if save_as or self.model.is_project_example():
             to_path = self.view.get_project_folder()
             if not to_path:
                 return False
-            self.model.save_path = to_path
-
-        self.model.save_project()
-        update_recent_projects(self.model.save_path)
-        self.view.undo_stack.setClean()
+        try:
+            self.model.save_project(to_path)
+        except OSError as err:
+            self.view.logging.error(f"Failed to save project to {to_path}.\n", exc_info=err)
+        else:
+            update_recent_projects(self.model.save_path)
+            self.view.undo_stack.setClean()
         return True
 
     def ask_to_save_project(self):
