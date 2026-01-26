@@ -1,12 +1,11 @@
 """Dialogs for editing custom files."""
 
-import logging
 from pathlib import Path
 
 from PyQt6 import Qsci, QtGui, QtWidgets
 from ratapi.utils.enums import Languages
 
-from rascal2.config import EXAMPLES_PATH, MatlabHelper
+from rascal2.config import EXAMPLES_PATH, LOGGER, MatlabHelper
 
 
 def edit_file(filename: str, language: Languages, parent: QtWidgets.QWidget):
@@ -24,8 +23,7 @@ def edit_file(filename: str, language: Languages, parent: QtWidgets.QWidget):
     """
     file = Path(filename)
     if not file.is_file():
-        logger = logging.getLogger("rascal_log")
-        logger.error("Attempted to edit a custom file which does not exist!")
+        LOGGER.error("Attempted to edit a custom file which does not exist!")
         return
 
     dialog = CustomFileEditorDialog(file, language, parent)
@@ -37,7 +35,7 @@ def edit_file_matlab(filename: str):
     try:
         engine = MatlabHelper().get_local_engine()
     except Exception as ex:
-        logging.error("Attempted to edit a file in MATLAB engine", exc_info=ex)
+        LOGGER.error("Attempted to edit a file in MATLAB engine", exc_info=ex)
         return
 
     engine.edit(str(filename))
@@ -131,5 +129,5 @@ class CustomFileEditorDialog(QtWidgets.QDialog):
             self.accept()
         except OSError as ex:
             message = f"Failed to save custom file to {self.file}.\n"
-            logging.error(message, exc_info=ex)
+            LOGGER.error(message, exc_info=ex)
             QtWidgets.QMessageBox.critical(self, "Save File", message, QtWidgets.QMessageBox.StandardButton.Ok)

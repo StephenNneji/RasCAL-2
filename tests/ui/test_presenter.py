@@ -47,14 +47,14 @@ class MockWindowView(QtWidgets.QMainWindow):
 
 @pytest.fixture
 def presenter():
-    with patch("rascal2.ui.presenter.logging", autospec=True) as mock_log:
+    with patch("rascal2.ui.presenter.LOGGER", autospec=True) as mock_log:
         pr = MainWindowPresenter(MockWindowView())
         pr.runner = MagicMock()
         pr.model.controls = Controls()
         pr.model.project = MagicMock()
         pr.model.results = MagicMock()
         pr.model.save_path = "some_path/"
-        pr.logging = mock_log
+        pr.logger = mock_log
 
         yield pr
 
@@ -128,7 +128,7 @@ def test_stop_run(presenter):
     presenter.runner = MagicMock()
     presenter.runner.error = None
     presenter.handle_interrupt()
-    presenter.logging.info.assert_called_once_with("RAT run interrupted!")
+    presenter.logger.info.assert_called_once_with("RAT run interrupted!")
 
 
 def test_run_error(presenter):
@@ -136,7 +136,7 @@ def test_run_error(presenter):
     presenter.runner = MagicMock()
     presenter.runner.error = ValueError("Test error!")
     presenter.handle_interrupt()
-    presenter.logging.error.assert_called_once_with("RAT run failed with exception.\n", exc_info=presenter.runner.error)
+    presenter.logger.error.assert_called_once_with("RAT run failed with exception.\n", exc_info=presenter.runner.error)
 
 
 @pytest.mark.parametrize(
@@ -169,7 +169,7 @@ def test_handle_progress_event(presenter):
 def test_handle_log_data(presenter):
     presenter.runner.events = [LogData(10, "Test log!")]
     presenter.handle_event()
-    presenter.logging.log.assert_called_with(10, "Test log!")
+    presenter.logger.log.assert_called_with(10, "Test log!")
 
 
 @pytest.mark.parametrize("function", ["create_project", "load_project", "load_r1_project"])
@@ -250,11 +250,11 @@ def test_export_fits(mock_write_result, presenter):
     error = OSError("Test Error")
     mock_write_result.side_effect = error
     presenter.view.get_save_file = MagicMock(return_value=test_zip_file)
-    presenter.logging.error = MagicMock()
+    presenter.logger.error = MagicMock()
 
     presenter.export_fits()
     mock_write_result.assert_called_once_with(test_zip_file, presenter.model.results)
-    presenter.logging.error.assert_called_once_with("Failed to save fits to test.zip.\n", exc_info=error)
+    presenter.logger.error.assert_called_once_with("Failed to save fits to test.zip.\n", exc_info=error)
 
     # If we do not have any results, don't ask for a file
     presenter.view.get_save_file.reset_mock()

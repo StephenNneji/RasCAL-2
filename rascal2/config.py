@@ -24,6 +24,7 @@ STATIC_PATH = SOURCE_PATH / "static"
 IMAGES_PATH = STATIC_PATH / "images"
 MATLAB_ARCH_FILE = pathlib.Path(SITE_PATH) / "matlab/engine/_arch.txt"
 EXAMPLES_TEMP_PATH = pathlib.Path(get_global_settings().fileName()).parent / "examples"
+LOGGER = logging.getLogger("rascal2")
 
 
 def handle_scaling():
@@ -237,6 +238,5 @@ class MatlabHelper:
         if error:
             self.engine_output[:] = []
             self.engine_output.append(Exception(error))
-            logger = logging.getLogger("rascal_log")
-            logger.error(f"{error}. Attempt to read MATLAB _arch file failed {MATLAB_ARCH_FILE}.")
+            LOGGER.error(f"{error}. Attempt to read MATLAB _arch file failed {MATLAB_ARCH_FILE}.")
         return str(install_dir)
