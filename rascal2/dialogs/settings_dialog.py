@@ -5,7 +5,7 @@ from contextlib import suppress
 
 from PyQt6 import QtCore, QtWidgets
 
-from rascal2.config import MATLAB_ARCH_FILE, MatlabHelper
+from rascal2.config import LOGGER, MATLAB_ARCH_FILE, MatlabHelper
 from rascal2.settings import SettingsGroups
 from rascal2.widgets.inputs import get_validated_input
 
@@ -168,7 +168,9 @@ class MatlabSetupTab(QtWidgets.QWidget):
         if platform.system() == "Darwin":
             folder_name = QtWidgets.QFileDialog.getOpenFileName(self, "Select MATLAB Application", filter="(*.app)")[0]
         else:
-            folder_name = QtWidgets.QFileDialog.getExistingDirectory(self, "Select MATLAB Directory", self.matlab_path.text())
+            folder_name = QtWidgets.QFileDialog.getExistingDirectory(
+                self, "Select MATLAB Directory", self.matlab_path.text()
+            )
         if folder_name:
             self.matlab_path.setText(folder_name)
             self.changed = True
@@ -178,10 +180,11 @@ class MatlabSetupTab(QtWidgets.QWidget):
         if not self.changed:
             return
 
-        should_init = False
+        # should_init = False
         with suppress(FileNotFoundError), open(MATLAB_ARCH_FILE, "r+") as path_file:
             try:
                 install_dir = pathlib.Path(self.matlab_path.text())
+                LOGGER.info(f"install_dir: {install_dir}")
                 if not getattr(sys, "frozen", False):
                     return
 
@@ -195,7 +198,7 @@ class MatlabSetupTab(QtWidgets.QWidget):
                     arch = "maca64" if platform.mac_ver()[-1] == "arm64" else "maci64"
                 else:
                     arch = "glnxa64"
-
+                LOGGER.info(f"arch: {arch}")
                 path_file.writelines(
                     [
                         f"{arch}\n",
@@ -206,7 +209,6 @@ class MatlabSetupTab(QtWidgets.QWidget):
                 )
                 path_file.truncate()
             except Exception as ex:
-                import logging
-                logging.error("exception occurred", exc_info=ex)
+                LOGGER.error("exception occurred", exc_info=ex)
         # if should_init:
         MatlabHelper().async_start()
