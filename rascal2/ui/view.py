@@ -263,7 +263,7 @@ class MainWindowView(QtWidgets.QMainWindow):
 
     def open_about_info(self):
         """Open about dialog containing information about RASCAL."""
-        self.about_dialog.update_rascal_info(self)
+        self.about_dialog.update_rascal_info()
         self.about_dialog.show()
 
     def show_undo_view(self):
