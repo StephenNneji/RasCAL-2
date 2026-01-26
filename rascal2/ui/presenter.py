@@ -1,3 +1,4 @@
+import pathlib
 import re
 import warnings
 from typing import Any
@@ -71,15 +72,21 @@ class MainWindowPresenter:
 
     def initialise_ui(self):
         """Initialise UI for a project."""
-        suffix = " [Example]" if self.model.is_project_example() else f"[{self.model.save_path}]"
-        self.view.setWindowTitle(
-            self.view.windowTitle().split(" - ")[0] + " - " + self.model.project.name + suffix,
-        )
+        self.update_title()
         self.view.setup_mdi()
         self.view.plot_widget.update_plots()
         self.view.handle_results(self.model.results)
         self.view.undo_stack.clear()
         self.view.enable_elements()
+
+    def update_title(self):
+        """Update window title with project path."""
+        if self.model.is_project_example():
+            name = pathlib.Path(self.model.save_path).name.replace("_", " ")
+            name = f"{name} [Example]"
+        else:
+            name = self.model.save_path
+        self.view.setWindowTitle(self.view.windowTitle().split(" - ")[0] + " - " + name)
 
     def edit_controls(self, setting: str, value: Any):
         """Edit a setting in the Controls object.
@@ -125,6 +132,7 @@ class MainWindowPresenter:
         except OSError as err:
             LOGGER.error(f"Failed to save project to {to_path}.\n", exc_info=err)
         else:
+            self.update_title()
             update_recent_projects(self.model.save_path)
             self.view.undo_stack.setClean()
         return True
@@ -191,7 +199,15 @@ class MainWindowPresenter:
         ):
             matlab_helper = MatlabHelper()
             matlab_helper.get_local_engine()
-        return rat.run(project, rat.Controls(display="off"))[1]
+
+        rat_inputs = rat.inputs.make_input(project, rat.Controls(display="off"))
+        for i, file in enumerate(project.custom_files):
+            if file.path.is_absolute():
+                continue
+            rat_inputs[0].customFiles.files[i]["path"] = pathlib.Path(self.model.save_path, file.path)
+
+        _, output, bayes = rat.rat_core.RATMain(*rat_inputs)
+        return rat.outputs.make_results("calculate", output, bayes)
 
     def run(self):
         """Run rat using multiprocessing."""
@@ -205,6 +221,10 @@ class MainWindowPresenter:
 
         self.model.controls.initialise_IPC()
         rat_inputs = rat.inputs.make_input(self.model.project, self.model.controls)
+        for i, file in enumerate(self.model.project.custom_files):
+            if file.path.is_absolute():
+                continue
+            rat_inputs[0].customFiles.files[i]["path"] = pathlib.Path(self.model.save_path, file.path)
         display_on = self.model.controls.display != rat.utils.enums.Display.Off
 
         self.runner = RATRunner(rat_inputs, self.model.controls.procedure, display_on)

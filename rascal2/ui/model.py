@@ -138,6 +138,14 @@ class MainWindowModel(QtCore.QObject):
         self.project.save(Path(save_path, "project.json"))
         if self.results:
             self.results.save(Path(save_path, "results.json"))
+
+        if self.save_path != save_path:
+            for file in self.project.custom_files:
+                if not file.path.is_absolute():
+                    cur_path = Path(self.save_path) / file.path / file.filename
+                    new_dir = Path(save_path) / file.path
+                    shutil.copy(cur_path, new_dir)
+
         self.save_path = save_path
         os.chdir(save_path)
 
@@ -184,6 +192,9 @@ class MainWindowModel(QtCore.QObject):
         project_file = Path(load_path, "project.json")
         try:
             project = rat.Project.load(project_file)
+            for file in project.custom_files:
+                if file.path.is_relative_to(load_path):
+                    file.path = file.path.relative_to(load_path)
         except JSONDecodeError as err:
             raise ValueError("The project.json file for this project contains invalid JSON.") from err
         except (KeyError, ValueError) as err:
