@@ -2,12 +2,12 @@ from pathlib import Path
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from rascal2.config import EXAMPLES_PATH, EXAMPLES_TEMP_PATH, get_logger, path_for, setup_logging, setup_settings
+from rascal2.config import EXAMPLES_PATH, EXAMPLES_TEMP_PATH, path_for
 from rascal2.core.enums import UnsavedReply
 from rascal2.dialogs.about_dialog import AboutDialog
 from rascal2.dialogs.settings_dialog import SettingsDialog
 from rascal2.dialogs.startup_dialog import PROJECT_FILES, LoadDialog, LoadR1Dialog, NewProjectDialog, StartupDialog
-from rascal2.settings import MDIGeometries, Settings
+from rascal2.settings import MDIGeometries, Settings, get_global_settings
 from rascal2.widgets import ControlsWidget, PlotWidget, TerminalWidget
 from rascal2.widgets.project import ProjectWidget
 from rascal2.widgets.startup import StartUpWidget
@@ -51,11 +51,11 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
 
         self.settings = Settings()
-        self.logging = get_logger()
         self.startup_dlg = StartUpWidget(self)
         self.setCentralWidget(self.startup_dlg)
 
         self.about_dialog = AboutDialog(self)
+        self.restoreGeometry(get_global_settings().value("window_geometry", bytearray(b"")))
 
     def closeEvent(self, event):
         if self.presenter.ask_to_save_project():
@@ -331,7 +331,11 @@ class MainWindowView(QtWidgets.QMainWindow):
 
     def reset_mdi_layout(self):
         """Reset MDI layout to the default."""
-        if self.settings.mdi_defaults is None:
+        try:
+            mdi_defaults = get_global_settings().value("mdi_defaults")
+        except TypeError:
+            mdi_defaults = None
+        if mdi_defaults is None:
             for window in self.mdi.subWindowList():
                 window.showNormal()
             self.mdi.tileSubWindows()
@@ -339,7 +343,7 @@ class MainWindowView(QtWidgets.QMainWindow):
             for window in self.mdi.subWindowList():
                 # get corresponding MDIGeometries entry for the widget
                 widget_name = window.windowTitle().lower().split(" ")[-1]
-                x, y, width, height, minimized = getattr(self.settings.mdi_defaults, widget_name)
+                x, y, width, height, minimized = getattr(mdi_defaults, widget_name)
                 if minimized:
                     window.showMinimized()
                 else:
@@ -355,23 +359,10 @@ class MainWindowView(QtWidgets.QMainWindow):
             geom = window.geometry()
             geoms[widget_name] = (geom.x(), geom.y(), geom.width(), geom.height(), window.isMinimized())
 
-        self.settings.mdi_defaults = MDIGeometries.model_validate(geoms)
-
-    def init_settings_and_log(self, save_path: str):
-        """Initialise settings and logging for the project.
-
-        Parameters
-        ----------
-        save_path : str
-            The save path for the project.
-
-        """
-        proj_path = Path(save_path)
-        self.settings = setup_settings(proj_path)
-
-        log_path = proj_path / "logs"
-        log_path.mkdir(parents=True, exist_ok=True)
-        self.logging = setup_logging(log_path / "rascal.log", self.terminal_widget)
+        global_setting = get_global_settings()
+        global_setting.setValue("mdi_defaults", MDIGeometries.model_validate(geoms))
+        global_setting.setValue("window_geometry", self.saveGeometry())
+        global_setting.sync()
 
     def enable_elements(self):
         """Enable the elements that are disabled on startup."""
@@ -503,11 +494,8 @@ class MainWindowView(QtWidgets.QMainWindow):
         no_show_check_box = QtWidgets.QCheckBox("Do not show this again")
         message_box.setCheckBox(no_show_check_box)
         no_show_check_box.toggled.connect(lambda val: setattr(self.settings, "show_stop_calculation_warning", not val))
-
-        # Make this save to general settings
-
         message_box.exec()
-
+        self.settings.set_global_settings()
         return message_box.clickedButton() == yes_button
 
     def show_unsaved_dialog(self, message: str) -> UnsavedReply:

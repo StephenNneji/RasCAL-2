@@ -8,7 +8,7 @@ import platform
 import site
 import sys
 
-from rascal2.settings import Settings, get_global_settings
+from rascal2.settings import get_global_settings
 
 if getattr(sys, "frozen", False):
     # we are running in a bundle
@@ -24,6 +24,7 @@ STATIC_PATH = SOURCE_PATH / "static"
 IMAGES_PATH = STATIC_PATH / "images"
 MATLAB_ARCH_FILE = pathlib.Path(SITE_PATH) / "matlab/engine/_arch.txt"
 EXAMPLES_TEMP_PATH = pathlib.Path(get_global_settings().fileName()).parent / "examples"
+LOGGER = logging.getLogger("rascal2")
 
 
 def handle_scaling():
@@ -50,84 +51,41 @@ def path_for(filename: str):
     return (IMAGES_PATH / filename).as_posix()
 
 
-def setup_settings(project_path: str | os.PathLike) -> Settings:
-    """Set up the Settings object for the project.
-
-    Parameters
-    ----------
-    project_path : str or PathLike
-        The path to the current RasCAL-2 project.
-
-    Returns
-    -------
-    Settings
-        If a settings.json file already exists in the
-        RasCAL-2 project, returns a Settings object with
-        the settings defined there. Otherwise, returns a
-        (global) default Settings object.
-
-    """
-    filepath: pathlib.Path = pathlib.Path(project_path, "settings.json")
-    if filepath.is_file():
-        json = filepath.read_text()
-        return Settings.model_validate_json(json)
-    return Settings()
+def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
+    """Qt slots swallows exceptions but this ensures exceptions are logged."""
+    logging.critical("An unhandled exception occurred!", exc_info=(exc_type, exc_value, exc_traceback))
+    logging.shutdown()
+    sys.exit(1)
 
 
-def setup_logging(log_path: str | os.PathLike, terminal=None, level: int = logging.INFO) -> logging.Logger:
+def setup_logging(level: int = logging.INFO) -> None:
     """Set up logging for the project.
 
-    The default logging path and level are defined in the settings.
-
     Parameters
     ----------
-    log_path : str | PathLike
-        The path to where the log file will be written.
-    terminal : Optional[TerminalWidget]
-        The TerminalWidget instance which acts as an IO stream.
     level : int, default logging.INFO
         The debug level for the logger.
 
     """
-    path = pathlib.Path(log_path)
-    logger = logging.getLogger("rascal_log")
+    path = pathlib.Path(get_global_settings().fileName()).parent
+    path.mkdir(parents=True, exist_ok=True)
+
+    logger = logging.getLogger()
     logger.setLevel(level)
     logger.handlers.clear()
 
-    log_filehandler = logging.FileHandler(path)
+    log_file_handler = logging.FileHandler(path / "rascal.log")
     file_formatting = logging.Formatter("%(asctime)s - %(threadName)s -  %(name)s - %(levelname)s - %(message)s")
-    log_filehandler.setFormatter(file_formatting)
-    logger.addHandler(log_filehandler)
+    log_file_handler.setFormatter(file_formatting)
+    logger.addHandler(log_file_handler)
 
-    if terminal is not None:
-        # handler that logs to terminal widget
-        log_termhandler = logging.StreamHandler(stream=terminal)
-        term_formatting = logging.Formatter("%(levelname)s - %(message)s")
-        log_termhandler.setFormatter(term_formatting)
-        logger.addHandler(log_termhandler)
+    # handler that logs to terminal widget
+    log_term_handler = logging.StreamHandler()
+    term_formatting = logging.Formatter("%(levelname)s - %(message)s")
+    log_term_handler.setFormatter(term_formatting)
+    logger.addHandler(log_term_handler)
 
-    return logger
-
-
-def get_logger():
-    """Get the RasCAL logger, and set up a backup logger if it hasn't been set up yet."""
-    logger = logging.getLogger("rascal_log")
-    if not logger.handlers:
-        # Backup in case the crash happens before the local logger setup
-        path = pathlib.Path(get_global_settings().fileName()).parent
-        path.mkdir(parents=True, exist_ok=True)
-        setup_logging(path / "rascal.log")
-
-    return logger
-
-
-def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
-    """Qt slots swallows exceptions but this ensures exceptions are logged."""
-    logger = get_logger()
-    logger.addHandler(logging.StreamHandler(stream=sys.stderr))  # print emergency crashes to terminal
-    logger.critical("An unhandled exception occurred!", exc_info=(exc_type, exc_value, exc_traceback))
-    logging.shutdown()
-    sys.exit(1)
+    sys.excepthook = log_uncaught_exceptions
 
 
 def run_matlab(ready_event, close_event, engine_output):
@@ -280,6 +238,5 @@ class MatlabHelper:
         if error:
             self.engine_output[:] = []
             self.engine_output.append(Exception(error))
-            logger = logging.getLogger("rascal_log")
-            logger.error(f"{error}. Attempt to read MATLAB _arch file failed {MATLAB_ARCH_FILE}.")
+            LOGGER.error(f"{error}. Attempt to read MATLAB _arch file failed {MATLAB_ARCH_FILE}.")
         return str(install_dir)

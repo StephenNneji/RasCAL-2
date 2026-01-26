@@ -5,7 +5,7 @@ from typing import Any
 import ratapi as rat
 import ratapi.wrappers
 
-from rascal2.config import MatlabHelper, get_matlab_engine
+from rascal2.config import LOGGER, MatlabHelper, get_matlab_engine
 from rascal2.core import commands
 from rascal2.core.enums import UnsavedReply
 from rascal2.core.runner import LogData, RATRunner
@@ -71,11 +71,10 @@ class MainWindowPresenter:
 
     def initialise_ui(self):
         """Initialise UI for a project."""
-        suffix = " [Example]" if self.model.is_project_example() else ""
+        suffix = " [Example]" if self.model.is_project_example() else f"[{self.model.save_path}]"
         self.view.setWindowTitle(
             self.view.windowTitle().split(" - ")[0] + " - " + self.model.project.name + suffix,
         )
-        self.view.init_settings_and_log(self.model.save_path)
         self.view.setup_mdi()
         self.view.plot_widget.update_plots()
         self.view.handle_results(self.model.results)
@@ -124,7 +123,7 @@ class MainWindowPresenter:
         try:
             self.model.save_project(to_path)
         except OSError as err:
-            self.view.logging.error(f"Failed to save project to {to_path}.\n", exc_info=err)
+            LOGGER.error(f"Failed to save project to {to_path}.\n", exc_info=err)
         else:
             update_recent_projects(self.model.save_path)
             self.view.undo_stack.setClean()
@@ -158,7 +157,7 @@ class MainWindowPresenter:
         try:
             write_result_to_zipped_csvs(save_file, results)
         except OSError as err:
-            self.view.logging.error(f"Failed to save fits to {save_file}.\n", exc_info=err)
+            LOGGER.error(f"Failed to save fits to {save_file}.\n", exc_info=err)
 
     def interrupt_terminal(self):
         """Send an interrupt signal to the RAT runner."""
@@ -232,9 +231,9 @@ class MainWindowPresenter:
     def handle_interrupt(self):
         """Handle a RAT run being interrupted."""
         if self.runner.error is None:
-            self.view.logging.info("RAT run interrupted!")
+            LOGGER.info("RAT run interrupted!")
         else:
-            self.view.logging.error("RAT run failed with exception.\n", exc_info=self.runner.error)
+            LOGGER.error("RAT run failed with exception.\n", exc_info=self.runner.error)
         self.view.handle_results()
         self.model.controls.delete_IPC()
 
@@ -252,7 +251,7 @@ class MainWindowPresenter:
             case rat.events.PlotEventData():
                 self.view.plot_widget.plot_with_blit(event)
             case LogData():
-                self.view.logging.log(event.level, event.msg)
+                LOGGER.log(event.level, event.msg)
 
     def edit_project(self, updated_project: dict, preview: bool = True) -> None:
         """Edit the Project with a dictionary of attributes.

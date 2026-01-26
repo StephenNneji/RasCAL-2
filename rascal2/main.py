@@ -1,3 +1,4 @@
+import logging
 import multiprocessing
 import re
 import sys
@@ -5,7 +6,7 @@ from contextlib import suppress
 
 from PyQt6 import QtGui, QtWidgets
 
-from rascal2.config import IMAGES_PATH, STATIC_PATH, MatlabHelper, handle_scaling, log_uncaught_exceptions, path_for
+from rascal2.config import IMAGES_PATH, STATIC_PATH, MatlabHelper, handle_scaling, path_for, setup_logging
 from rascal2.ui.view import MainWindowView
 
 
@@ -42,10 +43,11 @@ def main():
     """Entry point function for starting RasCAL."""
     multiprocessing.freeze_support()
     multiprocessing.set_start_method("spawn", force=True)
-    sys.excepthook = log_uncaught_exceptions
+    setup_logging()
     matlab_helper = MatlabHelper()
     exit_code = ui_execute()
     matlab_helper.close_event.set()
+    logging.shutdown()
     sys.exit(exit_code)
 
 

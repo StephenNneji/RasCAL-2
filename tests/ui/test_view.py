@@ -6,8 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from PyQt6 import QtWidgets
+from PyQt6.QtCore import QSettings
 
-from rascal2.settings import MDIGeometries, Settings
+from rascal2.settings import MDIGeometries
 from rascal2.ui.view import MainWindowView
 
 
@@ -59,19 +60,20 @@ def test_view():
 @patch("rascal2.ui.view.MainWindowPresenter")
 @patch("rascal2.ui.view.ControlsWidget.setup_controls")
 class TestMDISettings:
-    def test_reset_mdi(self, mock1, mock2, mock3, test_view, geometry):
+    def test_reset_mdi(self, mock1, mock2, mock3, global_setting, test_view, geometry):
         """Test that resetting the MDI works."""
-        test_view.settings = Settings()
         test_view.setup_mdi()
-        test_view.settings.mdi_defaults = MDIGeometries(
-            plots=geometry[0], project=geometry[1], terminal=geometry[2], controls=geometry[3]
+        global_setting.setValue(
+            "mdi_defaults",
+            MDIGeometries(plots=geometry[0], project=geometry[1], terminal=geometry[2], controls=geometry[3]),
         )
         test_view.reset_mdi_layout()
+        mdi_defaults = global_setting.value("mdi_defaults")
         for window in test_view.mdi.subWindowList():
             # get corresponding MDIGeometries entry for the widget
             widget_name = window.windowTitle().lower().split(" ")[-1]
             w_geom = window.geometry()
-            assert getattr(test_view.settings.mdi_defaults, widget_name) == (
+            assert getattr(mdi_defaults, widget_name) == (
                 w_geom.x(),
                 w_geom.y(),
                 w_geom.width(),
@@ -79,9 +81,8 @@ class TestMDISettings:
                 window.isMinimized(),
             )
 
-    def test_set_mdi(self, mock1, mock2, mock3, test_view, geometry):
+    def test_set_mdi(self, mock1, mock2, mock3, global_setting, test_view, geometry):
         """Test that setting the MDI adds the expected object to settings."""
-        test_view.settings = Settings()
         test_view.setup_mdi()
         widgets_in_order = []
 
@@ -92,9 +93,10 @@ class TestMDISettings:
                 window.showMinimized()
 
         test_view.save_mdi_layout()
+        mdi_defaults = global_setting.value("mdi_defaults")
         for i, widget in enumerate(widgets_in_order):
             window = test_view.mdi.subWindowList()[i]
-            assert getattr(test_view.settings.mdi_defaults, widget) == (
+            assert getattr(mdi_defaults, widget) == (
                 window.x(),
                 window.y(),
                 window.width(),
@@ -113,38 +115,44 @@ def test_set_enabled(test_view):
 
 
 @patch("PyQt6.QtWidgets.QFileDialog.getExistingDirectory")
-def test_get_project_folder(mock_get_dir: MagicMock):
+@patch("rascal2.ui.view.get_global_settings")
+def test_get_project_folder(mock_get_global, mock_get_dir: MagicMock):
     """Test that getting a specified folder works as expected."""
-    view = MainWindowView()
-    view.check_save_blacklist = MagicMock(return_value=False)
-    mock_overwrite = MagicMock(return_value=True)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        ini_file = Path(tmp_dir) / "settings.ini"
+        global_setting = QSettings(str(ini_file), QSettings.Format.IniFormat)
+        mock_get_global.return_value = global_setting
 
-    tmp = tempfile.mkdtemp()
-    view.presenter.create_project("test", tmp)
-    mock_get_dir.return_value = tmp
+        view = MainWindowView()
+        view.check_save_blacklist = MagicMock(return_value=False)
+        mock_overwrite = MagicMock(return_value=True)
 
-    with patch.object(view, "show_confirm_dialog", new=mock_overwrite):
-        assert view.get_project_folder() == tmp
+        tmp = tempfile.mkdtemp()
+        view.presenter.create_project("test", tmp)
+        mock_get_dir.return_value = tmp
 
-    # check overwrite is triggered if project already in folder
-    Path(tmp, "controls.json").touch()
-    with patch.object(view, "show_confirm_dialog", new=mock_overwrite):
-        assert view.get_project_folder() == tmp
-    mock_overwrite.assert_called_once()
+        with patch.object(view, "show_confirm_dialog", new=mock_overwrite):
+            assert view.get_project_folder() == tmp
 
-    def change_dir(*args, **kwargs):
-        """Change directory so mocked save_as doesn't recurse forever."""
-        mock_get_dir.return_value = "OTHERPATH"
+        # check overwrite is triggered if project already in folder
+        Path(tmp, "controls.json").touch()
+        with patch.object(view, "show_confirm_dialog", new=mock_overwrite):
+            assert view.get_project_folder() == tmp
+        mock_overwrite.assert_called_once()
 
-    # check not saved if overwrite is cancelled
-    # to avoid infinite recursion (which only happens because of the mock),
-    # set the mock to change the directory to some other path once called
-    mock_overwrite = MagicMock(return_value=False, side_effect=change_dir)
+        def change_dir(*args, **kwargs):
+            """Change directory so mocked save_as doesn't recurse forever."""
+            mock_get_dir.return_value = "OTHERPATH"
 
-    with patch.object(view, "show_confirm_dialog", new=mock_overwrite):
-        assert view.get_project_folder() == "OTHERPATH"
+        # check not saved if overwrite is cancelled
+        # to avoid infinite recursion (which only happens because of the mock),
+        # set the mock to change the directory to some other path once called
+        mock_overwrite = MagicMock(return_value=False, side_effect=change_dir)
 
-    mock_overwrite.assert_called_once()
+        with patch.object(view, "show_confirm_dialog", new=mock_overwrite):
+            assert view.get_project_folder() == "OTHERPATH"
+
+        mock_overwrite.assert_called_once()
 
 
 @pytest.mark.parametrize("submenu_name", ["&File", "&Edit", "&Windows", "&Tools", "&Help"])

@@ -1,13 +1,14 @@
 """File for Qt commands."""
 
 import copy
-import logging
 from collections.abc import Callable
 from enum import IntEnum, unique
 
 import ratapi
 from PyQt6 import QtGui
 from ratapi import ClassList
+
+from rascal2.config import LOGGER
 
 
 @unique
@@ -69,7 +70,7 @@ class AbstractModelEdit(QtGui.QUndoCommand):
                 except Exception as ex:
                     self.new_result = self.old_result
                     message = f"Error occurred when generating result preview:\n\n{ex}"
-                    logging.error(message, exc_info=ex)
+                    LOGGER.error(message, exc_info=ex)
                     self.presenter.view.terminal_widget.write(message)
             self.presenter.model.update_results(self.new_result)
         else:

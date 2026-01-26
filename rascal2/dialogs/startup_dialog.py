@@ -1,10 +1,9 @@
-import logging
 import os
 from pathlib import Path
 
 from PyQt6 import QtCore, QtWidgets
 
-from rascal2.config import EXAMPLES_PATH
+from rascal2.config import EXAMPLES_PATH, LOGGER
 from rascal2.core.worker import Worker
 from rascal2.settings import update_recent_projects
 
@@ -183,7 +182,7 @@ class StartupDialog(QtWidgets.QDialog):
         folder_name = args[0]
         error = str(exception).strip().replace("\n", "")
         message = f"The Project ({folder_name}) could not be opened because:\n\n{error}"
-        logging.error(message, exc_info=exception)
+        LOGGER.error(message, exc_info=exception)
         QtWidgets.QMessageBox.critical(self, self.windowTitle(), message)
 
 
