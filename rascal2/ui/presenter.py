@@ -292,6 +292,18 @@ class MainWindowPresenter:
         self.model.project.model_validate(project_dict)
         self.view.undo_stack.push(commands.EditProject(updated_project, self, preview=preview))
 
+    def copy_custom_file(self, file_path):
+        file_path = pathlib.Path(file_path)
+        if file_path.is_relative_to(self.model.save_path):
+            return file_path.relative_to(self.model.save_path)
+
+        import shutil
+        if self.view.show_confirm_copy_file_dialog():
+            new_relative_path = file_path.relative_to(self.model.save_path)
+            shutil.copy(file_path, self.model.save_path)
+
+
+
 
 # '\d+\.\d+' is the regex for
 # 'some integer, then a decimal point, then another integer'

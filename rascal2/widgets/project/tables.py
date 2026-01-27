@@ -604,6 +604,8 @@ class CustomFileModel(ClassListTableModel):
             self.classlist[row].path = file_path.parent
             self.classlist[row].filename = str(file_path.name)
 
+            # main_view = self.parent.parent.parent.parent
+            # main_view.presenter.copy_custom_file(file_path)
             message = QtWidgets.QMessageBox()
             message.exec()
             # auto-set language from file extension if possible
