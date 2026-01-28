@@ -89,7 +89,7 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.ItemDataRole.EditRole or role == QtCore.Qt.ItemDataRole.CheckStateRole:
             row = index.row()
             param = self.index_header(index)
-            if self.index_header(index) == "fit":
+            if param == "fit":
                 value = QtCore.Qt.CheckState(value) == QtCore.Qt.CheckState.Checked
             if param is not None:
                 current_value = getattr(self.classlist[index.row()], param)
@@ -355,6 +355,38 @@ class ParametersModel(ClassListTableModel):
             flags |= QtCore.Qt.ItemFlag.ItemIsEditable
 
         return flags
+
+    def setData(self, index, value, role=QtCore.Qt.ItemDataRole.EditRole) -> bool:
+        param = self.index_header(index)
+        if param == "min":
+            min_value = value
+            value_model_index = index.siblingAtColumn(index.column() + 1)
+            max_model_index = index.siblingAtColumn(index.column() + 2)
+
+            if min_value > max_model_index.data(QtCore.Qt.ItemDataRole.DisplayRole):
+                super().setData(max_model_index, min_value, role)
+            if min_value > value_model_index.data(QtCore.Qt.ItemDataRole.DisplayRole):
+                super().setData(value_model_index, min_value, role)
+
+        elif param == "value":
+            min_model_index = index.siblingAtColumn(index.column() - 1)
+            actual_value = value
+            max_model_index = index.siblingAtColumn(index.column() + 1)
+            if actual_value < min_model_index.data(QtCore.Qt.ItemDataRole.DisplayRole):
+                super().setData(min_model_index, actual_value, role)
+            if actual_value > max_model_index.data(QtCore.Qt.ItemDataRole.DisplayRole):
+                super().setData(max_model_index, actual_value, role)
+
+        elif param == "max":
+            min_model_index = index.siblingAtColumn(index.column() - 2)
+            value_model_index = index.siblingAtColumn(index.column() - 1)
+            max_value = value
+            if max_value < min_model_index.data(QtCore.Qt.ItemDataRole.DisplayRole):
+                super().setData(min_model_index, max_value, role)
+            if max_value < value_model_index.data(QtCore.Qt.ItemDataRole.DisplayRole):
+                super().setData(value_model_index, max_value, role)
+
+        return super().setData(index, value, role)
 
 
 class ParameterFieldWidget(ProjectFieldWidget):
