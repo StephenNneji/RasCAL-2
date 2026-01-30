@@ -136,7 +136,7 @@ class MatlabSetupTab(QtWidgets.QWidget):
         label_layout.addWidget(QtWidgets.QLabel("Current Matlab Directory:"))
         label_layout.addStretch(1)
         self.matlab_path = QtWidgets.QLineEdit(self)
-        self.matlab_path.setText(MatlabHelper().get_matlab_path())
+        self.matlab_path.setText(MatlabHelper().matlab_dir)
         self.matlab_path.setReadOnly(True)
         self.matlab_path.setPlaceholderText("Select MATLAB directory")
         self.matlab_path.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
@@ -180,28 +180,19 @@ class MatlabSetupTab(QtWidgets.QWidget):
         if not self.changed:
             return
 
-        # should_init = False
         with suppress(FileNotFoundError), open(MATLAB_ARCH_FILE, "r+") as path_file:
             try:
                 install_dir = pathlib.Path(self.matlab_path.text())
-                LOGGER.info(f"install_dir: {install_dir}")
                 if not getattr(sys, "frozen", False):
                     return
-
-                # if len(path_file.readlines()) == 0:
-                #     should_init = True
 
                 path_file.seek(0)
                 if platform.system() == "Windows":
                     arch = "win64"
                 elif platform.system() == "Darwin":
-                    if platform.mac_ver()[-1] == "arm64" and (install_dir / "bin/maca64").exists():
-                        arch = "maca64"
-                    else:
-                        arch = "maci64"
+                    arch = "maca64" if platform.mac_ver()[-1] == "arm64" else "maci64"
                 else:
                     arch = "glnxa64"
-                LOGGER.info(f"arch: {arch}")
                 path_file.writelines(
                     [
                         f"{arch}\n",
@@ -213,5 +204,5 @@ class MatlabSetupTab(QtWidgets.QWidget):
                 path_file.truncate()
             except Exception as ex:
                 LOGGER.error("exception occurred", exc_info=ex)
-        # if should_init:
+
         MatlabHelper().async_start()
