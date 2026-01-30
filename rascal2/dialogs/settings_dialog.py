@@ -195,10 +195,7 @@ class MatlabSetupTab(QtWidgets.QWidget):
                 if platform.system() == "Windows":
                     arch = "win64"
                 elif platform.system() == "Darwin":
-                    if platform.mac_ver()[-1] == "arm64" and (install_dir / "bin/maca64").exists():
-                        arch = "maca64"
-                    else:
-                        arch = "maci64"
+                    arch = "maca64" if platform.mac_ver()[-1] == "arm64" else "maci64"
                 else:
                     arch = "glnxa64"
                 LOGGER.info(f"arch: {arch}")
