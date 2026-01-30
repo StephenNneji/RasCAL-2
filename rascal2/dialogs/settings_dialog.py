@@ -136,7 +136,7 @@ class MatlabSetupTab(QtWidgets.QWidget):
         label_layout.addWidget(QtWidgets.QLabel("Current Matlab Directory:"))
         label_layout.addStretch(1)
         self.matlab_path = QtWidgets.QLineEdit(self)
-        self.matlab_path.setText(MatlabHelper().get_matlab_path())
+        self.matlab_path.setText(MatlabHelper().matlab_dir)
         self.matlab_path.setReadOnly(True)
         self.matlab_path.setPlaceholderText("Select MATLAB directory")
         self.matlab_path.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
