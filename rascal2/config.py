@@ -173,6 +173,7 @@ class MatlabHelper:
             cls._instance.ready_event = mp.Event()
             cls._instance.close_event = mp.Event()
             cls._instance.engine_output = None
+            cls._instance.matlab_dir = ""
             cls._instance.__engine = None
             cls._instance.async_start()
 
@@ -230,7 +231,7 @@ class MatlabHelper:
                 lines = path_file.readlines()
                 if len(lines) == 4:
                     arch = {"x86_64": "maci64", "arm64": "maca64"}
-                    if platform.system() == "Darwin" and arch.get(platform.mac_ver()[-1]) != lines[0]:
+                    if platform.system() == "Darwin" and arch.get(platform.mac_ver()[-1]) != lines[0].strip():
                         # installed intel Matlab on ARM or vice versa
                         raise MatlabHelper.ConfigError("The installed MATLAB is incompatible, "
                                                        f"ensure the {platform.mac_ver()[-1]} version of "
@@ -247,4 +248,5 @@ class MatlabHelper:
             self.engine_output.append(ex)
             LOGGER.error(f"Attempt to read MATLAB _arch file failed {MATLAB_ARCH_FILE}.\n {ex}.")
 
-        return str(install_dir)
+        self.matlab_dir = str(install_dir)
+        return self.matlab_dir
