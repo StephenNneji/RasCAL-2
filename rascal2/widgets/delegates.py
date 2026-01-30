@@ -108,11 +108,6 @@ class ValueSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
         max_val = float("inf")
         min_val = -float("inf")
 
-        if self.field in ["min", "value"]:
-            max_val = index.siblingAtColumn(index.column() + 1).data(QtCore.Qt.ItemDataRole.DisplayRole)
-        if self.field in ["value", "max"]:
-            min_val = index.siblingAtColumn(index.column() - 1).data(QtCore.Qt.ItemDataRole.DisplayRole)
-
         widget.setMinimum(min_val)
         widget.setMaximum(max_val)
 

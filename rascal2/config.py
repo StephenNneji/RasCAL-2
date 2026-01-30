@@ -120,7 +120,7 @@ def run_matlab(ready_event, close_event, engine_output):
     eng.quit()
 
 
-def get_matlab_engine(engine_ready, engine_output, is_local=False):
+def get_matlab_engine(engine_ready, engine_output):
     """Get a MATLAB engine from the MatlabHelper or exception if no engine is available.
 
     Parameters
@@ -129,8 +129,6 @@ def get_matlab_engine(engine_ready, engine_output, is_local=False):
         An event to inform listeners that MATLAB is ready.
     engine_output :  multiprocessing.Manager.list
         A list with the name of MATLAB engine instance or an exception from the MatlabHelper.
-    is_local : bool, default False
-        Indicates a local engine should be created other connect ratapi.
 
     Returns
     -------
@@ -143,17 +141,13 @@ def get_matlab_engine(engine_ready, engine_output, is_local=False):
     if engine_output:
         if isinstance(engine_output[0], bytes):
             engine_name = engine_output[0].decode("utf-8")
-            if is_local:
-                import matlab.engine
 
-                engine_future = matlab.engine.connect_matlab(engine_name, background=True)
-            else:
-                import ratapi
+            import ratapi
 
-                engine_future = ratapi.wrappers.use_shared_matlab(
-                    engine_name,
-                    "Error occurred when connecting to MATLAB, please ensure MATLAB is installed and set up properly.",
-                )
+            engine_future = ratapi.wrappers.use_shared_matlab(
+                engine_name,
+                "Error occurred when connecting to MATLAB, please ensure MATLAB is installed and set up properly.",
+            )
 
             return engine_future
         elif isinstance(engine_output[0], Exception):
@@ -208,7 +202,7 @@ class MatlabHelper:
         if self.__engine is not None:
             return self.__engine
 
-        result = get_matlab_engine(self.ready_event, self.engine_output, True)
+        result = get_matlab_engine(self.ready_event, self.engine_output)
         if isinstance(result, Exception):
             raise result
 
