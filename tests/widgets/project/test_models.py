@@ -420,14 +420,21 @@ def test_file_model_filename_data():
     model = CustomFileModel(init_list, parent)
 
     filename_col = model.headers.index("filename") + model.col_offset
-
+    working_path = Path(".").resolve().as_posix()
     assert model.data(model.index(0, filename_col)) == "myfile.m"
     assert model.data(model.index(1, filename_col)) == ""
+    assert model.data(model.index(0, filename_col), QtCore.Qt.ItemDataRole.UserRole) == working_path
+    assert model.data(model.index(1, filename_col), QtCore.Qt.ItemDataRole.UserRole) is None
+    assert model.data(model.index(0, filename_col), QtCore.Qt.ItemDataRole.ToolTipRole) == working_path
+    assert model.data(model.index(1, filename_col), QtCore.Qt.ItemDataRole.ToolTipRole) is None
 
     model.edit_mode = True
-
-    assert Path(model.data(model.index(0, filename_col))) == (Path(".") / "myfile.m").resolve()
+    assert model.data(model.index(0, filename_col)) == "myfile.m"
     assert model.data(model.index(1, filename_col)) == "Browse..."
+    assert model.data(model.index(0, filename_col), QtCore.Qt.ItemDataRole.UserRole) == working_path
+    assert model.data(model.index(1, filename_col), QtCore.Qt.ItemDataRole.UserRole) is None
+    assert model.data(model.index(0, filename_col), QtCore.Qt.ItemDataRole.ToolTipRole) == working_path
+    assert model.data(model.index(1, filename_col), QtCore.Qt.ItemDataRole.ToolTipRole) is None
 
 
 @pytest.mark.parametrize(
