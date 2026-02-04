@@ -191,6 +191,7 @@ class FitSettingsWidget(QtWidgets.QWidget):
         self.rows = {}
         self.datasetter = {}
         self.val_labels = {}
+        adjusted_decimals = {"nsTolerance": 3}
 
         settings_grid = QtWidgets.QGridLayout()
         settings_grid.setContentsMargins(10, 10, 10, 10)
@@ -198,6 +199,8 @@ class FitSettingsWidget(QtWidgets.QWidget):
         for i, setting in enumerate(settings):
             field_info = controls_fields[setting]
             self.rows[setting] = get_validated_input(field_info)
+            if setting in adjusted_decimals:
+                self.rows[setting].editor.setDecimals(adjusted_decimals[setting])
             self.rows[setting].layout().setContentsMargins(5, 0, 0, 0)
             self.datasetter[setting] = self.create_model_data_setter(setting)
             self.rows[setting].edited_signal.connect(self.datasetter[setting])
