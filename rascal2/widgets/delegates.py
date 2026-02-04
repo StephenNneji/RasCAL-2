@@ -45,6 +45,9 @@ class ValidatedInputDelegate(QtWidgets.QStyledItemDelegate):
 
     def setEditorData(self, _editor: QtWidgets.QWidget, index):
         data = index.data(QtCore.Qt.ItemDataRole.DisplayRole)
+        extra = index.data(QtCore.Qt.ItemDataRole.UserRole)
+        if extra:
+            self.widget.editor.path = extra
         self.widget.set_data(data)
 
     def setModelData(self, _editor, model, index):
@@ -60,9 +63,9 @@ class CustomFileFunctionDelegate(QtWidgets.QStyledItemDelegate):
         self.widget = parent
 
     def createEditor(self, parent, option, index):
-        func_names = self.widget.model.func_names[
+        func_names = self.widget.model.func_names.get(
             index.siblingAtColumn(index.column() - 1).data(QtCore.Qt.ItemDataRole.DisplayRole)
-        ]
+        )
         # we define the methods set_data and get_data
         # so that setEditorData and setModelData don't need
         # to know what kind of widget the editor is

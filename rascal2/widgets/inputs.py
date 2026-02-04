@@ -176,6 +176,7 @@ class PathWidget(QtWidgets.QLabel):
 
         self.open_on_show = False
         self.setAutoFillBackground(True)
+        self.path = ""
 
     def mouseDoubleClickEvent(self, event):
         self.open()
@@ -186,12 +187,25 @@ class PathWidget(QtWidgets.QLabel):
             self.open()
             self.open_on_show = False
 
+    def text(self):
+        if self.path:
+            return (Path(self.path) / super().text()).as_posix()
+        return super().text()
+
+    def setText(self, value):
+        # if value is a path, set text to the base name only.
+        if isinstance(value, Path):
+            self.path = value.parent.as_posix()
+            super().setText(value.name)
+        else:
+            super().setText(value)
+
     def open(self):
         """Open file dialog and get the selected filename."""
         file_dialog = QtWidgets.QFileDialog(parent=self)
-        file = file_dialog.getOpenFileName()[0]
+        file = file_dialog.getOpenFileName(directory=self.path)[0]
         if file:
-            self.setText(file)
+            self.setText(Path(file))
         self.text_changed.emit()
 
 

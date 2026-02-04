@@ -588,11 +588,13 @@ class CustomFileModel(ClassListTableModel):
 
     def data(self, index, role=QtCore.Qt.ItemDataRole.DisplayRole):
         data = super().data(index, role)
-        if role == QtCore.Qt.ItemDataRole.DisplayRole and self.index_header(index) == "filename" and self.edit_mode:
-            if data == "" or data == "Browse...":
+        if self.index_header(index) == "filename":
+            if role == QtCore.Qt.ItemDataRole.DisplayRole and self.edit_mode and (data == "" or data == "Browse..."):
                 return "Browse..."
-            return str(self.classlist[index.row()].path / data)
-
+            elif role in [QtCore.Qt.ItemDataRole.ToolTipRole, QtCore.Qt.ItemDataRole.UserRole]:
+                display = super().data(index, QtCore.Qt.ItemDataRole.DisplayRole)
+                if display != "" and display != "Browse...":
+                    return self.classlist[index.row()].path.as_posix()
         return data
 
     def setData(self, index, value, role=QtCore.Qt.ItemDataRole.DisplayRole):

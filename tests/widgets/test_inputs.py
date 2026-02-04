@@ -5,11 +5,14 @@ try:
 except ImportError:
     from strenum import StrEnum
 
+from pathlib import Path
+
 import pytest
 from pydantic.fields import FieldInfo
 from PyQt6 import QtWidgets
 
 from rascal2.widgets import AdaptiveDoubleSpinBox, MultiSelectComboBox, MultiSelectList, get_validated_input
+from rascal2.widgets.inputs import PathWidget
 
 
 class MyEnum(StrEnum):
@@ -26,6 +29,7 @@ class MyEnum(StrEnum):
         (FieldInfo(annotation=int), QtWidgets.QSpinBox, 15),
         (FieldInfo(annotation=MyEnum), QtWidgets.QComboBox, "value 2"),
         (FieldInfo(annotation=str), QtWidgets.QLineEdit, "Test string"),
+        (FieldInfo(annotation=Path), PathWidget, str(Path(".").resolve())),
     ],
 )
 def test_editor_type(field_info, expected_type, example_data):
@@ -71,3 +75,17 @@ def test_multi_select_list_update(selected):
     buttons = msl.findChildren(QtWidgets.QToolButton)
     buttons[1].click()
     assert msl.list.count() == 0
+
+
+def test_path_widget():
+    widget = PathWidget(None)
+    assert widget.path == ""
+    assert widget.text() == ""
+
+    widget.setText("Browse...")
+    assert widget.text() == "Browse..."
+
+    path = Path(".") / "file.m"
+    widget.setText(path)
+    assert widget.path == path.parent.as_posix()
+    assert widget.text() == path.name

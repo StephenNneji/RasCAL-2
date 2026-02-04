@@ -233,7 +233,15 @@ class ProjectWidget(QtWidgets.QWidget):
         self.edit_absorption_checkbox.checkStateChanged.connect(
             lambda s: self.edit_tabs["Layers"].tables["layers"].set_absorption(s == QtCore.Qt.CheckState.Checked)
         )
-        for tab in ["Experimental Parameters", "Layers", "Backgrounds", "Resolutions", "Data", "Domains"]:
+        for tab in [
+            "Experimental Parameters",
+            "Layers",
+            "Backgrounds",
+            "Resolutions",
+            "Data",
+            "Domains",
+            "Custom Files",
+        ]:
             for table in self.edit_tabs[tab].tables.values():
                 table.edited.connect(lambda: self.edit_tabs["Contrasts"].tables["contrasts"].update_item_view())
 
