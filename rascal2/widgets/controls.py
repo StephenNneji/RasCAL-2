@@ -76,9 +76,9 @@ class ControlsWidget(QtWidgets.QWidget):
 
         widget_layout = QtWidgets.QHBoxLayout()
         widget_layout.addStretch(1)
-        widget_layout.addLayout(procedure_box, 4)
+        widget_layout.addLayout(procedure_box, 8)
         widget_layout.addSpacing(20)
-        widget_layout.addWidget(self.fit_settings, 4)
+        widget_layout.addWidget(self.fit_settings, 12)
         widget_layout.addStretch(1)
         self.setLayout(widget_layout)
 
