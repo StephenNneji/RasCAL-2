@@ -38,9 +38,14 @@ def empty_results():
     return empty_results
 
 
-def test_create_project():
+@pytest.fixture
+def model():
+    with patch("rascal2.ui.model.os.chdir", autospec=True):
+        yield MainWindowModel()
+
+
+def test_create_project(model):
     """The project should be set up with the desired name and default objets when a new project is created."""
-    model = MainWindowModel()
     assert model.project is None
     assert model.controls is None
     assert model.results is None
@@ -53,8 +58,7 @@ def test_create_project():
     assert model.save_path == "C:/test"
 
 
-def test_save_project(empty_results):
-    model = MainWindowModel()
+def test_save_project(empty_results, model):
     model.project = Project(calculation="domains", name="test project")
     model.controls = Controls(procedure="dream", resampleMinAngle=0.5)
     model.results = empty_results
@@ -73,9 +77,8 @@ def test_save_project(empty_results):
     assert '"fitParams": []' in results
 
 
-def test_load_project(empty_results):
+def test_load_project(empty_results, model):
     """The load function should load the correct controls object from JSON."""
-    model = MainWindowModel()
     project = Project(name="test project", calculation="domains")
 
     with TemporaryDirectory() as tmpdir:
@@ -91,9 +94,8 @@ def test_load_project(empty_results):
 
 
 @patch("ratapi.utils.convert.r1_to_project")
-def test_load_r1_project(mock_r1_class):
+def test_load_r1_project(mock_r1_class, model):
     """load_r1_project should call the conversion function and set the path correctly."""
-    model = MainWindowModel()
     model.load_r1_project("test_path/r1project.mat")
 
     mock_r1_class.assert_called_once()
@@ -101,10 +103,8 @@ def test_load_r1_project(mock_r1_class):
 
 
 @pytest.mark.parametrize("bad_json", ['{"field1":3', '{"procedure":"fry eggs"}'])
-def test_load_controls_error(bad_json):
+def test_load_controls_error(bad_json, model):
     """The project load function should raise an error if the controls JSON is invalid or the parameters are invalid."""
-    model = MainWindowModel()
-
     with pytest.raises(  # noqa (for nested with's: pytest.raises breaks if not by itself)
         ValueError,
         match="The controls.json file for this project is not valid.\n"
@@ -116,10 +116,8 @@ def test_load_controls_error(bad_json):
 
 
 @pytest.mark.parametrize("bad_json", ['{"calculation":"Do}', '{i"m not a good project file'])
-def test_load_project_decode_error(bad_json):
+def test_load_project_decode_error(bad_json, model):
     """The project load function should raise an error if the project JSON is invalid JSON."""
-    model = MainWindowModel()
-
     with pytest.raises(  # noqa (for nested with's: pytest.raises breaks if not by itself)
         ValueError, match="The project.json file for this project contains invalid JSON."
     ):
@@ -132,10 +130,8 @@ def test_load_project_decode_error(bad_json):
 @pytest.mark.parametrize(
     "bad_json", ['{"calculation":"guessing"}', '{"parameters":[{"name":"parameter 1","thickness":0.51}]}']
 )
-def test_load_project_value_error(bad_json):
+def test_load_project_value_error(bad_json, model):
     """The project load function should raise an error if the values are not valid."""
-    model = MainWindowModel()
-
     with pytest.raises(  # noqa (for nested with's: pytest.raises breaks if not by itself)
         ValueError, match="The project.json file for this project is not valid."
     ):
