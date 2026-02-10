@@ -91,8 +91,8 @@ class ProjectWidget(QtWidgets.QWidget):
 
         Returns
         -------
-            label_form_widget:
-                A widget with label and the given widget.
+        label_form_widget:
+            A widget with label and the given widget.
         """
         layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(0)
