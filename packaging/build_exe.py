@@ -49,7 +49,6 @@ EXCLUDED_IMPORT = [
     "PyQt6.QtXml",
     "PyQt6.QtXmlPatterns",
     "sphinx",
-    "numpy.array_api",
     "pkg_resources",
 ]
 IS_WINDOWS = sys.platform.startswith("win")
@@ -80,6 +79,12 @@ def build_exe():
         str(PACKAGING_PATH / "hooks"),
         "--log-level",
         "ERROR",
+        "--collect-submodules",
+        "numpy",
+        "--collect-submodules",
+        "scipy",
+        "--collect-all",
+        "matlab",
         str(main_path),
     ]
 

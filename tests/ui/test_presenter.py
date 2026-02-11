@@ -47,7 +47,10 @@ class MockWindowView(QtWidgets.QMainWindow):
 
 @pytest.fixture
 def presenter():
-    with patch("rascal2.ui.presenter.LOGGER", autospec=True) as mock_log:
+    with (
+        patch("rascal2.ui.presenter.LOGGER", autospec=True) as mock_log,
+        patch("rascal2.ui.model.os.chdir", autospec=True),
+    ):
         pr = MainWindowPresenter(MockWindowView())
         pr.runner = MagicMock()
         pr.model.controls = Controls()

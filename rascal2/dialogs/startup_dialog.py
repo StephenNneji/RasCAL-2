@@ -10,13 +10,13 @@ from rascal2.settings import update_recent_projects
 # global variable for required project files
 PROJECT_FILES = ["controls.json", "project.json"]
 EXAMPLES = {
-    "absorption": "Shows absorption (imaginary SLD) effect usually seen below the critical edge",
-    "domains_custom_layers": "Incoherent summing ('domains') from custom layer model",
-    "domains_custom_XY": "Incoherent summing ('domains') from custom XY model",
-    "domains_standard_layers": "Incoherent summing ('domains') from standard layer model",
+    "DSPC_standard_layers": "Reflectivity analysis of a floating bilayer of DSPC using standard layer model",
     "DSPC_custom_layers": "Reflectivity analysis of a floating bilayer of DSPC using custom layer model",
     "DSPC_custom_XY": "Reflectivity analysis of a floating bilayer of DSPC using custom XY model",
-    "DSPC_standard_layers": "Reflectivity analysis of a floating bilayer of DSPC using standard layer model",
+    "domains_standard_layers": "Incoherent summing ('domains') from standard layer model",
+    "domains_custom_layers": "Incoherent summing ('domains') from custom layer model",
+    "domains_custom_XY": "Incoherent summing ('domains') from custom XY model",
+    "absorption": "Shows absorption (imaginary SLD) effect usually seen below the critical edge",
 }
 
 

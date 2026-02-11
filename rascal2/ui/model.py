@@ -1,4 +1,6 @@
+import os
 import shutil
+import sys
 from json import JSONDecodeError
 from pathlib import Path
 
@@ -63,7 +65,19 @@ class MainWindowModel(QtCore.QObject):
         self.result_log = ""
         self.controls = None
 
-        self.save_path = ""
+        self.__save_path = ""
+
+    @property
+    def save_path(self):
+        return self.__save_path
+
+    @save_path.setter
+    def save_path(self, value):
+        if self.__save_path in sys.path:
+            sys.path.remove(self.__save_path)
+        self.__save_path = value
+        os.chdir(value)
+        sys.path.append(value)
 
     def create_project(self, name: str, save_path: str):
         """Create a new RAT project and controls object.
@@ -125,6 +139,7 @@ class MainWindowModel(QtCore.QObject):
         if self.results:
             self.results.save(Path(save_path, "results.json"))
         self.save_path = save_path
+        os.chdir(save_path)
 
     def is_project_example(self):
         return Path(self.save_path).is_relative_to(EXAMPLES_TEMP_PATH)
