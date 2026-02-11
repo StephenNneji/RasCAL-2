@@ -1,6 +1,7 @@
 """Models and widgets for project fields."""
 
 import contextlib
+import os
 import re
 from enum import Enum
 from pathlib import Path
@@ -577,6 +578,7 @@ class CustomFileModel(ClassListTableModel):
         self.func_names = {}
         self.headers.remove("path")
         self.col_offset = 2
+        self.always_copy = True
 
     def flags(self, index):
         flags = super().flags(index)
@@ -594,20 +596,22 @@ class CustomFileModel(ClassListTableModel):
             elif role in [QtCore.Qt.ItemDataRole.ToolTipRole, QtCore.Qt.ItemDataRole.UserRole]:
                 display = super().data(index, QtCore.Qt.ItemDataRole.DisplayRole)
                 if display != "" and display != "Browse...":
-                    return self.classlist[index.row()].path.as_posix()
+                    path = Path(self.classlist[index.row()].path)
+                    if not path.is_absolute():
+                        path = Path(os.getcwd()) / self.classlist[index.row()].path
+                    return path.as_posix()
         return data
 
     def setData(self, index, value, role=QtCore.Qt.ItemDataRole.DisplayRole):
         if self.index_header(index) == "filename" and value != "Browse...":
             file_path = Path(value)
+            if self.always_copy:
+                file_path = self.copy_custom_file(file_path)
+
             row = index.row()
             self.classlist[row].path = file_path.parent
             self.classlist[row].filename = str(file_path.name)
 
-            # main_view = self.parent.parent.parent.parent
-            # main_view.presenter.copy_custom_file(file_path)
-            message = QtWidgets.QMessageBox()
-            message.exec()
             # auto-set language from file extension if possible
             # & get file names for dropdown on Python
             extension = file_path.suffix
@@ -639,6 +643,18 @@ class CustomFileModel(ClassListTableModel):
 
         return super().setData(index, value, role)
 
+    def copy_custom_file(self, file_path):
+        file_path = Path(file_path)
+        project_dir = os.getcwd()
+        if not file_path.is_relative_to(project_dir):
+            import shutil
+            try:
+                file_path = Path(shutil.copy(file_path, project_dir))
+            except OSError as ex:
+                print(ex)
+
+        return file_path.relative_to(project_dir)
+
     def append_item(self):
         """Append an item to the ClassList."""
         self.classlist.append(self.item_type(filename="", path="/"))
@@ -650,8 +666,23 @@ class CustomFileWidget(ProjectFieldWidget):
 
     classlist_model = CustomFileModel
 
+    def __init__(self, field: str, parent):
+        super().__init__(field, parent)
+
+        layout = self.layout().itemAt(0)  # topbar layout
+        self.copy_checkbox = QtWidgets.QCheckBox("Always Copy")
+        self.copy_checkbox.setChecked(True)
+        self.copy_checkbox.setHidden(True)
+        self.copy_checkbox.checkStateChanged.connect(self.update_copy_state)
+        self.copy_checkbox.setToolTip("Indicates if files should be copied when outside project folder.")
+        layout.insertWidget(layout.count()-1, self.copy_checkbox)
+
+    def update_copy_state(self, state):
+        self.model.always_copy = state == QtCore.Qt.CheckState.Checked
+
     def edit(self):
         super().edit()
+        self.copy_checkbox.setHidden(False)
         edit_file_column = 1
         self.table.showColumn(edit_file_column)
         # disconnect from old table's buttons so they don't create dangling references

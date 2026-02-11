@@ -512,24 +512,6 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.settings.set_global_settings()
         return message_box.clickedButton() == yes_button
 
-    def show_confirm_copy_file_dialog(self):
-        message_box = QtWidgets.QMessageBox(self)
-        message_box.setWindowTitle("Confirm Stop?")
-        message_box.setText("It is recommended to copy custom files into project folder. "
-                            "Confirm RasCAL should copy this file?")
-        message_box.setIcon(QtWidgets.QMessageBox.Icon.Question)
-
-        yes_button = message_box.addButton("Copy", QtWidgets.QMessageBox.ButtonRole.YesRole)
-        message_box.addButton("Leave", QtWidgets.QMessageBox.ButtonRole.NoRole)
-        message_box.setDefaultButton(yes_button)
-
-        # no_show_check_box = QtWidgets.QCheckBox("Do not show this again")
-        # message_box.setCheckBox(no_show_check_box)
-        # no_show_check_box.toggled.connect(lambda val: setattr(self.settings, "show_stop_calculation_warning", not val))
-        message_box.exec()
-        #self.settings.set_global_settings()
-        return message_box.clickedButton() == yes_button
-
     def show_unsaved_dialog(self, message: str) -> UnsavedReply:
         """Warn the user of unsaved changes, and ask whether to save those changes.
 

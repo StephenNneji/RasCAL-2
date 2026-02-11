@@ -1,5 +1,5 @@
 """Widgets for validated user inputs."""
-
+import os
 from collections.abc import Callable, Iterable
 from enum import Enum
 from math import floor, log10
@@ -176,7 +176,7 @@ class PathWidget(QtWidgets.QLabel):
 
         self.open_on_show = False
         self.setAutoFillBackground(True)
-        self.path = ""
+        self.path = os.getcwd()
 
     def mouseDoubleClickEvent(self, event):
         self.open()
