@@ -249,6 +249,7 @@ class ProjectFieldWidget(QtWidgets.QWidget):
 
         self.table.setModel(self.model)
         self.model.dataChanged.connect(lambda: self.edited.emit())
+        self.model.dataChanged.connect(lambda: print(self.sender()))
         self.model.modelReset.connect(lambda: self.edited.emit())
         self.table.hideColumn(0)
         if self.model.headers[1] == "filename":
@@ -676,6 +677,11 @@ class CustomFileWidget(ProjectFieldWidget):
         self.copy_checkbox.checkStateChanged.connect(self.update_copy_state)
         self.copy_checkbox.setToolTip("Indicates if files should be copied when outside project folder.")
         layout.insertWidget(layout.count()-1, self.copy_checkbox)
+        self.edit_file_column = 1
+
+    def update_model(self, classlist: ratapi.classlist.ClassList):
+        super().update_model(classlist)
+        self.model.dataChanged.connect(lambda index: self.setup_button(index.row()))
 
     def update_copy_state(self, state):
         self.model.always_copy = state == QtCore.Qt.CheckState.Checked
@@ -683,63 +689,51 @@ class CustomFileWidget(ProjectFieldWidget):
     def edit(self):
         super().edit()
         self.copy_checkbox.setHidden(False)
-        edit_file_column = 1
-        self.table.showColumn(edit_file_column)
-        # disconnect from old table's buttons so they don't create dangling references
-        # if no connections currently exist (i.e. table empty), disconnect() raises a TypeError
-        with contextlib.suppress(TypeError):
-            self.model.dataChanged.disconnect()
+        self.table.showColumn(self.edit_file_column)
         for i in range(0, self.model.rowCount()):
-            self.table.setIndexWidget(self.model.index(i, edit_file_column), self.make_edit_button(i))
+            self.table.setIndexWidget(self.model.index(i, self.edit_file_column),
+                                      QtWidgets.QPushButton("Edit File", self.table))
+            self.setup_button(i)
         self.resize_columns()
 
-    def make_edit_button(self, index):
-        button = QtWidgets.QPushButton("Edit File", self.table)
+    def setup_button(self, i):
+        """Check whether the button should be editable and set it up for the right language."""
+        print(i)
+        language = self.model.data(
+            self.model.index(i, self.model.headers.index("language") + self.model.col_offset)
+        )
+        button = self.table.indexWidget(self.model.index(i, self.edit_file_column))
+
         q_scintilla_action = QtGui.QAction("Edit in RasCAL-2...", self.table)
         q_scintilla_action.triggered.connect(
             lambda: edit_file(
-                self.model.classlist[index].path / self.model.classlist[index].filename,
-                self.model.classlist[index].language,
+                self.model.classlist[i].path / self.model.classlist[i].filename,
+                self.model.classlist[i].language,
                 self,
             )
         )
+
         matlab_action = QtGui.QAction("Edit in MATLAB...", self.table)
         matlab_action.triggered.connect(
-            lambda: edit_file_matlab(self.model.classlist[index].path / self.model.classlist[index].filename)
+            lambda: edit_file_matlab(self.model.classlist[i].path / self.model.classlist[i].filename)
         )
-        menu = QtWidgets.QMenu(self.table)
-        menu.addActions([q_scintilla_action, matlab_action])
 
-        def setup_button():
-            """Check whether the button should be editable and set it up for the right language."""
-            language = self.model.data(
-                self.model.index(index, self.model.headers.index("language") + self.model.col_offset)
-            )
-            with contextlib.suppress(TypeError):
-                button.pressed.disconnect()
-            if language == Languages.Matlab:
-                button.setMenu(menu)
-                button.pressed.connect(button.showMenu)
-            else:
-                button.setMenu(None)
-                button.pressed.connect(
-                    lambda: edit_file(
-                        self.model.classlist[index].path / self.model.classlist[index].filename,
-                        self.model.classlist[index].language,
-                        self,
-                    )
-                )
+        with contextlib.suppress(TypeError):
+            button.pressed.disconnect()
+        if language == Languages.Matlab:
+            menu = QtWidgets.QMenu(self.table)
+            menu.addActions([q_scintilla_action, matlab_action])
+            button.setMenu(menu)
+            button.pressed.connect(button.showMenu)
+        else:
+            button.setMenu(None)
+            button.pressed.connect(q_scintilla_action.trigger)
 
-            editable = (language in [Languages.Matlab, Languages.Python]) and (
-                self.model.data(self.model.index(index, self.model.headers.index("filename") + self.model.col_offset))
-                != "Browse..."
-            )
-            button.setEnabled(editable)
-
-        setup_button()
-        self.model.dataChanged.connect(lambda: setup_button())
-
-        return button
+        editable = (language in [Languages.Matlab, Languages.Python]) and (
+            self.model.data(self.model.index(i, self.model.headers.index("filename") + self.model.col_offset))
+            != "Browse..."
+        )
+        button.setEnabled(editable)
 
     def set_item_delegates(self):
         super().set_item_delegates()

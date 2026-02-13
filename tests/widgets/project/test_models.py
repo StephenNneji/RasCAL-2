@@ -453,6 +453,7 @@ def test_file_model_set_filename(filename, expected_lang, expected_filenames):
     python_file = "def func1(): pass \ndef func2(): pass \ndef func3(): pass"
 
     model = CustomFileModel(init_list, parent)
+    model.always_copy = False
 
     filename_col = model.headers.index("filename") + model.col_offset
     with tempfile.TemporaryDirectory() as tmp:
@@ -477,6 +478,7 @@ def test_file_widget_edit(filename):
 
         widget = CustomFileWidget("files", parent)
         widget.update_model(init_list)
+        widget.model.always_copy = False
 
         edit_col = 1
         assert widget.table.isColumnHidden(edit_col)

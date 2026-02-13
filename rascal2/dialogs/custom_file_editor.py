@@ -1,5 +1,5 @@
 """Dialogs for editing custom files."""
-
+import os
 from pathlib import Path
 
 from PyQt6 import Qsci, QtGui, QtWidgets
@@ -40,7 +40,11 @@ def edit_file_matlab(filename: str):
         LOGGER.error("Attempted to edit a file in MATLAB engine", exc_info=ex)
         return
 
-    engine.edit(str(filename))
+    path = Path(filename)
+    if not path.is_absolute():
+        path = os.getcwd() / path
+
+    engine.edit(path.as_posix())
 
 
 class Singleton(type(QtWidgets.QDialog), type):

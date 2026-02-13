@@ -4,7 +4,7 @@ try:
     from enum import StrEnum
 except ImportError:
     from strenum import StrEnum
-
+import os
 from pathlib import Path
 
 import pytest
@@ -79,7 +79,7 @@ def test_multi_select_list_update(selected):
 
 def test_path_widget():
     widget = PathWidget(None)
-    assert widget.path == ""
+    assert widget.path == os.getcwd()
     assert widget.text() == ""
 
     widget.setText("Browse...")

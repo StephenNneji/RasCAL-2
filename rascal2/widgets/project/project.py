@@ -234,6 +234,7 @@ class ProjectWidget(QtWidgets.QWidget):
             "Custom Files",
         ]:
             for table in self.edit_tabs[tab].tables.values():
+                print(table)
                 table.edited.connect(lambda: self.edit_tabs["Contrasts"].tables["contrasts"].update_item_view())
 
         main_layout.addWidget(self.edit_project_tab)
