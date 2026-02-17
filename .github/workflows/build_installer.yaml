@@ -19,18 +19,18 @@ jobs:
             activate-environment: rascal2
             environment-file: environment.yaml
             auto-activate-base: false
-      - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
-        with:
-          release: R2023a
+#      - name: Set up MATLAB
+#        uses: matlab-actions/setup-matlab@v2
+#        with:
+#          release: R2023a
       - name: Make installer
         shell: powershell
         run: |
           conda init powershell
+          conda update --all
           conda activate rascal2
           python --version
           conda install -c nsis nsis=3.* accesscontrol
-          python -m pip install matlabengine==9.14.*
           python packaging/build_exe.py
           if ($env:GITHUB_REF_NAME -eq "main") {
             makensis /DNIGHTLY packaging/windows/build_installer.nsi
