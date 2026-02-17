@@ -34,7 +34,7 @@ jobs:
           conda update --all
           conda activate rascal2
           conda install -c nsis nsis=3.* accesscontrol
-          python -m pip install matlabengine==9.14.*
+          python -m pip install --no-build-isolation 'D:\hostedtoolcache\windows\MATLAB\extern\engines\python'
           python packaging/build_exe.py
           if ($env:GITHUB_REF_NAME -eq "main") {
             makensis /DNIGHTLY packaging/windows/build_installer.nsi
@@ -47,76 +47,76 @@ jobs:
         with:
           name: windows installer
           path: packaging/windows/*.exe
-  linux-installer:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-      - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
-        with:
-          release: R2023a
-      - name: Make installer
-        shell: bash -l {0}
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y makeself
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/hostedtoolcache/MATLAB/2023.1.999/x64/bin/glnxa64
-          cd packaging/linux
-          chmod 777 "build_installer.sh"
-          mkdir build
-          if [ ${{ github.ref_name }} == "main" ]; then
-            ./build_installer.sh --remote
-          else
-            ./build_installer.sh --remote --tag $GITHUB_REF_NAME
-          fi
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux installer
-          path: packaging/linux/*.run
-  macos-installer:
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [ macos-15-intel, macos-14 ]
-    runs-on: ${{ matrix.platform }}
-    steps:
-      - uses: actions/checkout@v5
-      - uses: conda-incubator/setup-miniconda@v3
-        with:
-            activate-environment: rascal2
-            environment-file: environment.yaml
-            auto-activate-base: false
-      - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
-        with:
-          release: R2023b
-      - name: Make installer
-        shell: bash -el {0}
-        run: |
-          conda init bash
-          conda update --all
-          conda activate rascal2
-          if [ ${{ matrix.platform }} == "macos-14" ]; then
-            ARCH="arm64"
-            export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/runner/hostedtoolcache/MATLAB/2023.2.999/arm64/MATLAB.app/bin/maca64
-            python -m pip install --no-build-isolation /Users/runner/hostedtoolcache/MATLAB/2023.2.999/arm64/MATLAB.app/extern/engines/python
-          else
-            ARCH="x64"
-            export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64
-            python -m pip install --no-build-isolation /Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/extern/engines/python
-          fi
-          python packaging/build_exe.py
-          chmod 777 packaging/bundle/rascal.app/Contents/Resources/matlab/engine/_arch.txt
-          cd packaging/macos/
-          chmod 777 make.sh
-          ./make.sh $GITHUB_REF_NAME $ARCH
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: macOS installer-${{ strategy.job-index }}
-          path: packaging/macos/RasCAL-2*.pkg
+  # linux-installer:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v5
+  #     - name: Set up MATLAB
+  #       uses: matlab-actions/setup-matlab@v2
+  #       with:
+  #         release: R2023a
+  #     - name: Make installer
+  #       shell: bash -l {0}
+  #       run: |
+  #         sudo apt-get update -y
+  #         sudo apt-get install -y makeself
+  #         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/hostedtoolcache/MATLAB/2023.1.999/x64/bin/glnxa64
+  #         cd packaging/linux
+  #         chmod 777 "build_installer.sh"
+  #         mkdir build
+  #         if [ ${{ github.ref_name }} == "main" ]; then
+  #           ./build_installer.sh --remote
+  #         else
+  #           ./build_installer.sh --remote --tag $GITHUB_REF_NAME
+  #         fi
+  #     - name: Upload installer
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: linux installer
+  #         path: packaging/linux/*.run
+  # macos-installer:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       platform: [ macos-15-intel, macos-14 ]
+  #   runs-on: ${{ matrix.platform }}
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: conda-incubator/setup-miniconda@v3
+  #       with:
+  #           activate-environment: rascal2
+  #           environment-file: environment.yaml
+  #           auto-activate-base: false
+  #     - name: Set up MATLAB
+  #       uses: matlab-actions/setup-matlab@v2
+  #       with:
+  #         release: R2023b
+  #     - name: Make installer
+  #       shell: bash -el {0}
+  #       run: |
+  #         conda init bash
+  #         conda update --all
+  #         conda activate rascal2
+  #         if [ ${{ matrix.platform }} == "macos-14" ]; then
+  #           ARCH="arm64"
+  #           export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/runner/hostedtoolcache/MATLAB/2023.2.999/arm64/MATLAB.app/bin/maca64
+  #           python -m pip install --no-build-isolation /Users/runner/hostedtoolcache/MATLAB/2023.2.999/arm64/MATLAB.app/extern/engines/python
+  #         else
+  #           ARCH="x64"
+  #           export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64
+  #           python -m pip install --no-build-isolation /Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/extern/engines/python
+  #         fi
+  #         python packaging/build_exe.py
+  #         chmod 777 packaging/bundle/rascal.app/Contents/Resources/matlab/engine/_arch.txt
+  #         cd packaging/macos/
+  #         chmod 777 make.sh
+  #         ./make.sh $GITHUB_REF_NAME $ARCH
+  #     - name: Upload installer
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: macOS installer-${{ strategy.job-index }}
+  #         path: packaging/macos/RasCAL-2*.pkg
   deploy-nightly:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
