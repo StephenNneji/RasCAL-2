@@ -28,8 +28,9 @@ jobs:
         run: |
           conda init powershell
           conda activate rascal2
+          python --version
           conda install -c nsis nsis=3.* accesscontrol
-          pip install matlabengine==9.14.*
+          python -m pip install matlabengine==9.14.*
           python packaging/build_exe.py
           if ($env:GITHUB_REF_NAME -eq "main") {
             makensis /DNIGHTLY packaging/windows/build_installer.nsi
@@ -92,6 +93,8 @@ jobs:
         run: |
           conda init bash
           conda activate rascal2
+          python --version
+          fgfd
           if [ ${{ matrix.platform }} == "macos-14" ]; then
             ARCH="arm64"
             export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/runner/hostedtoolcache/MATLAB/2023.2.999/arm64/MATLAB.app/bin/maca64
