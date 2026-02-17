@@ -246,7 +246,9 @@ class MatlabHelper:
                     )
         except (FileNotFoundError, MatlabHelper.ConfigError) as ex:
             if isinstance(ex, FileNotFoundError):
-                ex.add_note("Matlab engine could not be found, ensure it is installed properly.")
+                ex = MatlabHelper.ConfigError(
+                    "Matlab engine could not be found, ensure it is installed properly."
+                ).with_traceback(ex.__traceback__)
             self.engine_output[:] = []
             self.engine_output.append(ex)
             LOGGER.error(f"Attempt to read MATLAB _arch file failed {MATLAB_ARCH_FILE}.\n {ex}.")
