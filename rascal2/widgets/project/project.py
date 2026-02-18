@@ -374,7 +374,9 @@ class ProjectWidget(QtWidgets.QWidget):
                     self.update_draft_project({"layers": empty})
             elif old_entry != LayerModels.StandardLayers and new_entry == LayerModels.StandardLayers:
                 empty = ratapi.ClassList()
-                empty._class_handle = ratapi.models.AbsorptionLayer if self.draft_project["absorption"] else ratapi.models.Layer
+                empty._class_handle = (
+                    ratapi.models.AbsorptionLayer if self.draft_project["absorption"] else ratapi.models.Layer
+                )
                 for layer in self.old_layers:
                     if not self.draft_project["absorption"]:
                         layer.pop("SLD_imaginary", "")
