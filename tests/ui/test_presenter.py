@@ -185,14 +185,13 @@ def test_load_project(presenter, function):
     if function == "create_project":
         params = ("proj_name", "some_path/")
         presenter.initialise_ui = end_function
+        getattr(presenter, function)(*params)
+        end_function.assert_called_once()
     else:
         presenter.model.project.name = "proj_name"
         params = ("some_path/",)
-        presenter.quick_run = end_function
+        getattr(presenter, function)(*params)
 
-    getattr(presenter, function)(*params)
-
-    end_function.assert_called_once()
     getattr(presenter.model, function).assert_called_once_with(*params)
 
 

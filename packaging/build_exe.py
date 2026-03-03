@@ -77,6 +77,8 @@ def build_exe():
         "--clean",
         "--additional-hooks-dir",
         str(PACKAGING_PATH / "hooks"),
+        "--runtime-hook",
+        "rascal_splash.py",
         "--log-level",
         "ERROR",
         "--collect-submodules",

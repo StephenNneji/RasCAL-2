@@ -434,6 +434,9 @@ class RefSLDWidget(AbstractPlotWidget):
         results : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
             The calculation results.
         """
+        if project is None or results is None:
+            return
+
         data = ratapi.events.PlotEventData()
 
         data.modelType = project.model

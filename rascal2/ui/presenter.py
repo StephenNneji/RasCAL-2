@@ -5,7 +5,7 @@ from typing import Any
 import ratapi as rat
 import ratapi.wrappers
 
-from rascal2.config import LOGGER, MatlabHelper
+from rascal2.config import LOGGER
 from rascal2.core import commands
 from rascal2.core.enums import UnsavedReply
 from rascal2.core.runner import LogData, RATRunner
@@ -53,8 +53,6 @@ class MainWindowPresenter:
 
         """
         self.model.load_project(load_path)
-        if self.model.results is None:
-            self.model.results = self.quick_run()
         update_recent_projects(load_path)
 
     def load_r1_project(self, load_path: str):
@@ -67,7 +65,6 @@ class MainWindowPresenter:
 
         """
         self.model.load_r1_project(load_path)
-        self.model.results = self.quick_run()
 
     def initialise_ui(self):
         """Initialise UI for a project."""
@@ -168,30 +165,6 @@ class MainWindowPresenter:
                 return
             if self.runner.process.is_alive():
                 self.runner.interrupt()
-
-    def quick_run(self, project=None):
-        """Run rat calculation with calculate procedure on the given project.
-
-        The project in the MainWindowModel is used if no project is provided.
-
-        Parameters
-        ----------
-        project : Optional[ratapi.Project]
-            The project to use for run
-
-        Returns
-        -------
-        results : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
-            The calculation results.
-        """
-        if project is None:
-            project = self.model.project
-        if ratapi.wrappers.MatlabWrapper.loader is None and any(
-            [file.language == "matlab" for file in self.model.project.custom_files]
-        ):
-            matlab_helper = MatlabHelper()
-            matlab_helper.get_local_engine()
-        return rat.run(project, rat.Controls(display="off"))[1]
 
     def run(self):
         """Run rat using multiprocessing."""

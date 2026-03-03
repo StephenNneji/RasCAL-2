@@ -4,10 +4,27 @@ import re
 import sys
 from contextlib import suppress
 
-from PyQt6 import QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from rascal2.config import IMAGES_PATH, STATIC_PATH, MatlabHelper, handle_scaling, path_for, setup_logging
 from rascal2.ui.view import MainWindowView
+
+
+def close_splash(window):
+    """Close the splash screen.
+
+    Parameters
+    ----------
+    window: MainWindowView
+        The rascal main window.
+    """
+    app = QtWidgets.QApplication.instance()
+    for widget in app.topLevelWidgets():
+        if isinstance(widget, QtWidgets.QSplashScreen):
+            widget.finish(window)
+            window.showMinimized()
+            window.showNormal()
+            break
 
 
 def ui_execute():
@@ -20,7 +37,10 @@ def ui_execute():
     """
     handle_scaling()
     QtWidgets.QApplication.setStyle("Fusion")
-    app = QtWidgets.QApplication(sys.argv[:1])
+    app = QtWidgets.QApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication([])
+
     app.setWindowIcon(QtGui.QIcon(path_for("logo.png")))
     with suppress(FileNotFoundError), open(STATIC_PATH / "style.css") as stylesheet:
         palette = app.palette()
@@ -35,6 +55,7 @@ def ui_execute():
         app.setStyleSheet(style)
 
     window = MainWindowView()
+    QtCore.QTimer.singleShot(100, lambda: close_splash(window))
     window.show()
     return app.exec()
 

@@ -4,11 +4,11 @@ import sys
 from json import JSONDecodeError
 from pathlib import Path
 
-import ratapi as rat
+import ratapi
 import ratapi.outputs
 from PyQt6 import QtCore
 
-from rascal2.config import EXAMPLES_PATH, EXAMPLES_TEMP_PATH
+from rascal2.config import EXAMPLES_PATH, EXAMPLES_TEMP_PATH, MatlabHelper
 
 
 def copy_example_project(load_path):
@@ -89,7 +89,7 @@ class MainWindowModel(QtCore.QObject):
         save_path : str
             The save path of the project.
         """
-        self.project = rat.Project(name=name)
+        self.project = ratapi.Project(name=name)
         self.project.contrasts.append(
             name="Default Contrast",
             background="Background 1",
@@ -99,8 +99,8 @@ class MainWindowModel(QtCore.QObject):
             bulk_in="SLD Air",
             data="Simulation",
         )
-        self.controls = rat.Controls()
-        self.results = rat.run(self.project, rat.Controls(display="off"))[1]
+        self.controls = ratapi.Controls()
+        self.results = ratapi.run(self.project, ratapi.Controls(display="off"))[1]
         self.save_path = save_path
 
     def update_results(self, results: ratapi.outputs.Results | ratapi.outputs.BayesResults):
@@ -162,7 +162,7 @@ class MainWindowModel(QtCore.QObject):
 
         results_file = Path(load_path, "results.json")
         try:
-            results = rat.Results.load(results_file)
+            results = ratapi.Results.load(results_file)
         except FileNotFoundError:
             # If results are not included, simply move on.
             results = None
@@ -174,7 +174,7 @@ class MainWindowModel(QtCore.QObject):
 
         controls_file = Path(load_path, "controls.json")
         try:
-            controls = rat.Controls.load(controls_file)
+            controls = ratapi.Controls.load(controls_file)
         except ValueError as err:
             raise ValueError(
                 "The controls.json file for this project is not valid.\n"
@@ -183,12 +183,21 @@ class MainWindowModel(QtCore.QObject):
 
         project_file = Path(load_path, "project.json")
         try:
-            project = rat.Project.load(project_file)
+            project = ratapi.Project.load(project_file)
         except JSONDecodeError as err:
             raise ValueError("The project.json file for this project contains invalid JSON.") from err
         except (KeyError, ValueError) as err:
             raise ValueError("The project.json file for this project is not valid.") from err
 
+        # Ensure the project always runs so errors are shown early,
+        # but we don't replace the users saved result.
+        new_results = self.quick_run(project)
+        if results is None:
+            results = new_results
+        else:
+            self.validate_results(project, results)
+
+        # Only update project when we are sure its valid
         self.results = results
         self.controls = controls
         self.project = project
@@ -204,9 +213,45 @@ class MainWindowModel(QtCore.QObject):
 
         """
         load_path = copy_example_project(load_path)
-        self.project = rat.utils.convert.r1_to_project(load_path)
-        self.controls = rat.Controls()
+        project = ratapi.utils.convert.r1_to_project(load_path)
+        results = self.quick_run(project)
+
+        self.project = project
+        self.controls = ratapi.Controls()
+        self.results = results
         self.save_path = str(Path(load_path).parent)
+
+    @staticmethod
+    def validate_results(project, results):
+        """Check that result is valid to plot.
+
+        Parameters
+        ----------
+        project : ratapi.Project
+            The project to use for result
+        results : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
+            The calculation results.
+        """
+        # This ia a hack that checks results are valid by using the plot
+        # helper function. A better way of doing this should be implemented.
+        if results is None:
+            return
+
+        data = ratapi.events.PlotEventData()
+        data.modelType = project.model
+        data.reflectivity = results.reflectivity
+        data.shiftedData = results.shiftedData
+        data.sldProfiles = results.sldProfiles
+        data.resampledLayers = results.resampledLayers
+        data.dataPresent = ratapi.inputs.make_data_present(project)
+        data.subRoughs = results.contrastParams.subRoughs
+        data.resample = ratapi.inputs.make_resample(project)
+        data.contrastNames = [contrast.name for contrast in project.contrasts]
+
+        try:
+            ratapi.plotting._extract_plot_data(data, False, True, 1)
+        except Exception as ex:
+            raise ValueError("Error occurred validating result, the result.json may not be valid.") from ex
 
     def update_controls(self, new_values: dict):
         """Update the control attributes.
@@ -218,3 +263,27 @@ class MainWindowModel(QtCore.QObject):
         """
         vars(self.controls).update(new_values)
         self.controls_updated.emit()
+
+    def quick_run(self, project=None):
+        """Run rat calculation with calculate procedure on the given project.
+
+        The project in the MainWindowModel is used if no project is provided.
+
+        Parameters
+        ----------
+        project : Optional[ratapi.Project]
+            The project to use for run
+
+        Returns
+        -------
+        results : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
+            The calculation results.
+        """
+        if project is None:
+            project = self.project
+        if ratapi.wrappers.MatlabWrapper.loader is None and any(
+            [file.language == "matlab" for file in project.custom_files]
+        ):
+            matlab_helper = MatlabHelper()
+            matlab_helper.get_local_engine()
+        return ratapi.run(project, ratapi.Controls(display="off"))[1]

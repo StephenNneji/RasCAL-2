@@ -1,6 +1,6 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -80,6 +80,7 @@ def test_save_project(empty_results, model):
 def test_load_project(empty_results, model):
     """The load function should load the correct controls object from JSON."""
     project = Project(name="test project", calculation="domains")
+    model.quick_run = MagicMock(return_value=None)
 
     with TemporaryDirectory() as tmpdir:
         empty_results.save(Path(tmpdir, "results"))
@@ -96,6 +97,7 @@ def test_load_project(empty_results, model):
 @patch("ratapi.utils.convert.r1_to_project")
 def test_load_r1_project(mock_r1_class, model):
     """load_r1_project should call the conversion function and set the path correctly."""
+    model.quick_run = MagicMock(return_value=None)
     model.load_r1_project("test_path/r1project.mat")
 
     mock_r1_class.assert_called_once()
