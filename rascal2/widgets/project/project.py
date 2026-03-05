@@ -1,5 +1,7 @@
 """Widget for the Project window."""
 
+import os
+import pathlib
 from collections.abc import Generator
 from copy import deepcopy
 
@@ -234,7 +236,6 @@ class ProjectWidget(QtWidgets.QWidget):
             "Custom Files",
         ]:
             for table in self.edit_tabs[tab].tables.values():
-                print(table)
                 table.edited.connect(lambda: self.edit_tabs["Contrasts"].tables["contrasts"].update_item_view())
 
         main_layout.addWidget(self.edit_project_tab)
@@ -434,6 +435,27 @@ class ProjectWidget(QtWidgets.QWidget):
         """Get all errors with the draft project."""
         yield from self.validate_layers()
         yield from self.validate_contrasts()
+        yield from self.validate_custom_file()
+
+    def validate_custom_file(self) -> Generator[str, None, None]:
+        """Ensure that all custom files in the draft project are valid, and yield errors if not.
+
+        Yields
+        ------
+        str
+            The message for each error in custom files.
+
+        """
+        project = self.draft_project
+        for file in project["custom_files"]:
+            if not file.filename:
+                msg = f"Custom file ({file.name}) does not have a valid filename."
+                yield msg
+            if file.filename:
+                path = file.path if file.path else os.getcwd()
+                if not (pathlib.Path(path) / file.filename).exists():
+                    msg = f"Custom file ({file.name}) could not be found in the given path {path}."
+                    yield msg
 
     def validate_layers(self) -> Generator[str, None, None]:
         """Ensure that all layers in the draft project are valid, and yield errors if not.

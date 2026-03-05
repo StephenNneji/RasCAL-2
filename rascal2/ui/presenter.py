@@ -1,3 +1,4 @@
+import os
 import re
 import warnings
 from typing import Any
@@ -5,7 +6,7 @@ from typing import Any
 import ratapi as rat
 import ratapi.wrappers
 
-from rascal2.config import LOGGER, MatlabHelper
+from rascal2.config import LOGGER, SETTINGS, MatlabHelper
 from rascal2.core import commands
 from rascal2.core.enums import UnsavedReply
 from rascal2.core.runner import LogData, RATRunner
@@ -71,15 +72,18 @@ class MainWindowPresenter:
 
     def initialise_ui(self):
         """Initialise UI for a project."""
-        suffix = " [Example]" if self.model.is_project_example() else f"[{self.model.save_path}]"
-        self.view.setWindowTitle(
-            self.view.windowTitle().split(" - ")[0] + " - " + self.model.project.name + suffix,
-        )
+        self.update_title()
         self.view.setup_mdi()
         self.view.plot_widget.update_plots()
         self.view.handle_results(self.model.results)
         self.view.undo_stack.clear()
         self.view.enable_elements()
+
+    def update_title(self):
+        suffix = " [Example]" if self.model.is_project_example() else f"[{self.model.save_path}]"
+        self.view.setWindowTitle(
+            self.view.windowTitle().split(" - ")[0] + " - " + self.model.project.name + suffix,
+        )
 
     def edit_controls(self, setting: str, value: Any):
         """Edit a setting in the Controls object.
@@ -126,6 +130,7 @@ class MainWindowPresenter:
             LOGGER.error(f"Failed to save project to {to_path}.\n", exc_info=err)
         else:
             update_recent_projects(self.model.save_path)
+            self.update_title()
             self.view.undo_stack.setClean()
         return True
 
@@ -190,14 +195,15 @@ class MainWindowPresenter:
             [file.language == "matlab" for file in self.model.project.custom_files]
         ):
             matlab_helper = MatlabHelper()
-            matlab_helper.get_local_engine()
+            engine = matlab_helper.get_local_engine()
+            engine.cd(os.getcwd())
         return rat.run(project, rat.Controls(display="off"))[1]
 
     def run(self):
         """Run rat using multiprocessing."""
         # reset terminal
         self.view.terminal_widget.progress_bar.setVisible(False)
-        if self.view.settings.clear_terminal:
+        if SETTINGS.clear_terminal:
             self.view.terminal_widget.clear()
 
         # hide bayes plots button so users can't open plots during run
@@ -211,6 +217,7 @@ class MainWindowPresenter:
         self.runner.finished.connect(self.handle_results)
         self.runner.stopped.connect(self.handle_interrupt)
         self.runner.event_received.connect(self.handle_event)
+        self.view.terminal_widget.write("Initializing RAT Process...")
         self.runner.start()
 
     def handle_results(self):

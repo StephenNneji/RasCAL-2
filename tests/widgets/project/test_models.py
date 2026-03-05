@@ -496,12 +496,12 @@ def test_file_widget_edit(filename):
         button = widget.table.indexWidget(widget.model.index(0, edit_col))
         assert isinstance(button, QtWidgets.QPushButton)
 
-        if filename in ["file.m", "file.py"]:
+        if filename in ["file.m", "file.py", ""]:
             assert button.isEnabled()
         else:
             assert not button.isEnabled()
 
-        if filename == "file.m":
+        if filename == "":
             assert button.menu() is not None
             assert len(button.menu().actions()) == 2
         else:

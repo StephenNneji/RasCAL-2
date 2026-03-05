@@ -1,5 +1,6 @@
 """QObject for running rat."""
 
+import os
 from dataclasses import dataclass
 from logging import INFO
 from multiprocessing import Process, Queue
@@ -105,6 +106,7 @@ def run(queue, rat_inputs: tuple, procedure: str, display: bool, engine_ready, e
                 raise result
             else:
                 engine_future = result
+                engine_future.result().cd(os.getcwd())
 
         problem_definition, output_results, bayes_results = rat.rat_core.RATMain(problem_definition, cpp_controls)
         results = rat.outputs.make_results(procedure, output_results, bayes_results)

@@ -8,7 +8,7 @@ import platform
 import site
 import sys
 
-from rascal2.settings import get_global_settings
+from rascal2.settings import Settings, get_global_settings
 
 if getattr(sys, "frozen", False):
     # we are running in a bundle
@@ -28,6 +28,7 @@ IMAGES_PATH = STATIC_PATH / "images"
 MATLAB_ARCH_FILE = pathlib.Path(SITE_PATH) / "matlab/engine/_arch.txt"
 EXAMPLES_TEMP_PATH = pathlib.Path(get_global_settings().fileName()).parent / "examples"
 LOGGER = logging.getLogger("rascal2")
+SETTINGS = Settings()
 
 
 def handle_scaling():

@@ -5,7 +5,7 @@ from contextlib import suppress
 
 from PyQt6 import QtCore, QtWidgets
 
-from rascal2.config import LOGGER, MATLAB_ARCH_FILE, MatlabHelper
+from rascal2.config import LOGGER, MATLAB_ARCH_FILE, SETTINGS, MatlabHelper
 from rascal2.settings import SettingsGroups
 from rascal2.widgets.inputs import get_validated_input
 
@@ -26,7 +26,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.setMinimumWidth(600)
         self.setMinimumHeight(400)
 
-        self.settings = parent.settings.copy()
+        self.settings = SETTINGS.copy()
         self.matlab_tab = MatlabSetupTab()
         self.reset_dialog = None
 
@@ -60,14 +60,14 @@ class SettingsDialog(QtWidgets.QDialog):
 
     def update_settings(self) -> None:
         """Accept the changed settings."""
-        self.parent().settings = self.settings
-        self.parent().settings.set_global_settings()
+        vars(SETTINGS).update(vars(self.settings))
+        SETTINGS.set_global_settings()
         self.matlab_tab.set_matlab_paths()
         self.accept()
 
     def reset_default_settings(self) -> None:
         """Reset the settings to the global defaults."""
-        self.parent().settings.reset_global_settings()
+        SETTINGS.reset_global_settings()
         self.accept()
 
 

@@ -2,12 +2,12 @@ from pathlib import Path
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from rascal2.config import EXAMPLES_PATH, EXAMPLES_TEMP_PATH, path_for
+from rascal2.config import EXAMPLES_PATH, EXAMPLES_TEMP_PATH, SETTINGS, path_for
 from rascal2.core.enums import UnsavedReply
 from rascal2.dialogs.about_dialog import AboutDialog
 from rascal2.dialogs.settings_dialog import SettingsDialog
 from rascal2.dialogs.startup_dialog import PROJECT_FILES, LoadDialog, LoadR1Dialog, NewProjectDialog, StartupDialog
-from rascal2.settings import MDIGeometries, Settings, get_global_settings
+from rascal2.settings import MDIGeometries, get_global_settings
 from rascal2.widgets import ControlsWidget, PlotWidget, TerminalWidget
 from rascal2.widgets.project import ProjectWidget
 from rascal2.widgets.startup import StartUpWidget
@@ -50,7 +50,6 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.setMinimumSize(1360, 800)
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
 
-        self.settings = Settings()
         self.startup_dlg = StartUpWidget(self)
         self.setCentralWidget(self.startup_dlg)
 
@@ -493,7 +492,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         bool
             Whether the confirmation was affirmative.
         """
-        if not self.settings.show_stop_calculation_warning:
+        if not SETTINGS.show_stop_calculation_warning:
             return True
 
         message_box = QtWidgets.QMessageBox(self)
@@ -509,7 +508,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         message_box.setCheckBox(no_show_check_box)
         no_show_check_box.toggled.connect(lambda val: setattr(self.settings, "show_stop_calculation_warning", not val))
         message_box.exec()
-        self.settings.set_global_settings()
+        SETTINGS.set_global_settings()
         return message_box.clickedButton() == yes_button
 
     def show_unsaved_dialog(self, message: str) -> UnsavedReply:

@@ -1,4 +1,5 @@
 """Widgets for validated user inputs."""
+
 import os
 from collections.abc import Callable, Iterable
 from enum import Enum
