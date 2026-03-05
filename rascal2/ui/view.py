@@ -540,6 +540,14 @@ class MainWindowView(QtWidgets.QMainWindow):
         else:
             return UnsavedReply.Cancel
 
+    def show_message(self, message):
+        """Show message to the user.
+
+        :param message: user message
+        :type message: str
+        """
+        QtWidgets.QMessageBox.information(self, MAIN_WINDOW_TITLE, message)
+
     def check_save_blacklist(self, save_path):
         """Check if user selected save path is invalid i.e. in the examples or tmp directory.
 

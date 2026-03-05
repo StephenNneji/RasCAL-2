@@ -38,11 +38,14 @@ class MockWindowView(QtWidgets.QMainWindow):
         super().__init__()
         self.undo_stack = MockUndoStack()
         self.controls_widget = MagicMock()
+        self.project_widget = MagicMock()
         self.terminal_widget = MagicMock()
         self.plot_widget = MagicMock()
         self.handle_results = MagicMock()
         self.settings = MagicMock()
         self.get_project_folder = lambda: "new path/"
+        self.windowTitle = lambda: "RasCAL2"
+        self.show_message = MagicMock()
 
 
 @pytest.fixture
@@ -55,6 +58,7 @@ def presenter():
         pr.runner = MagicMock()
         pr.model.controls = Controls()
         pr.model.project = MagicMock()
+        pr.model.project.name = "test_name"
         pr.model.results = MagicMock()
         pr.model.save_path = "some_path/"
         pr.logger = mock_log
@@ -200,7 +204,9 @@ def test_load_project(presenter, function):
 def test_save_project(recent_projects_mock, presenter):
     """Test that projects can be saved, optionally saved as a new folder."""
     presenter.model.project = MagicMock()
+    presenter.model.project.name = "test_name"
     presenter.model.controls = MagicMock()
+    presenter.view.project_widget.stacked_widget.currentIndex = MagicMock(return_value=0)
     presenter.save_project()
     presenter.model.project.save.assert_called_once()
     presenter.model.controls.save.assert_called_once()
@@ -228,6 +234,7 @@ def test_ask_to_save_project(presenter, reply, undo_clean_state, expected):
     """Test whether or not to proceed with an event based on the response to the unsaved changes warning."""
     presenter.model.save_project = MagicMock()
     presenter.view.show_unsaved_dialog = MagicMock(return_value=reply)
+    presenter.view.project_widget.stacked_widget.currentIndex = MagicMock(return_value=0)
 
     presenter.view.undo_stack.clean = undo_clean_state
     assert presenter.ask_to_save_project() is expected

@@ -758,8 +758,9 @@ class CustomFileWidget(ProjectFieldWidget):
             file_type,
             self,
         )
-        index = self.model.index(index, self.model.headers.index("filename") + self.model.col_offset)
-        self.model.setData(index, filename, QtCore.Qt.ItemDataRole.EditRole)
+        if filename:
+            index = self.model.index(index, self.model.headers.index("filename") + self.model.col_offset)
+            self.model.setData(index, filename, QtCore.Qt.ItemDataRole.EditRole)
 
     def set_item_delegates(self):
         super().set_item_delegates()

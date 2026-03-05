@@ -120,6 +120,13 @@ class MainWindowPresenter:
             Indicates if the project was saved.
         """
         to_path = self.model.save_path
+        if self.view.project_widget.stacked_widget.currentIndex() != 0:
+            # User is still editing the project
+            self.view.show_message(
+                "The project window is still editing, please accept changes or cancel before saving to file."
+            )
+            return False
+
         if save_as or self.model.is_project_example():
             to_path = self.view.get_project_folder()
             if not to_path:

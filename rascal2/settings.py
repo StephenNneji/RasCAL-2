@@ -62,13 +62,6 @@ class BackgroundColour(StrEnum):
     White = "white"
 
 
-class DefaultEditor(StrEnum):
-    """Default editor used for custom file."""
-
-    Rascal = "RasCAL"
-    Matlab = "Matlab"
-
-
 class LogLevels(IntEnum):
     """Debug log-levels with human readable string names."""
 
@@ -126,10 +119,10 @@ class Settings(BaseModel, validate_assignment=True, arbitrary_types_allowed=True
     # The global settings are read and written via this object using `set_global_settings`.
     style: Styles = Field(default=Styles.Light, title=SettingsGroups.General, description="Style")
     editor_fontsize: int = Field(default=12, title=SettingsGroups.General, description="Editor Font Size", gt=0)
-    default_editor: DefaultEditor = Field(
-        default=DefaultEditor.Rascal,
+    matlab_as_default_editor: bool = Field(
+        default=False,
         title=SettingsGroups.General,
-        description="Default Editor for Custom Files if available.",
+        description="Use MATLAB as Default Editor if available.",
     )
     live_recalculate: bool = Field(
         default=True, title=SettingsGroups.General, description="Auto-run simulation when parameter values change."

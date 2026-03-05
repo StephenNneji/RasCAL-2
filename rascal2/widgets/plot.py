@@ -8,7 +8,7 @@ import ratapi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from rascal2.config import path_for
+from rascal2.config import SETTINGS, path_for
 from rascal2.widgets.inputs import MultiSelectComboBox, ProgressButton
 
 
@@ -348,10 +348,9 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         """Save the figure to a file."""
         filepath, accepted = QtWidgets.QFileDialog.getSaveFileName(self, "Export Plot", filter="Image File (*.png)")
         if accepted:
-            settings = self.parent.parent.settings
             sx = self.figure.get_figwidth() * self.figure.dpi
             dpi = self.figure.dpi if sx > 1920 else 1920 // self.figure.get_figwidth()
-            self.figure.savefig(filepath, facecolor=settings.export_background_colour, dpi=dpi)
+            self.figure.savefig(filepath, facecolor=SETTINGS.export_background_colour, dpi=dpi)
 
 
 class RefSLDWidget(AbstractPlotWidget):
@@ -434,6 +433,9 @@ class RefSLDWidget(AbstractPlotWidget):
         results : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
             The calculation results.
         """
+        if project is None or results is None:
+            return
+
         data = ratapi.events.PlotEventData()
 
         data.modelType = project.model

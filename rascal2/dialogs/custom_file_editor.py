@@ -9,9 +9,8 @@ from ratapi.utils.enums import Languages
 
 from rascal2.config import EXAMPLES_PATH, LOGGER, SETTINGS, MatlabHelper
 from rascal2.core.enums import CustomFileType
-from rascal2.settings import DefaultEditor
 
-MATLAB_MODEL_TEMPLATE = """function [output,sub_rough] = {0}{1}
+MATLAB_MODEL_TEMPLATE = """function [output, sub_rough] = {0}{1}
 % RasCAL-2 Layer Model Custom File.
 %
 % The first 3 arguments are vectors containing the values for parameters, bulk in and bulk out
@@ -27,54 +26,48 @@ MATLAB_MODEL_TEMPLATE = """function [output,sub_rough] = {0}{1}
 % output = [thick 1, SLD 1, Rough 1;
 %           ....
 %           thick n, SLD n, Rough n];
-% The second output parameter should be the substrate roughness
-
-"""
+% The second output parameter should be the substrate roughness"""
 
 
-PYTHON_MODEL_TEMPLATE = """def {0}{1}
-# RasCAL-2 Layer Model Custom File.
-#
-# The first 3 arguments are vectors containing the values for parameters, bulk in and bulk out
-# The fourth argument is a number indicating which contrast is being calculated (this number starts from 1)
-# {2}
-# This function should return a tuple with 2 entries. The first entry is an array of layer values in the form.
-# output = [[thick 1, SLD 1, Rough 1, Percent Hydration 1, Hydrate how 1],
-#            ....
-#           [thick n, SLD n, Rough n, Percent Hydration n, Hydration how n]]
-# The "hydrate how" parameter decides if the layer is hydrated with
-# Bulk out or Bulk in phases. Set to 1 for Bulk out, 0 for Bulk in.
-# Alternatively, leave out hydration and just return.
-# output = [[thick 1, SLD 1, Rough 1]
-#            ....
-#           [thick n, SLD n, Rough n]]
-# The second output parameter should be the substrate roughness
-
+PYTHON_MODEL_TEMPLATE = """def {0}{1}:
+    \"\"\"RasCAL-2 Layer Model Custom File.
+    
+    The first 3 arguments are vectors containing the values for parameters, bulk in and bulk out
+    The fourth argument is a number indicating which contrast is being calculated (this number starts from 1)
+    {2}
+    This function should return a tuple with 2 entries. The first entry is an array of layer values in the form.
+    output = [[thick 1, SLD 1, Rough 1, Percent Hydration 1, Hydrate how 1],
+               ....
+              [thick n, SLD n, Rough n, Percent Hydration n, Hydration how n]]
+    The "hydrate how" parameter decides if the layer is hydrated with
+    Bulk out or Bulk in phases. Set to 1 for Bulk out, 0 for Bulk in.
+    Alternatively, leave out hydration and just return.
+    output = [[thick 1, SLD 1, Rough 1]
+               ....
+              [thick n, SLD n, Rough n]]
+    The second output parameter should be the substrate roughness\"\"\"
 """
 
 
 PYTHON_BACKGROUND_TEMPLATE = """def {0}(xdata, params):
-# RasCAL-2 Background Custom File.
-#
-# The first argument is a vector containing the first column from the supplied data, 
-# plus additional points above and below the data range as necessary.
-# The second argument is a vector containing the parameters
-#
-# This function should return an array or a list with the background corrected data.
-
+    \"\"\"RasCAL-2 Background Custom File.
+    
+    The first argument is a vector containing the first column from the supplied data, 
+    plus additional points above and below the data range as necessary.
+    The second argument is a vector containing the parameters
+    
+    This function should return an array or a list with the background corrected data.\"\"\"
 """
 
 
-MATLAB_BACKGROUND_TEMPLATE = """background = {0}(xdata, params):
+MATLAB_BACKGROUND_TEMPLATE = """function background = {0}(xdata, params)
 % RasCAL-2 Background Custom File.
 %
 % The first argument is a vector containing the first column from the supplied data, 
 % plus additional points above and below the data range as necessary.
 % The second argument is a vector containing the parameters
 %
-% This function should return a vector with the background corrected data.
-
-"""
+% This function should return a vector with the background corrected data."""
 
 
 def create_new_file(
@@ -105,11 +98,11 @@ def create_new_file(
     function_name = name.lower()
     if language == Languages.Python:
         ext = ".py"
-        comment = PYTHON_MODEL_TEMPLATE if file_type == "model" else PYTHON_BACKGROUND_TEMPLATE
+        comment = PYTHON_MODEL_TEMPLATE if file_type == CustomFileType.Model else PYTHON_BACKGROUND_TEMPLATE
         signature = "(params, bulk_in, bulk_out, contrast{0})"
     elif language == Languages.Matlab:
         ext = ".m"
-        comment = MATLAB_MODEL_TEMPLATE if file_type == "model" else MATLAB_BACKGROUND_TEMPLATE
+        comment = MATLAB_MODEL_TEMPLATE if file_type == CustomFileType.Model else MATLAB_BACKGROUND_TEMPLATE
         signature = "(params, bulkIn, bulkOut, contrast{0})"
     else:
         LOGGER.error(f"Creating a new file for {language} is not supported.")
@@ -128,7 +121,7 @@ def create_new_file(
         comment = comment.format(function_name)
 
     if Path(filename).is_file():
-        LOGGER.error(f"The file ({filename}) already exist, change custom file name to create a different file.")
+        LOGGER.error(f"The file ({filename}) already exists, change custom file name to create a different file.")
         return
 
     with open(filename, "w") as f:
@@ -151,7 +144,7 @@ def edit_file(filename: str, language: Languages, parent: QtWidgets.QWidget):
         The parent of this widget.
 
     """
-    use_matlab = SETTINGS.default_editor == DefaultEditor.Matlab or language == Languages.Matlab
+    use_matlab = SETTINGS.matlab_as_default_editor or language == Languages.Matlab
     if use_matlab and edit_file_matlab(filename):
         return
 
