@@ -328,7 +328,7 @@ class CustomFileEditorDialog(QtWidgets.QDialog, metaclass=Singleton):
 
         if self.editor.lexer() is not None:
             self.editor.lexer().setFont(self.default_font)
-        self.unchanged_text = self.file.read_text()
+        self.unchanged_text = self.file.read_text(encoding="utf-8", errors="backslashreplace")
         self.editor.setText(self.unchanged_text)
         self.editor.setModified(False)
         self.setWindowModified(False)
@@ -344,7 +344,7 @@ class CustomFileEditorDialog(QtWidgets.QDialog, metaclass=Singleton):
             return
 
         try:
-            self.file.write_text(self.editor.text())
+            self.file.write_text(self.editor.text(), encoding="utf-8")
             self.unchanged_text = self.editor.text()
             self.show_modified()
         except OSError as ex:

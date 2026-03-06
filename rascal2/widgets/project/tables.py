@@ -251,7 +251,6 @@ class ProjectFieldWidget(QtWidgets.QWidget):
 
         self.table.setModel(self.model)
         self.model.dataChanged.connect(lambda: self.edited.emit())
-        self.model.dataChanged.connect(lambda: print(self.sender()))
         self.model.modelReset.connect(lambda: self.edited.emit())
         self.table.hideColumn(0)
         if self.model.headers[1] == "filename":
@@ -623,7 +622,9 @@ class CustomFileModel(ClassListTableModel):
                     # (?:^|\n) means 'match start of the string (i.e. the file) or a newline'
                     # (\S+) means 'capture one or more non-whitespace characters'
                     # so the regex captures a word between 'def ' and '(', i.e. a function name
-                    func_names = re.findall(r"(?:^|\n)def (\S+)\(", file_path.read_text())
+                    func_names = re.findall(
+                        r"(?:^|\n)def (\S+)\(", file_path.read_text(encoding="utf-8", errors="backslashreplace")
+                    )
                 case ".m":
                     language = Languages.Matlab
                     func_names = None
