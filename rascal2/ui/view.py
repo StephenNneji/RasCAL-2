@@ -543,8 +543,10 @@ class MainWindowView(QtWidgets.QMainWindow):
     def show_message(self, message):
         """Show message to the user.
 
-        :param message: user message
-        :type message: str
+        Parameters
+        ----------
+        message : str
+            user message
         """
         QtWidgets.QMessageBox.information(self, MAIN_WINDOW_TITLE, message)
 

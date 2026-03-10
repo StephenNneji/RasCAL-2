@@ -664,7 +664,7 @@ class CustomFileModel(ClassListTableModel):
                 # should fail quietly since file is already copied.
                 pass
             except OSError as ex:
-                LOGGER.error("Attempt to copy custom file failed, full path will be used", exc_info=ex)
+                LOGGER.error("Attempt to copy custom file failed, full path will be used.", exc_info=ex)
         else:
             file_path = file_path.relative_to(project_dir)
 
@@ -698,6 +698,13 @@ class CustomFileWidget(ProjectFieldWidget):
         self.model.dataChanged.connect(lambda index: self.setup_button(index.row()))
 
     def update_copy_state(self, state):
+        """Update the always_copy state.
+
+        Parameters
+        ----------
+        state : QtCore.Qt.CheckState
+            Indicates the always_copy state.
+        """
         self.model.always_copy = state == QtCore.Qt.CheckState.Checked
 
     def edit(self):
@@ -711,29 +718,35 @@ class CustomFileWidget(ProjectFieldWidget):
             self.setup_button(i)
         self.resize_columns()
 
-    def setup_button(self, i):
-        """Check whether the button should be editable and set it up for the right language."""
-        language = self.model.data(self.model.index(i, self.model.headers.index("language") + self.model.col_offset))
-        button = self.table.indexWidget(self.model.index(i, self.edit_file_column))
+    def setup_button(self, row):
+        """Check whether the button should be editable and set it up for the right language.
+
+        Parameters
+        ----------
+        row : int
+            The row containing the button to setup.
+        """
+        language = self.model.data(self.model.index(row, self.model.headers.index("language") + self.model.col_offset))
+        button = self.table.indexWidget(self.model.index(row, self.edit_file_column))
 
         edit_file_action = QtGui.QAction("Edit File...", self.table)
         edit_file_action.triggered.connect(
             lambda: edit_file(
-                self.model.classlist[i].path / self.model.classlist[i].filename,
-                self.model.classlist[i].language,
+                self.model.classlist[row].path / self.model.classlist[row].filename,
+                self.model.classlist[row].language,
                 self,
             )
         )
         new_model_file_action = QtGui.QAction("New Model File...", self.table)
-        new_model_file_action.triggered.connect(lambda: self.create_new_file(i, CustomFileType.Model))
+        new_model_file_action.triggered.connect(lambda: self.create_new_file(row, CustomFileType.Model))
         new_background_file_action = QtGui.QAction("New Background File...", self.table)
-        new_background_file_action.triggered.connect(lambda: self.create_new_file(i, CustomFileType.Background))
+        new_background_file_action.triggered.connect(lambda: self.create_new_file(row, CustomFileType.Background))
 
         with contextlib.suppress(TypeError):
             button.pressed.disconnect()
 
         button.setMenu(None)
-        filename_index = self.model.index(i, self.model.headers.index("filename") + self.model.col_offset)
+        filename_index = self.model.index(row, self.model.headers.index("filename") + self.model.col_offset)
         if language in [Languages.Matlab, Languages.Python]:
             if self.model.data(filename_index) == "Browse...":
                 menu = QtWidgets.QMenu(self.table)
@@ -750,17 +763,31 @@ class CustomFileWidget(ProjectFieldWidget):
             editable = False
         button.setEnabled(editable)
 
-    def create_new_file(self, index, file_type):
+    def create_new_file(self, row, file_type):
+        """Create a new custom file for given model entry.
+
+        Parameters
+        ----------
+        row : int
+            The row to create file for.
+        file_type : CustomFileType
+            The type of custom file to create.
+        """
         is_domains = self.parent.parent.calculation_combobox.currentText() == Calculations.Domains
-        filename = create_new_file(
-            self.model.classlist[index].name,
-            self.model.classlist[index].language,
-            is_domains,
-            file_type,
-            self,
-        )
+        try:
+            filename = create_new_file(
+                self.model.classlist[row].name,
+                self.model.classlist[row].language,
+                is_domains,
+                file_type,
+                self,
+            )
+        except OSError as ex:
+            LOGGER.error("Attempt to create new custom file failed.", exc_info=ex)
+            return
+
         if filename:
-            index = self.model.index(index, self.model.headers.index("filename") + self.model.col_offset)
+            index = self.model.index(row, self.model.headers.index("filename") + self.model.col_offset)
             self.model.setData(index, filename, QtCore.Qt.ItemDataRole.EditRole)
 
     def set_item_delegates(self):

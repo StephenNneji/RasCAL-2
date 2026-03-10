@@ -16,17 +16,17 @@ MATLAB_MODEL_TEMPLATE = """function [output, sub_rough] = {0}{1}
 % The first 3 arguments are vectors containing the values for parameters, bulk in and bulk out
 % The fourth argument is a number indicating which contrast is being calculated (this number starts from 1)
 % {2}
-% This function should return a matrix of layer values in the form.
-% output = [thick 1, SLD 1, Rough 1, Percent Hydration 1, Hydrate how 1;
+% This function should return an array of layer values in the form:
+% output = [Thickness 1, SLD 1, Roughness 1, Percent Hydration 1, Hydrate how 1;
 %           ....
-%           thick n, SLD n, Rough n, Percent Hydration n, Hydration how n]
-% The "hydrate how" parameter decides if the layer is hydrated with
-% Bulk out or Bulk in phases. Set to 1 for Bulk out, 0 for Bulk in.
-% Alternatively, leave out hydration and just return.
-% output = [thick 1, SLD 1, Rough 1;
+%           Thickness n, SLD n, Roughness n, Percent Hydration n, Hydrate how n]
+% The "Hydrate how" parameter decides if the layer is hydrated with
+% Bulk in or Bulk out phases. Set to 0 for Bulk in or 1 for Bulk out.
+% Alternatively, leave out hydration and just return:
+% output = [Thickness 1, SLD 1, Roughness 1;
 %           ....
-%           thick n, SLD n, Rough n];
-% The second output parameter should be the substrate roughness"""
+%           Thickness n, SLD n, Roughness n];
+% The second output parameter should be the substrate roughness."""
 
 
 PYTHON_MODEL_TEMPLATE = """def {0}{1}:
@@ -35,39 +35,39 @@ PYTHON_MODEL_TEMPLATE = """def {0}{1}:
     The first 3 arguments are vectors containing the values for parameters, bulk in and bulk out
     The fourth argument is a number indicating which contrast is being calculated (this number starts from 1)
     {2}
-    This function should return a tuple with 2 entries. The first entry is an array of layer values in the form.
-    output = [[thick 1, SLD 1, Rough 1, Percent Hydration 1, Hydrate how 1],
+    This function should return a tuple with 2 entries. The first entry is an array of layer values in the form:
+    output = [[Thickness 1, SLD 1, Roughness 1, Percent Hydration 1, Hydrate how 1],
                ....
-              [thick n, SLD n, Rough n, Percent Hydration n, Hydration how n]]
-    The "hydrate how" parameter decides if the layer is hydrated with
-    Bulk out or Bulk in phases. Set to 1 for Bulk out, 0 for Bulk in.
-    Alternatively, leave out hydration and just return.
-    output = [[thick 1, SLD 1, Rough 1]
+              [Thickness n, SLD n, Roughness n, Percent Hydration n, Hydrate how n]]
+    The "Hydrate how" parameter decides if the layer is hydrated with
+    Bulk in or Bulk out phases. Set to 0 for Bulk in or 1 for Bulk out.
+    Alternatively, leave out hydration and just return:
+    output = [[Thickness 1, SLD 1, Roughness 1]
                ....
-              [thick n, SLD n, Rough n]]
-    The second output parameter should be the substrate roughness\"\"\"
+              [Thickness n, SLD n, Roughness n]]
+    The second output parameter should be the substrate roughness.\"\"\"
 """
 
 
 PYTHON_BACKGROUND_TEMPLATE = """def {0}(xdata, params):
     \"\"\"RasCAL-2 Background Custom File.
     
-    The first argument is a vector containing the first column from the supplied data, 
-    plus additional points above and below the data range as necessary.
-    The second argument is a vector containing the parameters
+    The first argument is a vector containing the q points over the simulation range, which should incorporate 
+    the q values of the supplied data.
+    The second argument is a vector containing the background parameters associated with the background.
     
-    This function should return an array or a list with the background corrected data.\"\"\"
+    This function should return an array with the background value for each of the input simulation points.\"\"\"
 """
 
 
 MATLAB_BACKGROUND_TEMPLATE = """function background = {0}(xdata, params)
 % RasCAL-2 Background Custom File.
 %
-% The first argument is a vector containing the first column from the supplied data, 
-% plus additional points above and below the data range as necessary.
-% The second argument is a vector containing the parameters
+% The first argument is a vector containing the q points over the simulation range, which should incorporate 
+% the q values of the supplied data.
+% The second argument is a vector containing the background parameters associated with the background.
 %
-% This function should return a vector with the background corrected data."""
+% This function should return an array with the background value for each of the input simulation points."""
 
 
 def create_new_file(
@@ -112,7 +112,7 @@ def create_new_file(
     if file_type == CustomFileType.Model:
         signature = signature.format(", domain" if is_domains else "")
         extra = (
-            "The fifth argument is a number indicating which domain is being calculated (this number starts from 1)"
+            "The fifth argument is a number indicating which domain is being calculated (this number starts from 1).\n"
             if is_domains
             else ""
         )
