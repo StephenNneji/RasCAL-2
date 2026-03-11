@@ -3,6 +3,8 @@
 import ratapi
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from rascal2.config import LOGGER
+
 
 class SliderViewWidget(QtWidgets.QWidget):
     """The slider view widget which allows user change fitted parameters with sliders."""
@@ -97,8 +99,11 @@ class SliderViewWidget(QtWidgets.QWidget):
         """Update and plot result when sliders are changed."""
         project = ratapi.Project()
         vars(project).update(self.draft_project)
-        results = self._parent.presenter.quick_run(project)
-        self._parent.plot_widget.reflectivity_plot.plot(project, results)
+        try:
+            results = self._parent.presenter.quick_run(project)
+            self._parent.plot_widget.reflectivity_plot.plot(project, results)
+        except Exception as ex:
+            LOGGER.error("Attempt to update slider preview failed", exc_info=ex)
 
     def _cancel_changes_from_sliders(self):
         """Revert changes to parameter values and close slider view."""

@@ -1,18 +1,21 @@
 """Models and widgets for project fields."""
 
 import contextlib
+import os
 import re
+import shutil
 from enum import Enum
 from pathlib import Path
 
 import pydantic
 import ratapi
 from PyQt6 import QtCore, QtGui, QtWidgets
-from ratapi.utils.enums import Languages, Procedures, TypeOptions
+from ratapi.utils.enums import Calculations, Languages, Procedures, TypeOptions
 
 import rascal2.widgets.delegates as delegates
-from rascal2.config import path_for
-from rascal2.dialogs.custom_file_editor import edit_file, edit_file_matlab
+from rascal2.config import LOGGER, SETTINGS, path_for
+from rascal2.core.enums import CustomFileType
+from rascal2.dialogs.custom_file_editor import create_new_file, edit_file
 
 
 class ClassListTableModel(QtCore.QAbstractTableModel):
@@ -317,11 +320,9 @@ class ProjectFieldWidget(QtWidgets.QWidget):
         """
         presenter = self.parent.parent.parent.presenter
         presenter.model.blockSignals(True)
-        presenter.edit_project(
-            {self.field: self.model.classlist}, preview=recalculate and presenter.view.settings.live_recalculate
-        )
+        presenter.edit_project({self.field: self.model.classlist}, preview=recalculate and SETTINGS.live_recalculate)
         presenter.model.blockSignals(False)
-        if presenter.view.settings.live_recalculate:
+        if SETTINGS.live_recalculate:
             presenter.view.plot_widget.update_plots()
 
 
@@ -577,6 +578,7 @@ class CustomFileModel(ClassListTableModel):
         self.func_names = {}
         self.headers.remove("path")
         self.col_offset = 2
+        self.always_copy = True
 
     def flags(self, index):
         flags = super().flags(index)
@@ -594,12 +596,18 @@ class CustomFileModel(ClassListTableModel):
             elif role in [QtCore.Qt.ItemDataRole.ToolTipRole, QtCore.Qt.ItemDataRole.UserRole]:
                 display = super().data(index, QtCore.Qt.ItemDataRole.DisplayRole)
                 if display != "" and display != "Browse...":
-                    return self.classlist[index.row()].path.as_posix()
+                    path = Path(self.classlist[index.row()].path)
+                    if not path.is_absolute():
+                        path = Path(os.getcwd()) / self.classlist[index.row()].path
+                    return path.as_posix()
         return data
 
     def setData(self, index, value, role=QtCore.Qt.ItemDataRole.DisplayRole):
         if self.index_header(index) == "filename" and value != "Browse...":
             file_path = Path(value)
+            if self.always_copy:
+                file_path = self.copy_custom_file(file_path)
+
             row = index.row()
             self.classlist[row].path = file_path.parent
             self.classlist[row].filename = str(file_path.name)
@@ -614,7 +622,9 @@ class CustomFileModel(ClassListTableModel):
                     # (?:^|\n) means 'match start of the string (i.e. the file) or a newline'
                     # (\S+) means 'capture one or more non-whitespace characters'
                     # so the regex captures a word between 'def ' and '(', i.e. a function name
-                    func_names = re.findall(r"(?:^|\n)def (\S+)\(", file_path.read_text())
+                    func_names = re.findall(
+                        r"(?:^|\n)def (\S+)\(", file_path.read_text(encoding="utf-8", errors="backslashreplace")
+                    )
                 case ".m":
                     language = Languages.Matlab
                     func_names = None
@@ -635,6 +645,31 @@ class CustomFileModel(ClassListTableModel):
 
         return super().setData(index, value, role)
 
+    @staticmethod
+    def copy_custom_file(file_path):
+        """Copy given custom file to the project directory.
+
+        Parameters
+        ----------
+        file_path : str
+            The custom file to copy.
+        """
+        file_path = Path(file_path)
+        project_dir = os.getcwd()
+        if not file_path.is_relative_to(project_dir):
+            try:
+                file_path = Path(shutil.copy(file_path, project_dir)).relative_to(project_dir)
+            except shutil.SameFileError:
+                # Attempting to copy a file to the same directory it is in
+                # should fail quietly since file is already copied.
+                pass
+            except OSError as ex:
+                LOGGER.error("Attempt to copy custom file failed, full path will be used.", exc_info=ex)
+        else:
+            file_path = file_path.relative_to(project_dir)
+
+        return file_path
+
     def append_item(self):
         """Append an item to the ClassList."""
         self.classlist.append(self.item_type(filename="", path="/"))
@@ -646,65 +681,114 @@ class CustomFileWidget(ProjectFieldWidget):
 
     classlist_model = CustomFileModel
 
+    def __init__(self, field: str, parent):
+        super().__init__(field, parent)
+
+        layout = self.layout().itemAt(0)  # topbar layout
+        self.copy_checkbox = QtWidgets.QCheckBox("Always Copy")
+        self.copy_checkbox.setChecked(True)
+        self.copy_checkbox.setHidden(True)
+        self.copy_checkbox.checkStateChanged.connect(self.update_copy_state)
+        self.copy_checkbox.setToolTip("Indicates if files should be copied when outside project folder.")
+        layout.insertWidget(layout.count() - 1, self.copy_checkbox)
+        self.edit_file_column = 1
+
+    def update_model(self, classlist: ratapi.classlist.ClassList):
+        super().update_model(classlist)
+        self.model.dataChanged.connect(lambda index: self.setup_button(index.row()))
+
+    def update_copy_state(self, state):
+        """Update the always_copy state.
+
+        Parameters
+        ----------
+        state : QtCore.Qt.CheckState
+            Indicates the always_copy state.
+        """
+        self.model.always_copy = state == QtCore.Qt.CheckState.Checked
+
     def edit(self):
         super().edit()
-        edit_file_column = 1
-        self.table.showColumn(edit_file_column)
-        # disconnect from old table's buttons so they don't create dangling references
-        # if no connections currently exist (i.e. table empty), disconnect() raises a TypeError
-        with contextlib.suppress(TypeError):
-            self.model.dataChanged.disconnect()
+        self.copy_checkbox.setHidden(False)
+        self.table.showColumn(self.edit_file_column)
         for i in range(0, self.model.rowCount()):
-            self.table.setIndexWidget(self.model.index(i, edit_file_column), self.make_edit_button(i))
+            self.table.setIndexWidget(
+                self.model.index(i, self.edit_file_column), QtWidgets.QPushButton("Edit File", self.table)
+            )
+            self.setup_button(i)
         self.resize_columns()
 
-    def make_edit_button(self, index):
-        button = QtWidgets.QPushButton("Edit File", self.table)
-        q_scintilla_action = QtGui.QAction("Edit in RasCAL-2...", self.table)
-        q_scintilla_action.triggered.connect(
+    def setup_button(self, row):
+        """Check whether the button should be editable and set it up for the right language.
+
+        Parameters
+        ----------
+        row : int
+            The row containing the button to setup.
+        """
+        language = self.model.data(self.model.index(row, self.model.headers.index("language") + self.model.col_offset))
+        button = self.table.indexWidget(self.model.index(row, self.edit_file_column))
+
+        edit_file_action = QtGui.QAction("Edit File...", self.table)
+        edit_file_action.triggered.connect(
             lambda: edit_file(
-                self.model.classlist[index].path / self.model.classlist[index].filename,
-                self.model.classlist[index].language,
+                self.model.classlist[row].path / self.model.classlist[row].filename,
+                self.model.classlist[row].language,
                 self,
             )
         )
-        matlab_action = QtGui.QAction("Edit in MATLAB...", self.table)
-        matlab_action.triggered.connect(
-            lambda: edit_file_matlab(self.model.classlist[index].path / self.model.classlist[index].filename)
-        )
-        menu = QtWidgets.QMenu(self.table)
-        menu.addActions([q_scintilla_action, matlab_action])
+        new_model_file_action = QtGui.QAction("New Model File...", self.table)
+        new_model_file_action.triggered.connect(lambda: self.create_new_file(row, CustomFileType.Model))
+        new_background_file_action = QtGui.QAction("New Background File...", self.table)
+        new_background_file_action.triggered.connect(lambda: self.create_new_file(row, CustomFileType.Background))
 
-        def setup_button():
-            """Check whether the button should be editable and set it up for the right language."""
-            language = self.model.data(
-                self.model.index(index, self.model.headers.index("language") + self.model.col_offset)
-            )
-            with contextlib.suppress(TypeError):
-                button.pressed.disconnect()
-            if language == Languages.Matlab:
+        with contextlib.suppress(TypeError):
+            button.pressed.disconnect()
+
+        button.setMenu(None)
+        filename_index = self.model.index(row, self.model.headers.index("filename") + self.model.col_offset)
+        if language in [Languages.Matlab, Languages.Python]:
+            if self.model.data(filename_index) == "Browse...":
+                menu = QtWidgets.QMenu(self.table)
+                menu.addActions([new_model_file_action, new_background_file_action])
                 button.setMenu(menu)
                 button.pressed.connect(button.showMenu)
+                button.setText("New File")
             else:
-                button.setMenu(None)
-                button.pressed.connect(
-                    lambda: edit_file(
-                        self.model.classlist[index].path / self.model.classlist[index].filename,
-                        self.model.classlist[index].language,
-                        self,
-                    )
-                )
+                button.pressed.connect(edit_file_action.trigger)
+                button.setText("Edit File")
+            editable = True
+        else:
+            button.setText("")
+            editable = False
+        button.setEnabled(editable)
 
-            editable = (language in [Languages.Matlab, Languages.Python]) and (
-                self.model.data(self.model.index(index, self.model.headers.index("filename") + self.model.col_offset))
-                != "Browse..."
+    def create_new_file(self, row, file_type):
+        """Create a new custom file for given model entry.
+
+        Parameters
+        ----------
+        row : int
+            The row to create file for.
+        file_type : CustomFileType
+            The type of custom file to create.
+        """
+        is_domains = self.parent.parent.calculation_combobox.currentText() == Calculations.Domains
+        try:
+            filename = create_new_file(
+                self.model.classlist[row].name,
+                self.model.classlist[row].language,
+                is_domains,
+                file_type,
+                self,
             )
-            button.setEnabled(editable)
+        except OSError as ex:
+            LOGGER.error("Attempt to create new custom file failed.", exc_info=ex)
+            return
 
-        setup_button()
-        self.model.dataChanged.connect(lambda: setup_button())
-
-        return button
+        if filename:
+            index = self.model.index(row, self.model.headers.index("filename") + self.model.col_offset)
+            self.model.setData(index, filename, QtCore.Qt.ItemDataRole.EditRole)
 
     def set_item_delegates(self):
         super().set_item_delegates()
@@ -759,16 +843,16 @@ class BackgroundsModel(AbstractSignalModel):
     """Model for classlists of Backgrounds."""
 
     @property
-    def num_valid_values(self) -> tuple[int]:
-        return (0, 1, 5)
+    def num_valid_values(self) -> tuple[int, int, int]:
+        return 0, 1, 5
 
 
 class ResolutionsModel(AbstractSignalModel):
     """Model for classlists of Resolutions."""
 
     @property
-    def num_valid_values(self) -> tuple[int]:
-        return (0, -1, 5)  # -1 to remove 'source' field for data resolutions
+    def num_valid_values(self) -> tuple[int, int, int]:
+        return 0, -1, 5  # -1 to remove 'source' field for data resolutions
 
 
 class AbstractSignalFieldWidget(ProjectFieldWidget):

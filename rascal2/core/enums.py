@@ -10,3 +10,10 @@ class UnsavedReply(StrEnum):
     Save = "Save"
     Discard = "Discard"
     Cancel = "Cancel"
+
+
+class CustomFileType(StrEnum):
+    """The responses to the warning of unsaved changes."""
+
+    Background = "Background"
+    Model = "Model"

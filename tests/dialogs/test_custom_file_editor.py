@@ -9,7 +9,7 @@ import pytest
 from PyQt6 import Qsci, QtWidgets
 from ratapi.utils.enums import Languages
 
-from rascal2.dialogs.custom_file_editor import CustomFileEditorDialog, edit_file, edit_file_matlab
+from rascal2.dialogs.custom_file_editor import CustomFileEditorDialog, edit_file_local, edit_file_matlab
 
 parent = QtWidgets.QMainWindow()
 
@@ -32,12 +32,12 @@ def temp_file():
 
 
 @patch("rascal2.dialogs.custom_file_editor.CustomFileEditorDialog.show")
-def test_edit_file(exec_mock):
-    """Test that the dialog is executed when edit_file() is called on a valid file."""
+def test_edit_file_local(exec_mock):
+    """Test that the dialog is executed when edit_file_local() is called on a valid file."""
     with tempfile.TemporaryDirectory() as tmp:
         file = Path(tmp, "testfile.py")
         file.touch()
-        edit_file(file, Languages.Python, parent)
+        edit_file_local(file, Languages.Python, parent)
 
         exec_mock.assert_called_once()
 
@@ -48,7 +48,7 @@ def test_edit_incorrect_file(dialog_mock, filepath, caplog):
     """A logger error should be emitted if a directory or nonexistent file is given to the editor."""
     with tempfile.TemporaryDirectory() as tmp:
         file = Path(tmp, filepath)
-        edit_file(file, Languages.Python, parent)
+        edit_file_local(file, Languages.Python, parent)
 
     errors = [record for record in caplog.get_records("call") if record.levelno == logging.ERROR]
     assert len(errors) == 1

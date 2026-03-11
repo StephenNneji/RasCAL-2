@@ -453,6 +453,7 @@ def test_file_model_set_filename(filename, expected_lang, expected_filenames):
     python_file = "def func1(): pass \ndef func2(): pass \ndef func3(): pass"
 
     model = CustomFileModel(init_list, parent)
+    model.always_copy = False
 
     filename_col = model.headers.index("filename") + model.col_offset
     with tempfile.TemporaryDirectory() as tmp:
@@ -477,6 +478,7 @@ def test_file_widget_edit(filename):
 
         widget = CustomFileWidget("files", parent)
         widget.update_model(init_list)
+        widget.model.always_copy = False
 
         edit_col = 1
         assert widget.table.isColumnHidden(edit_col)
@@ -494,12 +496,12 @@ def test_file_widget_edit(filename):
         button = widget.table.indexWidget(widget.model.index(0, edit_col))
         assert isinstance(button, QtWidgets.QPushButton)
 
-        if filename in ["file.m", "file.py"]:
+        if filename in ["file.m", "file.py", ""]:
             assert button.isEnabled()
         else:
             assert not button.isEnabled()
 
-        if filename == "file.m":
+        if filename == "":
             assert button.menu() is not None
             assert len(button.menu().actions()) == 2
         else:

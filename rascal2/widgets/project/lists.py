@@ -9,7 +9,7 @@ import ratapi
 from PyQt6 import QtCore, QtGui, QtWidgets
 from ratapi.utils.enums import BackgroundActions, LayerModels
 
-from rascal2.config import path_for
+from rascal2.config import SETTINGS, path_for
 from rascal2.core.readers import readers
 from rascal2.widgets.delegates import ProjectFieldDelegate
 from rascal2.widgets.inputs import RangeWidget
@@ -683,11 +683,9 @@ class ContrastWidget(AbstractProjectListWidget):
         if not self.edit_mode:
             presenter = self.parent.parent.parent.presenter
             presenter.model.blockSignals(True)
-            presenter.edit_project(
-                {"contrasts": self.model.classlist}, preview=presenter.view.settings.live_recalculate
-            )
+            presenter.edit_project({"contrasts": self.model.classlist}, preview=SETTINGS.live_recalculate)
             presenter.model.blockSignals(False)
-            if presenter.view.settings.live_recalculate:
+            if SETTINGS.live_recalculate:
                 presenter.view.plot_widget.update_plots()
 
     def set_name_data(self, index: int, name: str):
@@ -912,9 +910,9 @@ class DataWidget(AbstractProjectListWidget):
         """Update parent project data and recalculate plots."""
         presenter = self.parent.parent.parent.presenter
         presenter.model.blockSignals(True)
-        presenter.edit_project({"data": self.model.classlist}, preview=presenter.view.settings.live_recalculate)
+        presenter.edit_project({"data": self.model.classlist}, preview=SETTINGS.live_recalculate)
         presenter.model.blockSignals(False)
-        if presenter.view.settings.live_recalculate:
+        if SETTINGS.live_recalculate:
             presenter.view.plot_widget.update_plots()
 
     def set_name_data(self, index: int, name: str):

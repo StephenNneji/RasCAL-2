@@ -56,7 +56,7 @@ class Styles(StrEnum):
 
 
 class BackgroundColour(StrEnum):
-    """Background colour for plot exportRasCAL-2."""
+    """Background colour for plot export."""
 
     Transparent = "none"
     White = "white"
@@ -119,13 +119,17 @@ class Settings(BaseModel, validate_assignment=True, arbitrary_types_allowed=True
     # The global settings are read and written via this object using `set_global_settings`.
     style: Styles = Field(default=Styles.Light, title=SettingsGroups.General, description="Style")
     editor_fontsize: int = Field(default=12, title=SettingsGroups.General, description="Editor Font Size", gt=0)
+    matlab_as_default_editor: bool = Field(
+        default=False,
+        title=SettingsGroups.General,
+        description="Use MATLAB as Default Editor if available.",
+    )
     live_recalculate: bool = Field(
         default=True, title=SettingsGroups.General, description="Auto-run simulation when parameter values change."
     )
     show_stop_calculation_warning: bool = Field(
         default=True, title=SettingsGroups.General, description="Warn when Bayesian calculation is stopped manually."
     )
-
     clear_terminal: bool = Field(
         default=True, title=SettingsGroups.Terminal, description="Clear Terminal when Run Starts"
     )

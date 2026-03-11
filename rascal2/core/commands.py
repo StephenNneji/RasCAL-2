@@ -68,7 +68,7 @@ class AbstractModelEdit(QtGui.QUndoCommand):
                 try:
                     self.new_result = self.presenter.quick_run()
                 except Exception as ex:
-                    self.new_result = self.old_result
+                    self.new_result = None
                     message = f"Error occurred when generating result preview:\n\n{ex}"
                     LOGGER.error(message, exc_info=ex)
                     self.presenter.view.terminal_widget.write(message)

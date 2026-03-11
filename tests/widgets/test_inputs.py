@@ -4,7 +4,7 @@ try:
     from enum import StrEnum
 except ImportError:
     from strenum import StrEnum
-
+import os
 from pathlib import Path
 
 import pytest
@@ -29,7 +29,7 @@ class MyEnum(StrEnum):
         (FieldInfo(annotation=int), QtWidgets.QSpinBox, 15),
         (FieldInfo(annotation=MyEnum), QtWidgets.QComboBox, "value 2"),
         (FieldInfo(annotation=str), QtWidgets.QLineEdit, "Test string"),
-        (FieldInfo(annotation=Path), PathWidget, str(Path(".").resolve())),
+        (FieldInfo(annotation=Path), PathWidget, Path(".").resolve().as_posix()),
     ],
 )
 def test_editor_type(field_info, expected_type, example_data):
@@ -79,11 +79,8 @@ def test_multi_select_list_update(selected):
 
 def test_path_widget():
     widget = PathWidget(None)
-    assert widget.path == ""
-    assert widget.text() == ""
-
-    widget.setText("Browse...")
-    assert widget.text() == "Browse..."
+    assert widget.path == os.getcwd()
+    assert widget.text() == Path(widget.path).as_posix()
 
     path = Path(".") / "file.m"
     widget.setText(path)
