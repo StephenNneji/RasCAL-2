@@ -357,12 +357,12 @@ QTabBar::tab:selected {
 
 QTableView
 {
-  background-color: white;
+  background-color: @Window;
 }
 
 QTableView::disabled
 {
-  background-color: @Window;
+  background-color: @Midlight;
 }
 
 QTableView item
@@ -389,7 +389,7 @@ QTableView QPushButton {
 *****************************/
 
 QMenuBar {
-  background-color: white;
+  background-color: @Window;
 }
 
 QMenuBar:disabled,

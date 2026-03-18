@@ -53,6 +53,7 @@ class Styles(StrEnum):
     """Visual styles for RasCAL-2."""
 
     Light = "light"
+    Dark = "dark"
 
 
 class BackgroundColour(StrEnum):

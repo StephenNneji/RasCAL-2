@@ -1,12 +1,10 @@
 import logging
 import multiprocessing
-import re
-from contextlib import suppress
 
-from PyQt6 import QtWidgets
+from PyQt6 import QtWidgets, QtCore
 
 from rascal2.config import MatlabHelper, handle_scaling, setup_logging
-from rascal2.paths import IMAGES_PATH, STATIC_PATH
+from rascal2.theme import THEMES, set_stylesheet
 from rascal2.ui.view import MainWindowView
 
 
@@ -19,19 +17,11 @@ def ui_execute(splash):
         QApplication exit code
     """
     handle_scaling()
-    QtWidgets.QApplication.setStyle("Fusion")
     app = QtWidgets.QApplication.instance()
-    with suppress(FileNotFoundError), open(STATIC_PATH / "style.css") as stylesheet:
-        palette = app.palette()
-        replacements = {
-            "@Path": IMAGES_PATH.as_posix(),
-            "@Window": palette.window().color().name(),
-            "@Highlight": palette.highlight().color().name(),
-            "@Midlight": palette.midlight().color().name(),
-            "@Text": palette.text().color().name(),
-        }
-        style = re.sub("|".join(replacements), lambda x: replacements[x.group(0)], stylesheet.read())
-        app.setStyleSheet(style)
+    app.setStyle("Fusion")
+    app.installEventFilter(THEMES)
+    app.styleHints().setColorScheme(QtCore.Qt.ColorScheme.Unknown)
+    set_stylesheet(app)
 
     window = MainWindowView()
     window.show()
