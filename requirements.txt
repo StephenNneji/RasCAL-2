@@ -1,7 +1,10 @@
 PyInstaller==6.9.0
 PyQt6==6.7.1
 PyQt6-Qt6==6.7.3
-ratapi==0.0.0.dev13
+./wheels/ratapi-0.0.0.dev13-cp310-cp310-win_amd64.whl; sys_platform == 'win32'
+./wheels/ratapi-0.0.0.dev13-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl; sys_platform == 'linux'
+./wheels/ratapi-0.0.0.dev13-cp310-cp310-macosx_14_0_x86_64.whl; sys_platform == 'darwin' and platform_machine == 'i386'
+./wheels/ratapi-0.0.0.dev13-cp310-cp310-macosx_14_0_arm64.whl; sys_platform == 'darwin' and platform_machine != 'i386'
 pydantic==2.8.2
 PyQt6-QScintilla==2.14.1
 nexusformat==1.0.7
