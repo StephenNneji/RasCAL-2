@@ -8,8 +8,9 @@ import ratapi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+
 from rascal2.config import SETTINGS
-from rascal2.paths import path_for
+from rascal2.theme import IconEngine
 from rascal2.widgets.inputs import MultiSelectComboBox, ProgressButton
 
 
@@ -311,7 +312,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         self.toolbar.hide()
         reset_button = QtWidgets.QToolButton(objectName="InteractButton")
         reset_button.setToolTip("Reset plot")
-        reset_button.setIcon(QtGui.QIcon(path_for("refresh.png")))
+        reset_button.setIcon(QtGui.QIcon(IconEngine("refresh-dark.png")))
         reset_button.clicked.connect(lambda: self.toolbar.home())
         pan_button = QtWidgets.QToolButton(objectName="InteractButton")
         pan_button.setDefaultAction(self.toolbar._actions["pan"])
@@ -330,9 +331,9 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         """Toggles the visibility of the plot controls."""
         self.plot_controls.setVisible(toggled_on)
         if toggled_on:
-            self.toggle_button.setIcon(QtGui.QIcon(path_for("hide-settings.png")))
+            self.toggle_button.setIcon(QtGui.QIcon(IconEngine("hide-settings-dark.png")))
         else:
-            self.toggle_button.setIcon(QtGui.QIcon(path_for("settings.png")))
+            self.toggle_button.setIcon(QtGui.QIcon(IconEngine("settings-dark.png")))
 
     @abstractmethod
     def make_control_layout(self) -> QtWidgets.QLayout:
@@ -389,6 +390,16 @@ class AbstractPlotWidget(QtWidgets.QWidget):
             sx = self.figure.get_figwidth() * self.figure.dpi
             dpi = self.figure.dpi if sx > 1920 else 1920 // self.figure.get_figwidth()
             self.figure.savefig(filepath, facecolor=SETTINGS.export_background_colour, dpi=dpi)
+
+    def changeEvent(self, event):
+        if event.type() == QtCore.QEvent.Type.PaletteChange:
+            scheme = QtWidgets.QApplication.styleHints().colorScheme()
+            if scheme == QtCore.Qt.ColorScheme.Light:
+                matplotlib.style.use("default")
+            else:
+                matplotlib.style.use("dark_background")
+
+        super().changeEvent(event)
 
 
 class RefSLDWidget(AbstractPlotWidget):

@@ -5,7 +5,7 @@
 }
 
 QDialog{
-    border: 1px solid #ddd;
+    border: 1px solid @Midlight;
 }
 
 QToolBar {
@@ -23,11 +23,11 @@ QSpinBox, QDoubleSpinBox, QAbstractSpinBox, QLineEdit, QComboBox {
 
 QStatusBar {
     min-height: 20px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid @Midlight;
 }
 
 QPushButton {
-    background-color: white;
+    background-color: @Button;
     text-align: center;
     border: 1px solid #828282;
     padding: 5px 12px 5px 12px;
@@ -39,8 +39,8 @@ QPushButton {
 
 QPushButton:hover,
 QPushButton:focus {
-    color: black;
-    border-color: #3874f2;
+    color: @Text;
+    border-color: @Highlight;
 }
 
 QPushButton:hover{
@@ -64,16 +64,16 @@ QPushButton:checked {
 }
 
 QLineEdit {
-    color: black;
-    background-color: white;
-    selection-color: black;
+    color: @Text;
+    background-color: @Base;
+    selection-color: @Text;
     selection-background-color: @Highlight;
-    border: 1px solid #aaa;
+    border: 1px solid @Midlight;
     border-radius: 3px;
 }
 
 QLineEdit:read-only {
-    selection-color: black;
+    selection-color: @Text;
     selection-background-color: @Highlight;
     background-color: transparent;
 }
@@ -255,12 +255,12 @@ ProjectWidget QPushButton{
 *****************************/
 
 TerminalWidget QPlainTextEdit{
-    background-color: white;
+    background-color: @Base;
 }
 
 TerminalWidget QProgressBar{
     border-radius: 0px;
-    border: 1px solid grey;
+    border: 1px solid @Midlight;
     text-align: center;
 }
 
@@ -269,7 +269,7 @@ TerminalWidget QProgressBar{
 *****************************/
 
 ControlsWidget #FitSettings{
-    background-color: white;
+    background-color: @Base;
 }
 
 ControlsWidget QPushButton {
@@ -357,7 +357,7 @@ QTabBar::tab:selected {
 
 QTableView
 {
-  background-color: @Window;
+  background-color: @Base;
 }
 
 QTableView::disabled
@@ -425,7 +425,7 @@ AbstractProjectListWidget QPushButton {
 
 AbstractProjectListWidget QTableView {
     border: 1px solid @Midlight;
-    background-color: white;
+    background-color: @Window;
 }
 
 #CountHeader::section {

@@ -82,8 +82,7 @@ class StartUpWidget(QtWidgets.QWidget):
     def changeEvent(self, event):
         if event.type() == QtCore.QEvent.Type.PaletteChange:
             scheme = QtWidgets.QApplication.styleHints().colorScheme()
-            style = 'light' if scheme == QtCore.Qt.ColorScheme.Light else 'dark'
-            if style == 'dark':
+            if scheme == QtCore.Qt.ColorScheme.Dark:
                 self.banner_label.setPixmap(QtGui.QPixmap(path_for("banner-light.png")))
                 self.footer_label.setPixmap(QtGui.QPixmap(path_for("footer-light.png")))
             else:
