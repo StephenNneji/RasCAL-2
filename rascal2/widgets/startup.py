@@ -50,11 +50,11 @@ class StartUpWidget(QtWidgets.QWidget):
     def create_banner_and_footer(self) -> None:
         """Create banner and footer."""
         self.banner_label = QtWidgets.QLabel()
-        self.banner_label.setPixmap(QtGui.QPixmap(path_for("banner-dark.png")))
+        self.banner_label.setPixmap(QtGui.QPixmap(path_for("banner-light.png")))
         self.banner_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.footer_label = QtWidgets.QLabel()
-        self.footer_label.setPixmap(QtGui.QPixmap(path_for("footer-dark.png")))
+        self.footer_label.setPixmap(QtGui.QPixmap(path_for("footer-light.png")))
         self.footer_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
     def create_buttons(self) -> None:
@@ -83,10 +83,10 @@ class StartUpWidget(QtWidgets.QWidget):
         if event.type() == QtCore.QEvent.Type.PaletteChange:
             scheme = QtWidgets.QApplication.styleHints().colorScheme()
             if scheme == QtCore.Qt.ColorScheme.Dark:
-                self.banner_label.setPixmap(QtGui.QPixmap(path_for("banner-light.png")))
-                self.footer_label.setPixmap(QtGui.QPixmap(path_for("footer-light.png")))
-            else:
                 self.banner_label.setPixmap(QtGui.QPixmap(path_for("banner-dark.png")))
                 self.footer_label.setPixmap(QtGui.QPixmap(path_for("footer-dark.png")))
+            else:
+                self.banner_label.setPixmap(QtGui.QPixmap(path_for("banner-light.png")))
+                self.footer_label.setPixmap(QtGui.QPixmap(path_for("footer-light.png")))
 
         super().changeEvent(event)

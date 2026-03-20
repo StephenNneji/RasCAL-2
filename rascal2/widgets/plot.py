@@ -312,7 +312,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         self.toolbar.hide()
         reset_button = QtWidgets.QToolButton(objectName="InteractButton")
         reset_button.setToolTip("Reset plot")
-        reset_button.setIcon(QtGui.QIcon(IconEngine("refresh-dark.png")))
+        reset_button.setIcon(QtGui.QIcon(IconEngine("refresh-light.png")))
         reset_button.clicked.connect(lambda: self.toolbar.home())
         pan_button = QtWidgets.QToolButton(objectName="InteractButton")
         pan_button.setDefaultAction(self.toolbar._actions["pan"])
@@ -331,9 +331,9 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         """Toggles the visibility of the plot controls."""
         self.plot_controls.setVisible(toggled_on)
         if toggled_on:
-            self.toggle_button.setIcon(QtGui.QIcon(IconEngine("hide-settings-dark.png")))
+            self.toggle_button.setIcon(QtGui.QIcon(IconEngine("hide-settings-light.png")))
         else:
-            self.toggle_button.setIcon(QtGui.QIcon(IconEngine("settings-dark.png")))
+            self.toggle_button.setIcon(QtGui.QIcon(IconEngine("settings-light.png")))
 
     @abstractmethod
     def make_control_layout(self) -> QtWidgets.QLayout:

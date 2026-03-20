@@ -133,15 +133,15 @@ StartUpWidget QLabel {
 }
 
 StartUpWidget QToolButton#NewProjectButton{
-    image: url(@Path/create-light.png);
+    image: url(@Path/create-dark.png);
 }
 
 StartUpWidget QToolButton#ImportProjectButton{
-    image: url(@Path/browse-light.png);
+    image: url(@Path/browse-dark.png);
 }
 
 StartUpWidget QToolButton#ImportR1Button{
-    image: url(@Path/import-r1-light.png);
+    image: url(@Path/import-r1.png);
 }
 
 /*****************************
@@ -153,15 +153,15 @@ StartupDialog #CancelButton {
 }
 
 StartupDialog #BrowseButton {
-    icon: url(@Path/browse-dark.png);
+    icon: url(@Path/browse-light.png);
 }
 
 StartupDialog #CreateButton {
-    icon: url(@Path/create-dark.png);
+    icon: url(@Path/create-light.png);
 }
 
 StartupDialog #LoadButton {
-    icon: url(@Path/load-dark.png);
+    icon: url(@Path/load-light.png);
 }
 
 StartupDialog > QLabel {

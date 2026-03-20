@@ -99,13 +99,13 @@ class MainWindowView(QtWidgets.QMainWindow):
         """Create the menu and toolbar actions."""
         self.new_project_action = QtGui.QAction("&New Project", self)
         self.new_project_action.setStatusTip("Create a new project")
-        self.new_project_action.setIcon(QtGui.QIcon(IconEngine("new-project-dark.png")))
+        self.new_project_action.setIcon(QtGui.QIcon(IconEngine("new-project-light.png")))
         self.new_project_action.triggered.connect(lambda: self.show_project_dialog(NewProjectDialog))
         self.new_project_action.setShortcut(QtGui.QKeySequence.StandardKey.New)
 
         self.open_project_action = QtGui.QAction("&Open Project", self)
         self.open_project_action.setStatusTip("Open an existing project")
-        self.open_project_action.setIcon(QtGui.QIcon(IconEngine("browse-dark.png")))
+        self.open_project_action.setIcon(QtGui.QIcon(IconEngine("browse-light.png")))
         self.open_project_action.triggered.connect(lambda: self.show_project_dialog(LoadDialog))
         self.open_project_action.setShortcut(QtGui.QKeySequence.StandardKey.Open)
 
@@ -115,7 +115,7 @@ class MainWindowView(QtWidgets.QMainWindow):
 
         self.save_project_action = QtGui.QAction("&Save", self)
         self.save_project_action.setStatusTip("Save project")
-        self.save_project_action.setIcon(QtGui.QIcon(IconEngine("save-project-dark.png")))
+        self.save_project_action.setIcon(QtGui.QIcon(IconEngine("save-project-light.png")))
         self.save_project_action.triggered.connect(lambda: self.presenter.save_project())
         self.save_project_action.setShortcut(QtGui.QKeySequence.StandardKey.Save)
         self.save_project_action.setEnabled(False)
@@ -123,7 +123,7 @@ class MainWindowView(QtWidgets.QMainWindow):
 
         self.save_as_action = QtGui.QAction("Save To &Folder...", self)
         self.save_as_action.setStatusTip("Save project to a specified folder.")
-        self.save_as_action.setIcon(QtGui.QIcon(IconEngine("save-project-dark.png")))
+        self.save_as_action.setIcon(QtGui.QIcon(IconEngine("save-project-light.png")))
         self.save_as_action.triggered.connect(lambda: self.presenter.save_project(save_as=True))
         self.save_as_action.setShortcut(QtGui.QKeySequence.StandardKey.SaveAs)
         self.save_as_action.setEnabled(False)
@@ -138,12 +138,12 @@ class MainWindowView(QtWidgets.QMainWindow):
 
         self.undo_action = self.undo_stack.createUndoAction(self, "&Undo")
         self.undo_action.setStatusTip("Undo the last action")
-        self.undo_action.setIcon(QtGui.QIcon(IconEngine("undo-dark.png")))
+        self.undo_action.setIcon(QtGui.QIcon(IconEngine("undo-light.png")))
         self.undo_action.setShortcut(QtGui.QKeySequence.StandardKey.Undo)
 
         self.redo_action = self.undo_stack.createRedoAction(self, "&Redo")
         self.redo_action.setStatusTip("Redo the last undone action")
-        self.redo_action.setIcon(QtGui.QIcon(IconEngine("redo-dark.png")))
+        self.redo_action.setIcon(QtGui.QIcon(IconEngine("redo-light.png")))
         self.redo_action.setShortcut(QtGui.QKeySequence.StandardKey.Redo)
 
         self.undo_view_action = QtGui.QAction("Undo &History", self)
@@ -160,13 +160,13 @@ class MainWindowView(QtWidgets.QMainWindow):
 
         self.settings_action = QtGui.QAction("Settings", self)
         self.settings_action.setStatusTip("Settings")
-        self.settings_action.setIcon(QtGui.QIcon(IconEngine("settings-dark.png")))
+        self.settings_action.setIcon(QtGui.QIcon(IconEngine("settings-light.png")))
         self.settings_action.setMenuRole(QtGui.QAction.MenuRole.PreferencesRole)
         self.settings_action.triggered.connect(lambda: self.show_settings_dialog())
 
         self.open_help_action = QtGui.QAction("&Help", self)
         self.open_help_action.setStatusTip("Open Documentation")
-        self.open_help_action.setIcon(QtGui.QIcon(IconEngine("help-dark.png")))
+        self.open_help_action.setIcon(QtGui.QIcon(IconEngine("help-light.png")))
         self.open_help_action.triggered.connect(self.open_docs)
 
         self.toggle_slider_action = QtGui.QAction("Show &Sliders", self)
@@ -192,7 +192,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         # Window menu actions
         self.tile_windows_action = QtGui.QAction("Tile Windows", self)
         self.tile_windows_action.setStatusTip("Arrange windows in the default grid.")
-        self.tile_windows_action.setIcon(QtGui.QIcon(IconEngine("tile-dark.png")))
+        self.tile_windows_action.setIcon(QtGui.QIcon(IconEngine("tile-light.png")))
         self.tile_windows_action.triggered.connect(self.custom_tile_layout)
         self.tile_windows_action.setEnabled(False)
         self.disabled_elements.append(self.tile_windows_action)

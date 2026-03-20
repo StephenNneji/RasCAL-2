@@ -119,7 +119,7 @@ class ProjectWidget(QtWidgets.QWidget):
         show_sliders_button = QtWidgets.QPushButton("Show sliders")
         show_sliders_button.clicked.connect(self.parent.toggle_sliders)
 
-        self.edit_project_button = QtWidgets.QPushButton("Edit Project", icon=QtGui.QIcon(IconEngine("edit-dark.png")))
+        self.edit_project_button = QtWidgets.QPushButton("Edit Project", icon=QtGui.QIcon(IconEngine("edit-light.png")))
         self.edit_project_button.clicked.connect(self.show_edit_view)
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
@@ -169,11 +169,11 @@ class ProjectWidget(QtWidgets.QWidget):
         main_layout.setSpacing(20)
 
         self.save_project_button = QtWidgets.QPushButton(
-            "Accept Changes", icon=QtGui.QIcon(IconEngine("save-project-dark.png"))
+            "Accept Changes", icon=QtGui.QIcon(IconEngine("save-project-light.png"))
         )
         self.save_project_button.clicked.connect(self.save_changes)
 
-        self.cancel_button = QtWidgets.QPushButton("Cancel", icon=QtGui.QIcon(IconEngine("cancel-dark.png")))
+        self.cancel_button = QtWidgets.QPushButton("Cancel", icon=QtGui.QIcon(IconEngine("cancel-light.png")))
         self.cancel_button.clicked.connect(self.show_project_view)
 
         buttons_layout = QtWidgets.QHBoxLayout()
