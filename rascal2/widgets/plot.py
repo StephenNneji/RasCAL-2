@@ -642,6 +642,18 @@ class AbstractPanelPlotWidget(AbstractPlotWidget):
 
         return layout
 
+    def make_figure(self) -> matplotlib.figure.Figure:
+        """Make the figure to plot onto.
+
+        Returns
+        -------
+        Figure
+            The figure to plot onto.
+
+        """
+        figure = matplotlib.figure.Figure(figsize=(9, 6))
+        return figure
+
     def make_interaction_layout(self):
         """Make layout with pan, zoom, and reset button."""
 
