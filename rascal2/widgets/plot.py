@@ -425,9 +425,9 @@ class RefSLDWidget(AbstractPlotWidget):
         self.slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Vertical)
         self.slider.setTracking(False)
         self.slider.setInvertedAppearance(True)
-        self.slider.setMinimum(1)
+        self.slider.setMinimum(0)
         self.slider.setMaximum(100)
-        self.slider.setValue(1)
+        self.slider.setValue(0)
         self.slider.valueChanged.connect(self.handle_control_changed)
 
         return self.slider
