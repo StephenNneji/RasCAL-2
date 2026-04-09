@@ -312,7 +312,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         self.toolbar.hide()
         reset_button = QtWidgets.QToolButton(objectName="InteractButton")
         reset_button.setToolTip("Reset plot")
-        reset_button.setIcon(QtGui.QIcon(IconEngine("refresh-light.png")))
+        reset_button.setIcon(QtGui.QIcon(IconEngine("refresh-dark.png")))
         reset_button.clicked.connect(lambda: self.toolbar.home())
         pan_button = QtWidgets.QToolButton(objectName="InteractButton")
         pan_button.setDefaultAction(self.toolbar._actions["pan"])
