@@ -121,12 +121,13 @@ echo ""
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$TMP_DIR/miniconda.sh"
 bash ./miniconda.sh -b -p ./miniconda
 ./miniconda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main --channel https://repo.anaconda.com/pkgs/r
-./miniconda/bin/conda create -n rascal_builder -y python=3.10
+./miniconda/bin/conda create -n rascal_builder -y python=3.10 expat=2.7.3
 
 echo ""
 echo "Downloading Dependencies"
 echo ""
 python_exec="./miniconda/envs/rascal_builder/bin/python"
+mv "$TMP_DIR/rascal/wheels" "wheels"
 mkdir "$TMP_DIR/packages"
 $python_exec -m pip download -r "./rascal/requirements.txt" --dest "$TMP_DIR/packages"
 
@@ -135,9 +136,6 @@ if [ -z "$NOMATLAB" ]; then
   $python_exec -m pip install matlabengine==9.14.*
 fi
 
-# workaround for centos 7
-#$python_exec -m pip download --only-binary=":all:" --platform="manylinux_2_17_x86_64"  --dest "$TMP_DIR/packages" pillow==9.2
-
 echo ""
 echo "Compressing Package.tar.gz ..."
 echo ""
@@ -145,7 +143,7 @@ echo ""
 STAGE_DIR="$TMP_DIR/stage"
 mkdir "$STAGE_DIR"
 
-mv -t "$STAGE_DIR" "rascal" "miniconda/envs" "packages"
+mv -t "$STAGE_DIR" "rascal" "miniconda/envs" "packages" "wheels"
 chmod 777 "$STAGE_DIR/rascal/packaging/linux/install.sh"
 
 echo ""

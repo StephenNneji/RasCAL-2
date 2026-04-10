@@ -94,12 +94,45 @@ class BayesPlotsDialog(QtWidgets.QDialog):
             self.add_tab(plot_type, plot_widget)
 
         self.sync_and_update_model()
+        self.plot_tabs.addTab(self.create_confidence_table(), "Parameter values")
         layout.addWidget(self.plot_tabs)
         self.setLayout(layout)
         self.setModal(True)
         self.resize(900, 600)
         self.setWindowTitle("Bayes Results")
         self.plot_tabs.currentChanged.connect(self.redraw_panel_plot)
+
+    def create_confidence_table(self):
+        """Create table to display the confidence intervals."""
+        results = self.parent.presenter.model.results
+        if results is None:
+            return
+
+        table = QtWidgets.QTableWidget()
+        table.setColumnCount(4)
+        table.setRowCount(len(results.fitNames))
+        table.setHorizontalHeaderLabels(["Parameter", "Mean", "95% CI", "65% CI"])
+        table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
+        table.verticalHeader().hide()
+
+        ci = results.confidenceIntervals
+        for i, name in enumerate(results.fitNames):
+            table.setItem(i, 0, QtWidgets.QTableWidgetItem(name))
+            item1 = QtWidgets.QTableWidgetItem(f"{ci.mean[0][i]:g}")
+            item1.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
+            table.setItem(i, 1, item1)
+
+            item2 = QtWidgets.QTableWidgetItem(f"[{ci.percentile95[0][i]:g}, {ci.percentile95[1][i]:g}]")
+            item2.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
+            table.setItem(i, 2, item2)
+
+            item3 = QtWidgets.QTableWidgetItem(f"[{ci.percentile65[0][i]:g}, {ci.percentile65[1][i]:g}]")
+            item3.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
+            table.setItem(i, 3, item3)
+
+        table.resizeColumnsToContents()
+
+        return table
 
     def add_tab(self, plot_type: str, plot_widget: "AbstractPlotWidget"):
         """Add a widget as a tab to the plot widget.
@@ -233,6 +266,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         self.setMinimumSize(500, 300)
 
         scroll_area = QtWidgets.QScrollArea(self)
+        scroll_area.viewport().setAutoFillBackground(False)
         scroll_area.setWidget(self.canvas)
         scroll_area.setWidgetResizable(True)
 
@@ -323,7 +357,10 @@ class AbstractPlotWidget(QtWidgets.QWidget):
             The figure to plot onto.
 
         """
-        return matplotlib.figure.Figure(figsize=(9, 6))
+        figure = matplotlib.figure.Figure(figsize=(9, 6))
+        figure.set_tight_layout(True)
+        figure.set_tight_layout({"pad": 0.01, "w_pad": 0.5})
+        return figure
 
     @abstractmethod
     def plot(self, project: ratapi.Project, results: ratapi.outputs.Results | ratapi.outputs.BayesResults):
@@ -388,19 +425,17 @@ class RefSLDWidget(AbstractPlotWidget):
         self.slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Vertical)
         self.slider.setTracking(False)
         self.slider.setInvertedAppearance(True)
-        self.slider.setMinimum(1)
+        self.slider.setMinimum(0)
         self.slider.setMaximum(100)
-        self.slider.setValue(1)
+        self.slider.setValue(0)
         self.slider.valueChanged.connect(self.handle_control_changed)
 
         return self.slider
 
     def make_figure(self) -> matplotlib.figure.Figure:
         self.resize_timer = 0
-        figure = matplotlib.figure.Figure()
+        figure = super().make_figure()
         figure.subplots(1, 2)
-        figure.set_tight_layout(True)
-        figure.set_tight_layout({"pad": 0, "w_pad": 0.5})
 
         return figure
 
@@ -606,6 +641,18 @@ class AbstractPanelPlotWidget(AbstractPlotWidget):
         layout.addLayout(param_layout)
 
         return layout
+
+    def make_figure(self) -> matplotlib.figure.Figure:
+        """Make the figure to plot onto.
+
+        Returns
+        -------
+        Figure
+            The figure to plot onto.
+
+        """
+        figure = matplotlib.figure.Figure(figsize=(9, 6))
+        return figure
 
     def make_interaction_layout(self):
         """Make layout with pan, zoom, and reset button."""
