@@ -127,7 +127,6 @@ echo ""
 echo "Downloading Dependencies"
 echo ""
 python_exec="./miniconda/envs/rascal_builder/bin/python"
-mv "$TMP_DIR/rascal/wheels" "wheels"
 mkdir "$TMP_DIR/packages"
 $python_exec -m pip download -r "./rascal/requirements.txt" --dest "$TMP_DIR/packages"
 
@@ -143,7 +142,7 @@ echo ""
 STAGE_DIR="$TMP_DIR/stage"
 mkdir "$STAGE_DIR"
 
-mv -t "$STAGE_DIR" "rascal" "miniconda/envs" "packages" "wheels"
+mv -t "$STAGE_DIR" "rascal" "miniconda/envs" "packages"
 chmod 777 "$STAGE_DIR/rascal/packaging/linux/install.sh"
 
 echo ""
