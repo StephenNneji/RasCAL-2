@@ -138,7 +138,6 @@ def test_model_set_data(table_model):
 def test_append(table_model):
     """Test that append_item successfully adds an item of the relevant type."""
     model = table_model
-
     model.append_item()
 
     assert len(model.classlist) == 4
@@ -146,10 +145,25 @@ def test_append(table_model):
     assert model.classlist[-1].value == 15
 
 
+def test_insert(table_model):
+    """Test that insert_item successfully inserts an item of the relevant type."""
+    model = table_model
+    model.insert_item(1)
+
+    assert len(model.classlist) == 4
+    assert model.classlist[1].name == "Test Model"
+    assert model.classlist[1].value == 15
+
+    model.classlist[1].name = "D"
+    model.insert_item(3)
+    assert len(model.classlist) == 5
+    assert model.classlist[3].name == "Test Model"
+    assert model.classlist[3].value == 15
+
+
 def test_delete(table_model):
     """Test that delete_item deletes the item at the desired index."""
     model = table_model
-
     model.delete_item(1)
 
     assert len(model.classlist) == 2

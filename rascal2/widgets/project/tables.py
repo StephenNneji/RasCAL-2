@@ -124,11 +124,25 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
             else:
                 header = header.replace("_", " ").title()
             return header
+        elif orientation == QtCore.Qt.Orientation.Vertical and role == QtCore.Qt.ItemDataRole.DisplayRole:
+            return f"{section + 1}"
         return None
 
     def append_item(self):
         """Append an item to the ClassList."""
         self.classlist.append(self.item_type())
+        self.endResetModel()
+
+    def insert_item(self, row: int):
+        """Insert an item in the ClassList at given row.
+
+        Parameters
+        ----------
+        row : int
+            The row to insert the item.
+
+        """
+        self.classlist.insert(row, self.item_type())
         self.endResetModel()
 
     def delete_item(self, row: int):
@@ -188,25 +202,45 @@ class ProjectFieldWidget(QtWidgets.QWidget):
         self.parent = parent
         self.project_widget = parent.parent
         self.table = QtWidgets.QTableView(parent)
-
+        self.table.setSelectionMode(self.table.SelectionMode.SingleSelection)
+        self.table.setSelectionBehavior(self.table.SelectionBehavior.SelectItems)
+        self.table.verticalHeader().sectionClicked.connect(self.toggle_row_selection)
         self.table.horizontalHeader().setCascadingSectionResizes(True)
+        self.table.horizontalHeader().setHighlightSections(False)
         self.table.setMinimumHeight(100)
 
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        topbar = QtWidgets.QHBoxLayout()
-        topbar.addWidget(QtWidgets.QLabel(header, objectName="ProjectFieldWidgetLabel"))
+        top_bar = QtWidgets.QHBoxLayout()
+        top_bar.addWidget(QtWidgets.QLabel(header, objectName="ProjectFieldWidgetLabel"))
         self.add_button = QtWidgets.QPushButton(
             f"Add new {header[:-1] if header[-1] == 's' else header}", objectName="ProjectFieldWidgetButton"
         )
         self.add_button.setHidden(True)
         self.add_button.pressed.connect(self.append_item)
-        topbar.addStretch(1)
-        topbar.addWidget(self.add_button)
+        top_bar.addStretch(1)
+        top_bar.addWidget(self.add_button)
 
-        layout.addLayout(topbar)
+        layout.addLayout(top_bar)
         layout.addWidget(self.table)
         self.setLayout(layout)
+
+    def toggle_row_selection(self, index):
+        """Toggle selection of a given row in the table.
+
+        Parameters
+        ----------
+        index : int
+            The row to be deleted.
+
+        """
+        selection = self.table.selectionModel()
+        if selection.isRowSelected(index):
+            selection.clear()
+        else:
+            selection.clear()
+            for i in range(self.model.columnCount()):
+                selection.select(self.model.index(index, i), QtCore.QItemSelectionModel.SelectionFlag.Select)
 
     def resizeEvent(self, event):
         self.resize_columns()
@@ -271,11 +305,19 @@ class ProjectFieldWidget(QtWidgets.QWidget):
         """Append an item to the model if the model exists."""
         self.model.rowCount()
         if self.model is not None:
-            self.model.append_item()
+            selection = self.table.selectionModel().selectedRows()
+            if selection:
+                cur_row = selection[-1].row() + 1
+                self.model.insert_item(selection[-1].row() + 1)
+            else:
+                self.model.append_item()
+                cur_row = self.model.rowCount() - 1
+                self.table.scrollToBottom()
+            cur_col = self.model.headers.index("name") + self.model.col_offset
+            self.table.setCurrentIndex(self.model.index(cur_row, cur_col))
 
         # call edit again to recreate delete buttons
         self.edit()
-        self.table.scrollToBottom()
 
     def delete_item(self, index):
         """Delete an item at the index if the model exists.
@@ -303,7 +345,14 @@ class ProjectFieldWidget(QtWidgets.QWidget):
         self.resize_columns()
 
     def make_delete_button(self, index):
-        """Make a button that deletes index `index` from the list."""
+        """Make a button that deletes the given row from the list when clicked.
+
+        Parameters
+        ----------
+        index : int
+            The row to be deleted.
+
+        """
         button = QtWidgets.QPushButton(icon=QtGui.QIcon(path_for("delete-dark.png")))
         button.resize(button.sizeHint().width(), button.sizeHint().width())
         button.pressed.connect(lambda: self.delete_item(index))
@@ -339,6 +388,16 @@ class ParametersModel(ClassListTableModel):
             for i, item in enumerate(classlist):
                 if isinstance(item, ratapi.models.ProtectedParameter):
                     self.protected_indices.append(i)
+
+    def data(self, index, role=QtCore.Qt.ItemDataRole.DisplayRole):
+        if not index.isValid():
+            return QtCore.QVariant()
+
+        if role == QtCore.Qt.ItemDataRole.BackgroundRole:
+            header = self.index_header(index)
+            if self.classlist[index.row()].prior_type != "gaussian" and header in ["mu", "sigma"]:
+                return QtGui.QBrush(self.parent.palette().window().color())
+        return super().data(index, role)
 
     def flags(self, index):
         flags = super().flags(index)
@@ -456,6 +515,13 @@ class LayersModel(ClassListTableModel):
         if self.absorption:
             kwargs["SLD_imaginary"] = ""
         self.classlist.append(self.item_type(**kwargs))
+        self.endResetModel()
+
+    def insert_item(self, row: int):
+        kwargs = {"thickness": "", "SLD": "", "roughness": ""}
+        if self.absorption:
+            kwargs["SLD_imaginary"] = ""
+        self.classlist.insert(row, self.item_type(**kwargs))
         self.endResetModel()
 
     def set_absorption(self, absorption: bool):
