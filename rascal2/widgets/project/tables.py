@@ -231,7 +231,7 @@ class ProjectFieldWidget(QtWidgets.QWidget):
         Parameters
         ----------
         index : int
-            The row to be deleted.
+            The row to select or deselect.
 
         """
         selection = self.table.selectionModel()
