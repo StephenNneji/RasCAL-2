@@ -124,8 +124,15 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
             else:
                 header = header.replace("_", " ").title()
             return header
-        elif orientation == QtCore.Qt.Orientation.Vertical and role == QtCore.Qt.ItemDataRole.DisplayRole:
-            return f"{section + 1}"
+        elif orientation == QtCore.Qt.Orientation.Vertical:
+            if role == QtCore.Qt.ItemDataRole.DisplayRole:
+                return f"{section + 1}"
+            elif role == QtCore.Qt.ItemDataRole.FontRole:
+                selection_model = self.parent.table.selectionModel()
+                if selection_model is not None and selection_model.isRowSelected(section):
+                    font = QtGui.QFont()
+                    font.setBold(True)
+                    return font
         return None
 
     def append_item(self):
@@ -205,6 +212,7 @@ class ProjectFieldWidget(QtWidgets.QWidget):
         self.table.setSelectionMode(self.table.SelectionMode.SingleSelection)
         self.table.setSelectionBehavior(self.table.SelectionBehavior.SelectItems)
         self.table.verticalHeader().sectionClicked.connect(self.toggle_row_selection)
+        self.table.verticalHeader().setHighlightSections(False)
         self.table.horizontalHeader().setCascadingSectionResizes(True)
         self.table.horizontalHeader().setHighlightSections(False)
         self.table.setMinimumHeight(100)
@@ -314,6 +322,7 @@ class ProjectFieldWidget(QtWidgets.QWidget):
                 cur_row = self.model.rowCount() - 1
                 self.table.scrollToBottom()
             cur_col = self.model.headers.index("name") + self.model.col_offset
+            self.table.setFocus()
             self.table.setCurrentIndex(self.model.index(cur_row, cur_col))
 
         # call edit again to recreate delete buttons
