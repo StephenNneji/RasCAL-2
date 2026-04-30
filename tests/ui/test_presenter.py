@@ -161,9 +161,9 @@ def test_handle_message_chisquared(presenter, procedure, string):
     presenter.handle_event()
     presenter.view.terminal_widget.write.assert_called_with(string)
     if procedure in ["simplex", "de"]:
-        presenter.view.controls_widget.chi_squared.setText.assert_called_with("10.5")
+        presenter.view.controls_widget.update_chi_squared.assert_called_with("10.5")
     else:
-        presenter.view.controls_widget.chi_squared.setText.assert_not_called()
+        presenter.view.controls_widget.update_chi_squared.assert_not_called()
 
 
 def test_handle_progress_event(presenter):

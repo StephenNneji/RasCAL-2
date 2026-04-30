@@ -222,8 +222,8 @@ class SaveCalculationOutputs(QtGui.QUndoCommand):
         self.set_parameter_values(problem)
         self.presenter.model.update_results(copy.deepcopy(results))
         self.presenter.model.result_log = log
-        chi_text = "" if results is None else f"{results.calculationResults.sumChi:.6g}"
-        self.presenter.view.controls_widget.chi_squared.setText(chi_text)
+        chi = "" if results is None else results.calculationResults.sumChi
+        self.presenter.view.controls_widget.update_chi_squared(chi)
         self.presenter.view.terminal_widget.clear()
         self.presenter.view.terminal_widget.write(log)
         self.presenter.view.project_widget.update_project_view()

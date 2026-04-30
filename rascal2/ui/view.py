@@ -404,7 +404,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         """
         self.controls_widget.run_button.setChecked(False)
         if results is not None:
-            self.controls_widget.chi_squared.setText(f"{results.calculationResults.sumChi:.6g}")
+            self.controls_widget.update_chi_squared(results.calculationResults.sumChi)
 
     def set_editing_enabled(self, enabled: bool):
         """Disable or enable project editing, for example during a run.

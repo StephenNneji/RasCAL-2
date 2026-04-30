@@ -44,6 +44,7 @@ class ControlsWidget(QtWidgets.QWidget):
         chi_layout = QtWidgets.QHBoxLayout()
         self.chi_squared = QtWidgets.QLineEdit()
         self.chi_squared.setReadOnly(True)
+        self.chi_squared.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         chi_layout.addWidget(QtWidgets.QLabel("Current chi-squared:"))
         chi_layout.addWidget(self.chi_squared)
         chi_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignVCenter)
@@ -168,6 +169,19 @@ class ControlsWidget(QtWidgets.QWidget):
         for field in common_fields:
             if field not in ["procedure"]:
                 self.fit_settings_layout.currentWidget().update_data(field)
+
+    def update_chi_squared(self, value):
+        """Update chi squared to given value.
+
+        Parameters
+        ----------
+        value : str or float
+            chi squared value.
+
+        """
+        chi = value if isinstance(value, str) else f"{value:.6g}"
+        self.chi_squared.setText(chi)
+        self.chi_squared.home(False)
 
 
 class FitSettingsWidget(QtWidgets.QWidget):
