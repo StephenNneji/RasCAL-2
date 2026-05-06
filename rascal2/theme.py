@@ -54,7 +54,7 @@ class IconEngine(QtGui.QIconEngine):
         scheme = QtWidgets.QApplication.styleHints().colorScheme()
         style = 'light' if scheme == QtCore.Qt.ColorScheme.Light else 'dark'
 
-        filename = f"{self.name}-dark.png" if style == "light" else f"{self.name}-light.png"
+        filename = f"{self.name}-light.png" if style == "light" else f"{self.name}-dark.png"
         path = path_for(filename)
         self.icon = QtGui.QIcon(path)
 

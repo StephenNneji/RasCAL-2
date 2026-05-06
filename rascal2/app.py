@@ -27,7 +27,9 @@ def ui_execute(splash):
     window.show()
     splash.finish(window)
 
-    return app.exec()
+    exit_code = app.exec()
+    app.removeEventFilter(THEMES)
+    return exit_code
 
 
 def start_app(splash):
