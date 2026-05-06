@@ -267,7 +267,7 @@ class MainWindowPresenter:
                 self.view.terminal_widget.write(event)
                 chi_squared = get_live_chi_squared(event, str(self.model.controls.procedure))
                 if chi_squared is not None:
-                    self.view.controls_widget.chi_squared.setText(chi_squared)
+                    self.view.controls_widget.update_chi_squared(chi_squared)
             case rat.events.ProgressEventData():
                 self.view.terminal_widget.update_progress(event)
             case rat.events.PlotEventData():

@@ -2,11 +2,12 @@ from pathlib import Path
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from rascal2.config import EXAMPLES_PATH, EXAMPLES_TEMP_PATH, SETTINGS, path_for
+from rascal2.config import SETTINGS
 from rascal2.core.enums import UnsavedReply
 from rascal2.dialogs.about_dialog import AboutDialog
 from rascal2.dialogs.settings_dialog import SettingsDialog
 from rascal2.dialogs.startup_dialog import PROJECT_FILES, LoadDialog, LoadR1Dialog, NewProjectDialog, StartupDialog
+from rascal2.paths import EXAMPLES_PATH, EXAMPLES_TEMP_PATH, path_for
 from rascal2.settings import MDIGeometries, get_global_settings
 from rascal2.widgets import ControlsWidget, PlotWidget, TerminalWidget
 from rascal2.widgets.project import ProjectWidget
@@ -403,7 +404,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         """
         self.controls_widget.run_button.setChecked(False)
         if results is not None:
-            self.controls_widget.chi_squared.setText(f"{results.calculationResults.sumChi:.6g}")
+            self.controls_widget.update_chi_squared(results.calculationResults.sumChi)
 
     def set_editing_enabled(self, enabled: bool):
         """Disable or enable project editing, for example during a run.
