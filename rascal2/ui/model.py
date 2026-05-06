@@ -149,6 +149,16 @@ class MainWindowModel(QtCore.QObject):
         self.save_path = save_path
         os.chdir(save_path)
 
+    def save_project_as_script(self, save_path):
+        """Save the project to the save path as a script file.
+
+        Parameters
+        ----------
+        save_path : str
+            The save path of the project.
+        """
+        self.project.write_script(script=save_path)
+
     def is_project_example(self):
         return Path(self.save_path).is_relative_to(EXAMPLES_TEMP_PATH)
 

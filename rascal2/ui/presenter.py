@@ -106,13 +106,16 @@ class MainWindowPresenter:
             self.model.controls.model_validate({setting: value})
             self.view.undo_stack.push(commands.EditControls({setting: value}, self))
 
-    def save_project(self, save_as: bool = False):
+    def save_project(self, save_as: bool = False, as_script: bool = False):
         """Save the model.
 
         Parameters
         ----------
         save_as : bool
             Whether we are saving to the existing save path or to a specified folder.
+
+        as_script: bool
+            Whether we are saving the project as a script or not.
 
         Returns
         -------
@@ -132,7 +135,14 @@ class MainWindowPresenter:
             if not to_path:
                 return False
         try:
-            self.model.save_project(to_path)
+            if as_script:
+                filename = self.model.project.name.replace(" ", "_")
+                save_file = self.view.get_save_file("Save Project as Script", filename, "*.py")
+                if not save_file:
+                    return
+                self.model.save_project_as_script(save_file)
+            else:
+                self.model.save_project(to_path)
         except OSError as err:
             LOGGER.error(f"Failed to save project to {to_path}.\n", exc_info=err)
         else:
