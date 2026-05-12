@@ -1,12 +1,21 @@
-RasCAL-2 developer documentation
-================================
+RasCAL-2
+========
 
-This is developer documentation for RasCAL-2. It contains information on how the 
-project is structured.
+RasCAL-2 is a software for the analysis of multi-contrast neutron reflectometry data.
+It is a graphical user interface (GUI) for the `Python RAT API <https://github.com/RascalSoftware/python-RAT>`_.
+
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
-   project
-   plot
+   Home <self>
+
+.. toctree::
+   :hidden:
+   :titlesonly:
+
+   install
+   guide
+   example
+   dev
+

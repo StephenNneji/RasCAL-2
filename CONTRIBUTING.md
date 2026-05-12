@@ -97,3 +97,11 @@ plugins
    Matlab, run as shown below
    
        > ./build_installer.sh --remote --nomatlab
+
+### MacOS
+1. Build the executable and run the **packaging/macos/make.sh** bash script, the script will create an Apple installer 
+   package (*.pkg) with the given version (e.g. 1.0.0) and architecture (e.g. x64, arm64) appended to the package name.  
+
+        cd packaging/
+        python build_exe.py
+        ./macos/make.sh $VERSION $ARCHITECTURE
