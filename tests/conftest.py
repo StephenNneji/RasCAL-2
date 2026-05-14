@@ -1,7 +1,7 @@
+import os
 import tempfile
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-import os
+from unittest.mock import MagicMock, patch
 
 os.environ["DELAY_MATLAB_START"] = "1"
 import pytest
@@ -71,6 +71,7 @@ class MockWindowView(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.undo_stack = MockUndoStack()
+        self.presenter = MagicMock()
         self.controls_widget = MagicMock()
         self.project_widget = MagicMock()
         self.terminal_widget = MagicMock()
@@ -80,3 +81,4 @@ class MockWindowView(QtWidgets.QMainWindow):
         self.get_project_folder = lambda: "new path/"
         self.windowTitle = lambda: "RasCAL2"
         self.show_message = MagicMock()
+        self.toggle_sliders = MagicMock()

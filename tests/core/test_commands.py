@@ -6,14 +6,14 @@ import pytest
 from ratapi import Controls, Project
 from ratapi.rat_core import ProblemDefinition
 
+from rascal2.core.commands import CommandID, EditControls, EditProject, SaveCalculationOutputs
 from rascal2.ui.presenter import MainWindowPresenter
-from rascal2.core.commands import CommandID, EditProject, EditControls, SaveCalculationOutputs
 
 
 @pytest.fixture
 def presenter(mock_window_view):
     with (
-        patch("rascal2.ui.presenter.LOGGER", autospec=True) as mock_log,
+        patch("rascal2.ui.presenter.LOGGER", autospec=True),
         patch("rascal2.ui.model.os.chdir", autospec=True),
     ):
         pr = MainWindowPresenter(mock_window_view)
@@ -24,8 +24,6 @@ def presenter(mock_window_view):
         pr.model.project = Project()
         pr.model.results = None
         pr.model.result_log = ""
-        # pr.model.save_path = "some_path/"
-        # pr.logger = mock_log
 
         yield pr
 
@@ -59,7 +57,7 @@ def test_edit_project_preview(presenter):
     presenter.quick_run.assert_called_once()
     assert presenter.model.results.calculationResults.sumChi == 45
     command.undo()
-    assert presenter.model.results == None
+    assert presenter.model.results is None
     command.redo()
     # confirm quick_run is always done once
     presenter.quick_run.assert_called_once()
@@ -70,7 +68,6 @@ def test_edit_project_preview(presenter):
     command.redo()
     # run failed so result is None
     assert command.new_result is None
-
 
 
 def test_save_calculation_outputs(presenter):
