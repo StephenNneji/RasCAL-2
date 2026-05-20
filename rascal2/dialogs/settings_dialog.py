@@ -7,7 +7,7 @@ from PyQt6 import QtCore, QtWidgets
 
 from rascal2.config import LOGGER, SETTINGS, MatlabHelper
 from rascal2.paths import MATLAB_ARCH_FILE
-from rascal2.settings import SettingsGroups
+from rascal2.settings import SettingsGroups, change_ui_style
 from rascal2.widgets.inputs import get_validated_input
 
 
@@ -69,6 +69,7 @@ class SettingsDialog(QtWidgets.QDialog):
     def reset_default_settings(self) -> None:
         """Reset the settings to the global defaults."""
         SETTINGS.reset_global_settings()
+        change_ui_style()
         self.accept()
 
 
@@ -121,6 +122,10 @@ class SettingsTab(QtWidgets.QWidget):
             The name of the setting to be modified by this slot
         """
         setattr(self.settings, setting, self.widgets[setting].get_data())
+
+        match setting:
+            case "style":
+                change_ui_style(self.widgets[setting].get_data())
 
 
 class MatlabSetupTab(QtWidgets.QWidget):
