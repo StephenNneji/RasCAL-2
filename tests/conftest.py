@@ -26,7 +26,11 @@ def mock_setting(request):
     ini_file = Path(tmp_dir.name) / "settings.ini"
     GLOBAL_SETTING = QtCore.QSettings(str(ini_file), QtCore.QSettings.Format.IniFormat)
     setting_patch = []
-    for target in ["rascal2.ui.view.get_global_settings", "rascal2.settings.get_global_settings"]:
+    for target in [
+        "rascal2.ui.view.get_global_settings",
+        "rascal2.settings.get_global_settings",
+        "rascal2.dialogs.check_update_dialog.get_global_settings",
+    ]:
         setting_patch.append(patch(target, return_value=GLOBAL_SETTING))
         setting_patch[-1].start()
 

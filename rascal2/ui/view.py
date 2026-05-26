@@ -5,6 +5,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from rascal2.config import SETTINGS
 from rascal2.core.enums import UnsavedReply
 from rascal2.dialogs.about_dialog import AboutDialog
+from rascal2.dialogs.check_update_dialog import CheckUpdateDialog
 from rascal2.dialogs.settings_dialog import SettingsDialog
 from rascal2.dialogs.startup_dialog import PROJECT_FILES, LoadDialog, LoadR1Dialog, NewProjectDialog, StartupDialog
 from rascal2.paths import EXAMPLES_PATH, EXAMPLES_TEMP_PATH, path_for
@@ -55,6 +56,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.startup_dlg = StartUpWidget(self)
         self.setCentralWidget(self.startup_dlg)
 
+        self.check_update_dialog = CheckUpdateDialog(self)
         self.about_dialog = AboutDialog(self)
         self.restoreGeometry(get_global_settings().value("window_geometry", bytearray(b"")))
 
@@ -177,11 +179,14 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.toggle_slider_action.setEnabled(False)
         self.disabled_elements.append(self.toggle_slider_action)
 
-        open_about_action = QtGui.QAction("&About", self)
-        open_about_action.setStatusTip(f"About {MAIN_WINDOW_TITLE}")
-        open_about_action.triggered.connect(self.open_about_info)
-        open_about_action.setMenuRole(QtGui.QAction.MenuRole.AboutQtRole)
-        self.open_about_action = open_about_action
+        self.check_update_action = QtGui.QAction("&Check for Updates", self)
+        self.check_update_action.setStatusTip("Check the internet for software updates")
+        self.check_update_action.triggered.connect(lambda: self.check_update_dialog.check())
+
+        self.open_about_action = QtGui.QAction("&About", self)
+        self.open_about_action.setStatusTip(f"About {MAIN_WINDOW_TITLE}")
+        self.open_about_action.triggered.connect(self.open_about_info)
+        self.open_about_action.setMenuRole(QtGui.QAction.MenuRole.AboutQtRole)
 
         self.exit_action = QtGui.QAction("E&xit", self)
         self.exit_action.setStatusTip(f"Quit {MAIN_WINDOW_TITLE}")
@@ -253,8 +258,10 @@ class MainWindowView(QtWidgets.QMainWindow):
         tools_menu.addAction(self.clear_terminal_action)
 
         help_menu = main_menu.addMenu("&Help")
-        help_menu.addAction(self.open_about_action)
         help_menu.addAction(self.open_help_action)
+        help_menu.addSeparator()
+        help_menu.addAction(self.check_update_action)
+        help_menu.addAction(self.open_about_action)
 
     def toggle_sliders(self):
         """Toggle sliders for the fitted parameters in project class view."""

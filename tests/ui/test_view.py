@@ -189,7 +189,7 @@ def test_menu_element_present(test_view, submenu_name):
         ("&Edit", ["&Undo", "&Redo", "Undo &History"]),
         ("&Windows", ["Tile Windows", "Reset to Default", "Save Current Window Positions"]),
         ("&Tools", ["Show &Sliders", "", "Clear Terminal"]),
-        ("&Help", ["&About", "&Help"]),
+        ("&Help", ["&Help", "", "&Check for Updates", "&About"]),
     ],
 )
 def test_help_menu_actions_present(test_view, submenu_name, action_names_and_layout):
