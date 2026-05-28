@@ -82,3 +82,4 @@ class MockWindowView(QtWidgets.QMainWindow):
         self.windowTitle = lambda: "RasCAL2"
         self.show_message = MagicMock()
         self.toggle_sliders = MagicMock()
+        self.set_editing_enabled = MagicMock()
