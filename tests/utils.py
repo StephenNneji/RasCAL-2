@@ -1,5 +1,6 @@
 import numpy as np
 import ratapi.outputs
+from PyQt6 import QtCore, QtTest
 
 
 def check_results_equal(actual_results, expected_results) -> None:
@@ -90,3 +91,17 @@ def check_bayes_fields_equal(actual_results, expected_results) -> None:
                 )
 
     assert (actual_results.chain == expected_results.chain).all()
+
+
+def edit_line_edit_text(line_edit, text):
+    """Clear and edit of a line edit.
+
+    line_edit: QtWidgets.QLineEdit
+        widget to edit
+    text: str
+        The new text
+    """
+    QtTest.QTest.keyClick(line_edit, QtCore.Qt.Key.Key_A, QtCore.Qt.KeyboardModifier.ControlModifier)
+    QtTest.QTest.keyClicks(line_edit, text)
+    QtTest.QTest.keyClick(line_edit, QtCore.Qt.Key.Key_Enter)
+    QtTest.QTest.qWait(100)
