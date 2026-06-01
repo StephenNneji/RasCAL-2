@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import ratapi.outputs
 from PyQt6 import QtCore, QtTest
@@ -105,3 +107,18 @@ def edit_line_edit_text(line_edit, text):
     QtTest.QTest.keyClicks(line_edit, text)
     QtTest.QTest.keyClick(line_edit, QtCore.Qt.Key.Key_Enter)
     QtTest.QTest.qWait(100)
+
+
+def assert_error_logged(caplog, last_error_message, expected_error_count=1):
+    """Assert an exception was logged.
+
+    caplog: caplog
+        pytest caplog
+    last_error_message: str
+        The partial or full error message
+    expected_error_count: int
+        number of expected errors
+    """
+    errors = [record for record in caplog.get_records("call") if record.levelno == logging.ERROR]
+    assert len(errors) == expected_error_count
+    assert last_error_message in caplog.text

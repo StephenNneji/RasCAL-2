@@ -57,7 +57,7 @@ def test_setting_dialog(mock_matlab_helper, fake_setting, mock_window_view):
 @patch("rascal2.dialogs.settings_dialog.QtWidgets.QFileDialog.getExistingDirectory")
 @patch("rascal2.dialogs.settings_dialog.SETTINGS", new_callable=FakeSetting)
 @patch("rascal2.dialogs.settings_dialog.MatlabHelper")
-def test_matlab_setup(mock_matlab_helper, fake_setting, mock_get_dir, mock_get_file, mock_sys, mock_window_view):
+def test_matlab_setup(mock_matlab_helper, _fake_setting, mock_get_dir, mock_get_file, mock_sys, mock_window_view):
     mock_matlab_helper.return_value = MagicMock()
     matlab_dir = "matlab_2023a"
     mock_matlab_helper.return_value.matlab_dir = matlab_dir
@@ -66,7 +66,7 @@ def test_matlab_setup(mock_matlab_helper, fake_setting, mock_get_dir, mock_get_f
     assert dialog.matlab_tab.matlab_path.text() == matlab_dir
 
     matlab_dir = "matlab_2024b.app" if platform.system() == "Darwin" else "matlab_2024b"
-    mock_get_file.return_value = matlab_dir
+    mock_get_file.return_value = (matlab_dir,)
     mock_get_dir.return_value = matlab_dir
     assert not dialog.matlab_tab.changed
     dialog.matlab_tab.open_folder_selector()
