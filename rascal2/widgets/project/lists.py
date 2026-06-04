@@ -37,6 +37,7 @@ class ClassListItemModel(QtCore.QAbstractListModel, Generic[T]):
         self.classlist = classlist
         self.item_type = classlist._class_handle
         self.edit_mode = False
+        self.renamed_entries = {}
 
     def rowCount(self, parent=None) -> int:
         return len(self.classlist)
@@ -75,6 +76,10 @@ class ClassListItemModel(QtCore.QAbstractListModel, Generic[T]):
             The value to set the parameter to.
 
         """
+        if param == "name" and self.classlist[row].name != value:
+            self.renamed_entries[self.classlist[row].name] = value
+            self.renamed_entries.pop(value, None)  # avoid cycle
+
         setattr(self.classlist[row], param, value)
         self.endResetModel()
 
@@ -100,6 +105,7 @@ class ClassListItemModel(QtCore.QAbstractListModel, Generic[T]):
         """
         if len(self.classlist) == 0:
             return
+        self.renamed_entries[self.classlist[row].name] = ""
         self.classlist.pop(row)
         self.endResetModel()
 
@@ -641,19 +647,32 @@ class ContrastWidget(AbstractProjectListWidget):
                     return widget
                 case "model":
                     if self.project_widget.draft_project["model"] == LayerModels.StandardLayers:
-                        widget = StandardLayerModelWidget(current_data, self)
+                        model_field_name = "domain_contrasts" if self.model.domains else "layers"
+                        changes = self.parent.parent.renamed_parameters.get(model_field_name, {})
+                        clean_data = [changes.get(item, item) for item in current_data]
+
+                        widget = StandardLayerModelWidget(clean_data, self)
                         widget.model.dataChanged.connect(
                             lambda: self.model.set_data(i, field, widget.model.stringList())
                         )
                         widget.model.rowsMoved.connect(lambda: self.model.set_data(i, field, widget.model.stringList()))
+                        if current_data != clean_data:
+                            # Data is missing so updated model to get better error message
+                            self.model.set_data(i, field, clean_data)
                         return widget
                     else:
                         widget = QtWidgets.QComboBox(self)
-                        widget.addItem("", [])
+                        model_items = []
                         for file in self.project_widget.draft_project["custom_files"]:
                             widget.addItem(file.name, [file.name])
+                            model_items.append(file.name)
                         if current_data:
-                            widget.setCurrentText(current_data[0])
+                            changes = self.parent.parent.renamed_parameters.get("custom_files", {})
+                            widget.setCurrentText(changes.get(current_data[0], current_data[0]))
+                            if current_data[0] not in model_items:
+                                # Data is missing so updated model to get better error message
+                                widget.setCurrentIndex(-1)
+                                self.model.set_data(i, field, [])
                         else:
                             widget.setCurrentText("")
                         widget.currentTextChanged.connect(lambda: self.model.set_data(i, field, widget.currentData()))
@@ -666,21 +685,28 @@ class ContrastWidget(AbstractProjectListWidget):
                     project_field_name = field + "s"
                     pass
 
+            changes = self.parent.parent.renamed_parameters.get(project_field_name, {})
             project_field = self.project_widget.draft_project[project_field_name]
             combobox = QtWidgets.QComboBox(self)
-            items = [""] + [item.name for item in project_field]
+            items = [item.name for item in project_field]
             combobox.addItems(items)
-            combobox.setCurrentText(current_data)
+            combobox.setCurrentText(changes.get(current_data, current_data))
             combobox.currentTextChanged.connect(lambda: self.model.set_data(i, field, combobox.currentText()))
             combobox.setSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding, QtWidgets.QSizePolicy.Policy.Fixed)
-
+            if current_data not in items:
+                # Data is missing so update model to get better error message
+                combobox.setCurrentIndex(-1)
+                self.model.set_data(i, field, combobox.currentText())
             return combobox
 
         return self.compose_widget(i, data_combobox)
 
     def update_project(self, index, prop, value):
         """Update parent project data and recalculate plots."""
+        selected = self.list.selectionModel().currentIndex()
+        # This clears the selection so we cache the selected index
         self.model.set_data(index, prop, value)
+        self.list.selectionModel().setCurrentIndex(selected, self.list.selectionModel().SelectionFlag.ClearAndSelect)
         if not self.edit_mode:
             presenter = self.parent.parent.parent.presenter
             presenter.model.blockSignals(True)

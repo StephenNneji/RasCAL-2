@@ -93,7 +93,7 @@ class TerminalWidget(QtWidgets.QWidget):
             The text to append.
 
         """
-        self.write_html(f'<div style="color: crimson;white-space: pre-line;"><b>{text}</b></div>')
+        self.write_html(f'<div style="color: crimson;white-space: pre-line;"><br/><b>{text}</b></div>')
 
     def clear(self):
         """Clear the text in the terminal."""

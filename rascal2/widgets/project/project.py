@@ -65,6 +65,7 @@ class ProjectWidget(QtWidgets.QWidget):
         # for making model type changes non-destructive
         self.old_contrast_models = {}
         self.old_layers = []
+        self.renamed_parameters = {}
 
         project_view = self.create_project_view()
         project_edit = self.create_edit_view()
@@ -238,6 +239,12 @@ class ProjectWidget(QtWidgets.QWidget):
             for table in self.edit_tabs[tab].tables.values():
                 table.edited.connect(lambda: self.edit_tabs["Contrasts"].tables["contrasts"].update_item_view())
 
+        for tab in ["Backgrounds", "Resolutions"]:
+            # This ensures that changes made to the background or resolution parameter tables
+            # force an update in the Background or Resolution tables respectively.
+            table = self.edit_tabs[tab].tables[self.tabs[tab][0]]
+            table.edited.connect(self.edit_tabs[tab].tables[self.tabs[tab][1]].setFocus)
+
         main_layout.addWidget(self.edit_project_tab)
 
         edit_project_widget.setLayout(main_layout)
@@ -284,6 +291,9 @@ class ProjectWidget(QtWidgets.QWidget):
         for tab in self.tabs:
             self.view_tabs[tab].update_model(self.draft_project)
             self.edit_tabs[tab].update_model(self.draft_project)
+
+            for table_name, table in self.edit_tabs[tab].tables.items():
+                self.renamed_parameters[table_name] = table.model.renamed_entries
 
         self.absorption_checkbox.setChecked(self.parent_model.project.absorption)
         self.calculation_type.setText(self.parent_model.project.calculation)
@@ -434,8 +444,34 @@ class ProjectWidget(QtWidgets.QWidget):
     def validate_draft_project(self) -> Generator[str, None, None]:
         """Get all errors with the draft project."""
         yield from self.validate_layers()
-        yield from self.validate_contrasts()
+        yield from self.validate_background_and_resolutions()
         yield from self.validate_custom_file()
+        yield from self.validate_contrasts()
+
+    def validate_background_and_resolutions(self) -> Generator[str, None, None]:
+        """Ensure that all background and resolution in the draft project are valid, and yield errors if not.
+
+        Yields
+        ------
+        str
+            The message for each error in background and resolutions.
+
+        """
+        project = self.draft_project
+        for field in ["backgrounds", "resolutions"]:
+            for i, entry in enumerate(project[field]):
+                missing_params = []
+                if not entry.source and not (field == "resolutions" and entry.type == "data"):
+                    missing_params.append("source")
+
+                if missing_params:
+                    action = (
+                        "Please update the missing entry with a valid value"
+                        if len(missing_params) == 1
+                        else "Please update the missing entries with valid values"
+                    )
+                    msg = f"{field.title()} {i + 1} ({entry.name}) is missing: {', '.join(missing_params)}. {action}"
+                    yield msg
 
     def validate_custom_file(self) -> Generator[str, None, None]:
         """Ensure that all custom files in the draft project are valid, and yield errors if not.
@@ -471,27 +507,16 @@ class ProjectWidget(QtWidgets.QWidget):
             layer_attrs = list(project["layers"][0].model_fields)
             layer_attrs.remove("name")
             layer_attrs.remove("hydrate_with")
-            # ensure all layer parameters have been filled in, and all names are parameters that exist
-            valid_params = [p.name for p in project["parameters"]] + [""]
             for i, layer in enumerate(project["layers"]):
                 missing_params = []
-                invalid_params = []
                 for attr in layer_attrs:
                     param = getattr(layer, attr)
                     if param == "" and attr != "hydration":  # hydration is allowed to be blank
                         missing_params.append(attr)
-                    elif param not in valid_params:
-                        invalid_params.append((attr, param))
 
                 if missing_params:
                     noun = "a parameter" if len(missing_params) == 1 else "parameters"
-                    msg = f"Layer '{layer.name}' (row {i + 1}) is missing {noun}: {', '.join(missing_params)}"
-                    yield msg
-                if invalid_params:
-                    noun = "an invalid value" if len(invalid_params) == 1 else "invalid values"
-                    msg = f"Layer '{layer.name}' (row {i + 1}) has {noun}: {{0}}".format(
-                        ",\n  ".join(f'"{v}" for parameter {p}' for p, v in invalid_params)
-                    )
+                    msg = f"Layer {i + 1} ({layer.name}) is missing {noun}: {', '.join(missing_params)}"
                     yield msg
 
     def validate_contrasts(self) -> Generator[str, None, None]:
@@ -513,50 +538,42 @@ class ProjectWidget(QtWidgets.QWidget):
             contrast_attrs.remove("repeat_layers")
             for i, contrast in enumerate(project["contrasts"]):
                 missing_params = []
-                invalid_params = []
                 for attr in contrast_attrs:
-                    project_field_name = attr if attr in ["data", "bulk_in", "bulk_out"] else attr + "s"
-                    valid_params = [p.name for p in project[project_field_name]]
                     param = getattr(contrast, attr)
                     if param == "":
                         missing_params.append(attr)
-                    elif param not in valid_params:
-                        invalid_params.append((attr, param))
 
                 if missing_params:
-                    msg = f"Contrast '{contrast.name}' (row {i + 1}) is missing: {', '.join(missing_params)}"
-                    yield msg
-                if invalid_params:
-                    noun = "an invalid value" if len(invalid_params) == 1 else "invalid values"
-                    msg = f"Contrast '{contrast.name}' (row {i + 1}) has {noun}: {{0}}".format(
-                        ",\n  ".join(f'"{v}" for field {p}' for p, v in invalid_params)
+                    action = (
+                        "Update the missing entry with a valid value"
+                        if len(missing_params) == 1
+                        else "Please update the missing entries with valid values"
                     )
+                    msg = f"Contrast {i + 1} ({contrast.name}) is missing: {', '.join(missing_params)}. {action}"
                     yield msg
 
                 model = contrast.model
                 if project["model"] == LayerModels.StandardLayers:
                     if project["calculation"] == Calculations.Domains:
-                        model_field_name = "domain_contrasts"
+                        model_field_name = "domain contrast"
                     else:
-                        model_field_name = "layers"
-                    valid_params = [p.name for p in project[model_field_name]]
-                    # strip out empty items
-                    model = [item for item in model if item != ""]
-                    invalid_model_vals = [item for item in model if item not in valid_params]
-                    # this is the fastest way to get all unique items from a list without changing the order...
-                    invalid_model_vals = list(dict.fromkeys(invalid_model_vals))
-                    if invalid_model_vals:
-                        noun = "an invalid model value" if len(invalid_model_vals) == 1 else "invalid model values"
-                        msg = f"Contrast '{contrast.name}' (row {i + 1}) has {noun}: {{0}}".format(
-                            ", ".join(invalid_model_vals)
-                        )
+                        model_field_name = "layer"
+                    missing_params = [item for item in model if not item]
+                    if missing_params:
+                        if len(missing_params) == 1:
+                            noun = "an empty entry"
+                            action = f"Please update the empty entry with a valid {model_field_name}"
+                        else:
+                            noun = "multiple empty entries"
+                            action = f"Please update the empty entries with valid {model_field_name}s"
+                        msg = f"Contrast {i + 1} ({contrast.name}) has {noun} in the model. {action}"
                         yield msg
                 else:
                     if not model:
-                        msg = f"Contrast '{contrast.name}' (row {i + 1}) has no model set"
-                        yield msg
-                    elif model[0] not in [f.name for f in project["custom_files"]]:
-                        msg = f"Contrast '{contrast.name}' (row {i + 1}) has invalid model: {model[0]}"
+                        msg = (
+                            f"Contrast {i + 1} ({contrast.name}) has no model. "
+                            f"Please select a valid model for the contrast"
+                        )
                         yield msg
 
     def set_editing_enabled(self, enabled: bool):

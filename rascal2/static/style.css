@@ -47,6 +47,7 @@ QPushButton:pressed {
 QPushButton:hover,
 QPushButton:pressed {
     background-color: @Highlight;
+    color: @HighlightedText;
 }
 
 QPushButton:disabled,
@@ -64,14 +65,14 @@ QPushButton:checked {
 QLineEdit {
     color: @Text;
     background-color: @Base;
-    selection-color: @Text;
+    selection-color: @HighlightedText;
     selection-background-color: @Highlight;
     border: 1px solid darkgray;
     border-radius: 3px;
 }
 
 QLineEdit:read-only {
-    selection-color: @Text;
+    selection-color: @HighlightedText;
     selection-background-color: @Highlight;
     background-color: transparent;
 }
@@ -170,6 +171,8 @@ StartupDialog QLineEdit[error="true"] {
     border: 1px solid #E34234;
 }
 
+StartupDialog QListWidget::item{color:green;}
+
 StartupDialog QListWidget::item:hover {
     background-color: @Highlight;
 }
@@ -199,10 +202,6 @@ StartupDialog QProgressBar::chunk {
 DisplayWidget #title{
     font-weight: 600;
     font-size: 16px;
-}
-
-DisplayWidget #desc{
-    color: @text
 }
 
 /*****************************
@@ -422,8 +421,13 @@ AbstractProjectListWidget QPushButton {
 }
 
 AbstractProjectListWidget QTableView {
-    border: 1px solid @Midlight;
-    background-color: @Window;
+    selection-color: @HighlightedText;
+    selection-background-color: @Highlight;
+}
+
+AbstractProjectListWidget QTableView::item:selected:!active{
+    background-color: @Highlight;
+    color: @HighlightText;
 }
 
 #CountHeader::section {
@@ -439,6 +443,18 @@ AbstractProjectListWidget QTableView {
     font-weight: 600;
 }
 
+ContrastWidget QListView{
+    show-decoration-selected: 1;
+}
+
+ContrastWidget QListView::item {
+    border-bottom: 1px solid @Midlight;
+}
+
+ContrastWidget QListView::item:selected {
+    background-color: @Highlight;
+    color: @HighlightedText;
+}
 
 /*****************************
    BayesPlotsDialog Styles

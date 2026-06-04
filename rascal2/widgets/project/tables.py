@@ -4,6 +4,7 @@ import contextlib
 import os
 import re
 import shutil
+import warnings
 from enum import Enum
 from pathlib import Path
 
@@ -41,6 +42,7 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
         self.item_type: type
         self.headers: list[str]
 
+        self.renamed_entries = {}
         self.setup_classlist(classlist)
         self.edit_mode = False
         self.col_offset = 1
@@ -65,8 +67,6 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
         if param is None:
             return None
 
-        data = getattr(self.classlist[index.row()], param)
-
         if role == QtCore.Qt.ItemDataRole.DisplayRole and self.index_header(index) != "fit":
             data = getattr(self.classlist[index.row()], param)
             # pyqt can't automatically coerce enums to strings...
@@ -76,6 +76,7 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
                 return ", ".join(data)
             return data
         elif role == QtCore.Qt.ItemDataRole.CheckStateRole and self.index_header(index) == "fit":
+            data = getattr(self.classlist[index.row()], param)
             return QtCore.Qt.CheckState.Checked if data else QtCore.Qt.CheckState.Unchecked
 
     def setData(self, index, value, role=QtCore.Qt.ItemDataRole.EditRole) -> bool:
@@ -95,13 +96,17 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
             param = self.index_header(index)
             if param == "fit":
                 value = QtCore.Qt.CheckState(value) == QtCore.Qt.CheckState.Checked
+            if param == "name" and self.classlist[row].name != value:
+                self.renamed_entries[self.classlist[row].name] = value
+                self.renamed_entries.pop(value, None)  # avoid cycle
             if param is not None:
                 current_value = getattr(self.classlist[index.row()], param)
                 if current_value == value:
                     # No change
                     return False
                 try:
-                    with contextlib.suppress(UserWarning):
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", UserWarning)
                         setattr(self.classlist[row], param, value)
                 except pydantic.ValidationError:
                     return False
@@ -162,6 +167,7 @@ class ClassListTableModel(QtCore.QAbstractTableModel):
             The row containing the item to delete.
 
         """
+        self.renamed_entries[self.classlist[row].name] = ""
         self.classlist.pop(row)
         self.endResetModel()
 
@@ -520,6 +526,23 @@ class LayersModel(ClassListTableModel):
             flags |= QtCore.Qt.ItemFlag.ItemIsEditable
         return flags
 
+    def data(self, index, role=QtCore.Qt.ItemDataRole.DisplayRole):
+        param = self.index_header(index)
+
+        if param is None:
+            return None
+
+        if role == QtCore.Qt.ItemDataRole.DisplayRole:
+            data = getattr(self.classlist[index.row()], param)
+            if isinstance(data, Enum):
+                return str(data)
+
+            changes = self.parent.parent.parent.renamed_parameters.get("parameters", {})
+            if param != "name" and data in changes:
+                data = changes[data]
+                setattr(self.classlist[index.row()], param, data)
+            return data
+
     def append_item(self):
         kwargs = {"thickness": "", "SLD": "", "roughness": ""}
         if self.absorption:
@@ -621,6 +644,27 @@ class DomainsModel(ClassListTableModel):
         if self.edit_mode:
             flags |= QtCore.Qt.ItemFlag.ItemIsEditable
         return flags
+
+    def data(self, index, role=QtCore.Qt.ItemDataRole.DisplayRole):
+        param = self.index_header(index)
+
+        if param is None:
+            return None
+
+        if role == QtCore.Qt.ItemDataRole.DisplayRole:
+            data = getattr(self.classlist[index.row()], param)
+
+            changes = self.parent.parent.parent.renamed_parameters.get("layers", {})
+            if param != "name":
+                data_list = []
+                for item in data:
+                    new_item = changes.get(item, item)
+                    if new_item:
+                        data_list.append(new_item)
+
+                data = ", ".join(data_list)
+                setattr(self.classlist[index.row()], param, data_list)
+            return data
 
 
 class DomainContrastWidget(ProjectFieldWidget):
@@ -886,6 +930,34 @@ class CustomFileWidget(ProjectFieldWidget):
 
 class AbstractSignalModel(ClassListTableModel):
     """Model for Signal objects (backgrounds and resolutions)."""
+
+    def data(self, index, role=QtCore.Qt.ItemDataRole.DisplayRole):
+        param = self.index_header(index)
+
+        if param is None:
+            return None
+
+        if role == QtCore.Qt.ItemDataRole.DisplayRole or role == QtCore.Qt.ItemDataRole.EditRole:
+            data = getattr(self.classlist[index.row()], param)
+            if isinstance(data, Enum):
+                return str(data)
+
+            if param == "source" or param.startswith("value_"):
+                signal_type = self.classlist[index.row()].type
+                if signal_type == TypeOptions.Data and param == "source":
+                    changes = self.parent.parent.parent.renamed_parameters.get("data", {})
+                elif signal_type == TypeOptions.Function and param == "source":
+                    changes = self.parent.parent.parent.renamed_parameters.get("custom_files", {})
+                else:
+                    name_key = (
+                        "background_parameters" if isinstance(self, BackgroundsModel) else "resolution_parameters"
+                    )
+                    changes = self.parent.parent.parent.renamed_parameters.get(name_key, {})
+                if data and data in changes:
+                    data = changes[data]
+                    setattr(self.classlist[index.row()], param, data)
+
+            return data
 
     def flags(self, index):
         flags = super().flags(index)

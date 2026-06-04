@@ -1,6 +1,6 @@
 import os
-from pathlib import Path
 import traceback
+from pathlib import Path
 
 from PyQt6 import QtCore, QtWidgets
 
@@ -264,7 +264,6 @@ class DisplayWidget(QtWidgets.QWidget):
         title_widget = QtWidgets.QLabel(title)
         title_widget.setObjectName("title")
         desc_widget = QtWidgets.QLabel(desc)
-        desc_widget.setObjectName("desc")
         layout.addWidget(title_widget)
         layout.addWidget(desc_widget)
         self.setLayout(layout)

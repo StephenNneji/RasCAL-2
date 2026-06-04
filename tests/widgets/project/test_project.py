@@ -254,15 +254,15 @@ def test_project_tab_update_model(classlist, param_classlist, edit_mode):
 @pytest.mark.parametrize(
     "input_params",
     [
-        ([0, 1, 1, 2, 1], [0, 0, 3, 0, 1]),
+        ([0, 1, 1, 2, 1], [0, 0, 2, 0, 1]),
         ([0, 0, 0, 1, 0], [0, 0, 1, 1, 0]),
-        ([3, 3, 3, 2, 0], [0, 0, 3, 0, 1]),
+        ([2, 1, 1, 2, 0], [0, 0, 2, 0, 1]),
     ],
 )
 @pytest.mark.parametrize("absorption", [True, False])
 def test_project_tab_validate_layers(input_params, absorption):
     """Test that the project tab produces the correct result for validating the layers tab."""
-    params = ["Param 1", "Param 2", "Invalid Param", ""]
+    params = ["Param 1", "Param 2", ""]
     if absorption:
         attrs = ["thickness", "SLD_real", "SLD_imaginary", "roughness", "hydration"]
         layer_class = ratapi.models.AbsorptionLayer
@@ -278,17 +278,11 @@ def test_project_tab_validate_layers(input_params, absorption):
 
     expected_err = []
     for i, layer in enumerate(layers):
-        missing_params = [p for j, p in enumerate(attrs) if input_params[i][j] == 3]
-        invalid_params = [p for j, p in enumerate(attrs) if input_params[i][j] == 2]
+        missing_params = [p for j, p in enumerate(attrs) if input_params[i][j] == 2 if p != "hydration"]
 
         if missing_params:
             noun = "a parameter" if len(missing_params) == 1 else "parameters"
-            msg = f"Layer '{layer.name}' (row {i + 1}) is missing {noun}: {', '.join(missing_params)}"
-            expected_err.append(msg)
-        if invalid_params:
-            noun = "an invalid value" if len(invalid_params) == 1 else "invalid values"
-            inner_msg = [f'"Invalid Param" for parameter {p}' for p in invalid_params]
-            msg = f"Layer '{layer.name}' (row {i + 1}) has {noun}: {', '.join(inner_msg)}"
+            msg = f"Layer {i + 1} ({layer.name}) is missing {noun}: {', '.join(missing_params)}"
             expected_err.append(msg)
 
     draft = create_draft_project(ratapi.Project())
@@ -301,6 +295,7 @@ def test_project_tab_validate_layers(input_params, absorption):
     )
 
     project = ProjectWidget(parent)
+    project.renamed_parameters = {}
     project.draft_project = draft
 
     assert list(project.validate_layers()) == expected_err
@@ -311,17 +306,17 @@ def test_project_tab_validate_layers(input_params, absorption):
     [
         (Calculations.Normal, ([0, 1, 1, 2, 1], [0, 0, 1, 0, 1])),
         (Calculations.Normal, ([0, 0, 0, 1, 0], [0, 0, 1, 1, 0])),
-        (Calculations.Normal, ([0, 0, 0, 1, 0], [0, 0, 1, 3, 0])),
-        (Calculations.Normal, ([2, 2, 3, 2, 0], [0, 0, 2, 0, 1])),
+        (Calculations.Normal, ([0, 0, 0, 1, 0], [0, 0, 1, 2, 0])),
+        (Calculations.Normal, ([2, 2, 2, 2, 0], [0, 0, 2, 0, 1])),
         (Calculations.Domains, ([0, 1], [1, 1])),
         (Calculations.Domains, ([0, 2], [0, 1])),
         (Calculations.Domains, ([0, 1], [1, 2])),
-        (Calculations.Domains, ([2, 3], [1, 3])),
+        (Calculations.Domains, ([2, 2], [1, 2])),
     ],
 )
 def test_project_tab_validate_contrast_models_standard(calculation, model_values, project_with_draft):
     """Test that contrast values are correctly validated for a standard layers calculation."""
-    model_names = ["1", "2", "Invalid 1", "Invalid 2"]
+    model_names = ["1", "2", ""]
     models = [[model_names[i] for i in model_values[j]] for j in [0, 1]]
     contrasts = ratapi.ClassList(
         [
@@ -341,15 +336,17 @@ def test_project_tab_validate_contrast_models_standard(calculation, model_values
 
     expected_err = []
     for i in [0, 1]:
-        invalid = []
-        if 2 in model_values[i]:
-            invalid.append("Invalid 1")
-        if 3 in model_values[i]:
-            invalid.append("Invalid 2")
-
+        invalid = ["mising"] * model_values[i].count(2)
         if invalid:
-            noun = "an invalid model value" if len(invalid) == 1 else "invalid model values"
-            msg = f"Contrast 'contrast {i}' (row {i + 1}) has {noun}: {{0}}".format(", ".join(invalid))
+            if len(invalid) == 1:
+                noun = "an empty entry"
+                action = "empty entry with a"
+                suffix = "layer" if calculation == Calculations.Normal else "domain contrast"
+            else:
+                noun = "multiple empty entries"
+                action = "empty entries with"
+                suffix = "layers" if calculation == Calculations.Normal else "domain contrasts"
+            msg = f"Contrast {i + 1} (contrast {i}) has {noun} in the model. Please update the {action} valid {suffix}"
             expected_err.append(msg)
 
     draft = project_with_draft.draft_project
@@ -376,7 +373,6 @@ def test_project_tab_validate_contrast_models_standard(calculation, model_values
 @pytest.mark.parametrize("calc_type", [LayerModels.CustomLayers, LayerModels.CustomXY])
 def test_project_tab_validate_contrast_models_custom(contrast_models, calc_type, project_with_draft):
     """Test that contrast values are correctly validated for a custom layers/XY calculation."""
-    custom_files = ["Custom File 1", "Invalid Custom File"]
     contrasts = ratapi.ClassList(
         [
             ratapi.models.Contrast(
@@ -387,7 +383,7 @@ def test_project_tab_validate_contrast_models_custom(contrast_models, calc_type,
                 bulk_out="SLD D2O",
                 scalefactor="Scalefactor 1",
                 resolution="Resolution 1",
-                model=[custom_files[model_index]],
+                model=["Custom File 1"] if model_index == 0 else [],
             )
             for i, model_index in enumerate(contrast_models)
         ]
@@ -396,7 +392,9 @@ def test_project_tab_validate_contrast_models_custom(contrast_models, calc_type,
     expected_err = []
     for i, model_index in enumerate(contrast_models):
         if model_index == 1:
-            expected_err.append(f"Contrast 'contrast {i}' (row {i + 1}) has invalid model: Invalid Custom File")
+            expected_err.append(
+                f"Contrast {i + 1} (contrast {i}) has no model. Please select a valid model for the contrast"
+            )
 
     draft = project_with_draft.draft_project
     draft["model"] = calc_type

@@ -13,6 +13,7 @@ def set_stylesheet(app):
         replacements = {
             "@Path": IMAGES_PATH.as_posix(),
             "@Window": palette.window().color().name(),
+            "@HighlightedText": palette.highlightedText().color().name(),
             "@Highlight": palette.highlight().color().name(),
             "@Midlight": palette.midlight().color().name(),
             "@Text": palette.text().color().name(),

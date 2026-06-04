@@ -30,6 +30,8 @@ class MockMainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.presenter = MagicMock()
         self.update_project = MagicMock()
+        self.parent = MagicMock()
+        self.parent.renamed_parameters = {}
 
 
 class DataModel(pydantic.BaseModel, validate_assignment=True):
