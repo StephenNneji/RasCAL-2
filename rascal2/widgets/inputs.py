@@ -674,13 +674,13 @@ class MultiSelectList(QtWidgets.QWidget):
         self.setLayout(layout)
         self.select_menu = QtWidgets.QMenu()
 
-        add_button = QtWidgets.QToolButton(icon=QtGui.QIcon(path_for("create-dark.png")))
+        add_button = QtWidgets.QToolButton(icon=QtGui.QIcon(path_for("create-light.png")))
         add_button.setMinimumWidth(40)
         add_button.setSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.MinimumExpanding)
         add_button.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.InstantPopup)
         add_button.setMenu(self.select_menu)
 
-        delete_button = QtWidgets.QToolButton(icon=QtGui.QIcon(path_for("delete-dark.png")))
+        delete_button = QtWidgets.QToolButton(icon=QtGui.QIcon(path_for("delete-light.png")))
         delete_button.setMinimumWidth(40)
         delete_button.clicked.connect(self.delete_items)
         delete_button.setSizePolicy(

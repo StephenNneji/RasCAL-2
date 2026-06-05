@@ -11,7 +11,7 @@ from ratapi.utils.enums import BackgroundActions, LayerModels
 
 from rascal2.config import SETTINGS
 from rascal2.core.readers import readers
-from rascal2.paths import path_for
+from rascal2.theme import IconEngine
 from rascal2.widgets.delegates import ProjectFieldDelegate
 from rascal2.widgets.inputs import RangeWidget
 
@@ -135,12 +135,12 @@ class AbstractProjectListWidget(QtWidgets.QWidget):
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
         button_layout.addStretch(1)
-        self.add_button = QtWidgets.QToolButton(icon=QtGui.QIcon(path_for("create-dark.png")))
+        self.add_button = QtWidgets.QToolButton(icon=QtGui.QIcon(IconEngine("create-light.png")))
         self.add_button.setHidden(True)
         self.add_button.pressed.connect(self.append_item)
         button_layout.addWidget(self.add_button)
 
-        self.delete_button = QtWidgets.QToolButton(icon=QtGui.QIcon(path_for("delete-dark.png")))
+        self.delete_button = QtWidgets.QToolButton(icon=QtGui.QIcon(IconEngine("delete-light.png")))
         self.delete_button.setHidden(True)
         self.delete_button.pressed.connect(self.delete_item)
         button_layout.addWidget(self.delete_button)
@@ -379,14 +379,14 @@ class StandardLayerModelWidget(QtWidgets.QWidget):
         model_type = "domain contrast" if self.domains else "layer"
 
         self.add_button = QtWidgets.QPushButton(
-            f"Add {model_type.title()}", icon=QtGui.QIcon(path_for("create-dark.png"))
+            f"Add {model_type.title()}", icon=QtGui.QIcon(IconEngine("create-light.png"))
         )
         self.add_button.setToolTip(
             f"Add a {model_type.title()} after the currently selected {model_type.title()} (Shift+Enter)"
         )
 
         self.delete_button = QtWidgets.QPushButton(
-            f"Delete {model_type.title()}", icon=QtGui.QIcon(path_for("delete-dark.png"))
+            f"Delete {model_type.title()}", icon=QtGui.QIcon(IconEngine("delete-light.png"))
         )
         self.delete_button.setToolTip(f"Delete the currently selected {model_type.title()} (Del)")
 

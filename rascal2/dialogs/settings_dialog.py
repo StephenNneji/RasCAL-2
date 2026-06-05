@@ -7,7 +7,7 @@ from PyQt6 import QtCore, QtWidgets
 
 from rascal2.config import LOGGER, SETTINGS, MatlabHelper
 from rascal2.paths import MATLAB_ARCH_FILE
-from rascal2.settings import SettingsGroups
+from rascal2.settings import SettingsGroups, change_ui_style
 from rascal2.widgets.inputs import get_validated_input
 
 
@@ -45,7 +45,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.accept_button = QtWidgets.QPushButton("OK", self)
         self.accept_button.clicked.connect(self.update_settings)
         self.cancel_button = QtWidgets.QPushButton("Cancel", self)
-        self.cancel_button.clicked.connect(self.reject)
+        self.cancel_button.clicked.connect(self.cancel_settings)
 
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.reset_button)
@@ -69,7 +69,13 @@ class SettingsDialog(QtWidgets.QDialog):
     def reset_default_settings(self) -> None:
         """Reset the settings to the global defaults."""
         SETTINGS.reset_global_settings()
+        change_ui_style(SETTINGS.model_fields["style"].default)
         self.accept()
+
+    def cancel_settings(self):
+        if SETTINGS.style != self.settings.style:
+            change_ui_style(SETTINGS.style)
+        self.reject()
 
 
 class SettingsTab(QtWidgets.QWidget):
@@ -121,6 +127,10 @@ class SettingsTab(QtWidgets.QWidget):
             The name of the setting to be modified by this slot
         """
         setattr(self.settings, setting, self.widgets[setting].get_data())
+
+        match setting:
+            case "style":
+                change_ui_style(self.widgets[setting].get_data())
 
 
 class MatlabSetupTab(QtWidgets.QWidget):
