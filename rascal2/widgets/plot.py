@@ -9,7 +9,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationTool
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from rascal2.config import SETTINGS
-from rascal2.theme import IconEngine
+from rascal2.theme import IconEngine, colorize_icon, get_correct_qt_color_scheme
 from rascal2.widgets.inputs import MultiSelectComboBox, ProgressButton
 
 
@@ -392,11 +392,15 @@ class AbstractPlotWidget(QtWidgets.QWidget):
 
     def changeEvent(self, event):
         if event.type() == QtCore.QEvent.Type.PaletteChange:
-            scheme = QtWidgets.QApplication.styleHints().colorScheme()
+            scheme = get_correct_qt_color_scheme()
             if scheme == QtCore.Qt.ColorScheme.Light:
                 matplotlib.style.use("default")
             else:
                 matplotlib.style.use("dark_background")
+            for name in ["pan", "zoom"]:
+                icon_color = self.palette().text().color()
+                icon = self.toolbar._actions[name].icon()
+                self.toolbar._actions[name].setIcon(colorize_icon(icon, icon_color))
 
         super().changeEvent(event)
 

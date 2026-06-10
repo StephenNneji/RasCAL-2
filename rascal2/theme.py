@@ -6,9 +6,43 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from rascal2.paths import IMAGES_PATH, STATIC_PATH, path_for
 
 
+def get_correct_qt_color_scheme():
+    """Get the correct colour scheme."""
+    # On linux PyQt 6.9.1 sometimes returns incorrect scheme.
+    # A workaround is to store the scheme to ensure it is correct.
+    # This issue is fixed in PyQt 6.10 but 6.10 is not available on IDAaas
+    # due to older GLIBC, so we are stuck on 6.9.1 for now.
+    app = QtWidgets.QApplication.instance()
+    scheme = app.styleHints().property("colour_scheme")
+    if scheme is None:
+        return QtCore.Qt.ColorScheme.Light
+    elif scheme == QtCore.Qt.ColorScheme.Unknown:
+        return app.styleHints().colorScheme()
+    return scheme
+
+
+def colorize_icon(icon, colour):
+    """Change icon colour to given colour.
+
+    Parameters
+    ----------
+    icon : QtGui.QIcon
+        The icon to colourize
+    colour : QtGui.QColor
+        The new colour of the icon
+    """
+    pixmap = icon.pixmap(200, 200)
+    mask = pixmap.createMaskFromColor(QtGui.QColor(QtCore.Qt.GlobalColor.transparent), QtCore.Qt.MaskMode.MaskInColor)
+    pixmap.fill(colour)
+    pixmap.setMask(mask)
+
+    return QtGui.QIcon(pixmap)
+
+
 def set_stylesheet(app):
     """Set the stylesheet of the app according to the given style.css file if available."""
     with suppress(FileNotFoundError), open(STATIC_PATH / "style.css") as stylesheet:
+        app.setStyleSheet("* {}")  # This is a hack to force PyQt 6.9.1 to update the palette on Linux
         palette = app.palette()
         replacements = {
             "@Path": IMAGES_PATH.as_posix(),
@@ -26,13 +60,13 @@ class ThemeManager(QtCore.QObject):
 
     def __init__(self):
         super().__init__()
-        scheme = QtWidgets.QApplication.styleHints().colorScheme()
+        scheme = get_correct_qt_color_scheme()
         self.cur_style = "light" if scheme == QtCore.Qt.ColorScheme.Light else "dark"
 
     def eventFilter(self, obj, event):
         """Catch close event for overlay widget."""
         if isinstance(obj, QtWidgets.QApplication) and event.type() == QtCore.QEvent.Type.ApplicationPaletteChange:
-            scheme = QtWidgets.QApplication.styleHints().colorScheme()
+            scheme = get_correct_qt_color_scheme()
             style = "light" if scheme == QtCore.Qt.ColorScheme.Light else "dark"
             if style != self.cur_style:
                 set_stylesheet(obj)
@@ -45,7 +79,13 @@ THEMES = ThemeManager()
 
 
 class IconEngine(QtGui.QIconEngine):
-    """Create the icons for the application."""
+    """Load the appropriate icon for the application theme.
+
+    Parameters
+    ----------
+    filename : str
+        The path of the icon
+    """
 
     def __init__(self, filename):
         super().__init__()
@@ -53,8 +93,8 @@ class IconEngine(QtGui.QIconEngine):
         self.update_icon()
 
     def update_icon(self):
-        """Update the Icon."""
-        scheme = QtWidgets.QApplication.styleHints().colorScheme()
+        """Update the icon to match the current theme."""
+        scheme = get_correct_qt_color_scheme()
         style = "light" if scheme == QtCore.Qt.ColorScheme.Light else "dark"
 
         filename = f"{self.name}-light.png" if style == "light" else f"{self.name}-dark.png"
@@ -62,29 +102,11 @@ class IconEngine(QtGui.QIconEngine):
         self.icon = QtGui.QIcon(path)
 
     def pixmap(self, size, mode, state):
-        """Create the pixmap.
-
-        :param size: size
-        :type size: QSize
-        :param mode: mode
-        :type mode: QIcon.Mode
-        :param state: state
-        :type state: QIcon.State
-        """
+        """Create the pixmap."""
         self.update_icon()
         return self.icon.pixmap(size, mode, state)
 
     def paint(self, painter, rect, mode, state):
-        """Paint the icon.
-
-        :param painter: painter
-        :type painter: QPainter
-        :param rect: rect
-        :type rect: QRect
-        :param mode: mode
-        :type mode: QIcon.Mode
-        :param state: state
-        :type state: QIcon.State
-        """
+        """Paint the icon."""
         self.update_icon()
         return self.icon.pixmap.paint(painter, rect, mode, state)
