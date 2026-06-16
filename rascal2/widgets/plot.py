@@ -213,6 +213,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         super().__init__(parent)
         self.parent = parent
 
+        self.toolbar = None
         self.current_plot_data = None
 
         main_layout = QtWidgets.QHBoxLayout()
@@ -391,7 +392,7 @@ class AbstractPlotWidget(QtWidgets.QWidget):
             self.figure.savefig(filepath, facecolor=SETTINGS.export_background_colour, dpi=dpi)
 
     def changeEvent(self, event):
-        if event.type() == QtCore.QEvent.Type.PaletteChange:
+        if self.toolbar is not None and event.type() == QtCore.QEvent.Type.PaletteChange:
             scheme = get_correct_qt_color_scheme()
             if scheme == QtCore.Qt.ColorScheme.Light:
                 matplotlib.style.use("default")
