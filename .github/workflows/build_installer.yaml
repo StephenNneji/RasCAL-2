@@ -10,71 +10,71 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  windows-installer:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: conda-incubator/setup-miniconda@v3
-        with:
-            activate-environment: rascal2
-            environment-file: environment.yaml
-            auto-activate-base: false
-      - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
-        with:
-          release: R2023a
-      - name: Make installer
-        shell: powershell
-        run: |
-          conda init powershell
-          conda activate rascal2
-          conda install -c nsis nsis=3.* accesscontrol
-          python -m pip install --no-build-isolation 'D:\hostedtoolcache\windows\MATLAB\extern\engines\python'
-          python packaging/build_exe.py
-          if ($env:GITHUB_REF_NAME -eq "main") {
-            makensis /DNIGHTLY packaging/windows/build_installer.nsi
-          }
-          else {
-            makensis packaging/windows/build_installer.nsi
-          }
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows installer
-          path: packaging/windows/*.exe
-  linux-installer:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-      - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
-        with:
-          release: R2023a
-      - name: Make installer
-        shell: bash -l {0}
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y makeself
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/hostedtoolcache/MATLAB/2023.1.999/x64/bin/glnxa64
-          cd packaging/linux
-          chmod 777 "build_installer.sh"
-          mkdir build
-          if [ ${{ github.ref_name }} == "main" ]; then
-            ./build_installer.sh --remote
-          else
-            ./build_installer.sh --remote --tag $GITHUB_REF_NAME
-          fi
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux installer
-          path: packaging/linux/*.run
+#  windows-installer:
+#    runs-on: windows-latest
+#    steps:
+#      - uses: actions/checkout@v5
+#      - uses: conda-incubator/setup-miniconda@v3
+#        with:
+#            activate-environment: rascal2
+#            environment-file: environment.yaml
+#            auto-activate-base: false
+#      - name: Set up MATLAB
+#        uses: matlab-actions/setup-matlab@v2
+#        with:
+#          release: R2023a
+#      - name: Make installer
+#        shell: powershell
+#        run: |
+#          conda init powershell
+#          conda activate rascal2
+#          conda install -c nsis nsis=3.* accesscontrol
+#          python -m pip install --no-build-isolation 'D:\hostedtoolcache\windows\MATLAB\extern\engines\python'
+#          python packaging/build_exe.py
+#          if ($env:GITHUB_REF_NAME -eq "main") {
+#            makensis /DNIGHTLY packaging/windows/build_installer.nsi
+#          }
+#          else {
+#            makensis packaging/windows/build_installer.nsi
+#          }
+#      - name: Upload installer
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: windows installer
+#          path: packaging/windows/*.exe
+#  linux-installer:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v5
+#      - name: Set up MATLAB
+#        uses: matlab-actions/setup-matlab@v2
+#        with:
+#          release: R2023a
+#      - name: Make installer
+#        shell: bash -l {0}
+#        run: |
+#          sudo apt-get update -y
+#          sudo apt-get install -y makeself
+#          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/hostedtoolcache/MATLAB/2023.1.999/x64/bin/glnxa64
+#          cd packaging/linux
+#          chmod 777 "build_installer.sh"
+#          mkdir build
+#          if [ ${{ github.ref_name }} == "main" ]; then
+#            ./build_installer.sh --remote
+#          else
+#            ./build_installer.sh --remote --tag $GITHUB_REF_NAME
+#          fi
+#      - name: Upload installer
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: linux installer
+#          path: packaging/linux/*.run
   macos-installer:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ macos-15-intel, macos-14 ]
+        platform: [macos-14]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v5
@@ -87,7 +87,7 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           release: R2023b
-      - name: Make installer
+      - name: Make executable
         shell: bash -el {0}
         run: |
           conda init bash
@@ -103,28 +103,54 @@ jobs:
           fi
           python packaging/build_exe.py
           chmod 777 packaging/bundle/rascal.app/Contents/Resources/matlab/engine/_arch.txt
+      - name: Build and Sign installer
+        run: |
           cd packaging/macos/
+          # create variables
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          echo -n $CODE_SIGNING_CERTIFICATE_BASE64 | base64 -d -o   ./dev_id_app_certificate.p12
+          security import dev_id_app_certificate.p12 -A -t cert -f pkcs12 -k $KEYCHAIN_PATH -P "$CODE_SIGNING_PASSWORD" -T /usr/bin/codesign
+          echo -n $PKG_SIGNING_CERTIFICATE_BASE64 | base64 -d -o  ./dev_id_install_certificate.p12
+          security import dev_id_install_certificate.p12 -A -t cert -f pkcs12 -k $KEYCHAIN_PATH -P "$PKG_SIGNING_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+                    
           chmod 777 make.sh
-          ./make.sh $GITHUB_REF_NAME $ARCH
+          ./make.sh $GITHUB_REF_NAME $ARCH $DEV_TEAM_ID
+
+        env:
+          CODE_SIGNING_CERTIFICATE_BASE64: ${{ secrets.CODE_SIGNING_CERTIFICATE_BASE64 }}
+          CODE_SIGNING_PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
+          PKG_SIGNING_CERTIFICATE_BASE64: ${{ secrets.PKG_SIGNING_CERTIFICATE_BASE64 }}
+          PKG_SIGNING_PASSWORD: ${{ secrets.PKG_SIGNING_PASSWORD }}
+          DEV_TEAM_ID: ${{ secrets.DEV_TEAM_ID }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
           name: macOS installer-${{ strategy.job-index }}
           path: packaging/macos/RasCAL-2*.pkg
-  deploy-nightly:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    needs: [windows-installer, linux-installer, macos-installer]
-    permissions:
-      contents: write
-    steps:
-      - name: Get artifacts
-        uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
-      - name: Create nightly release
-        run: |
-          output=$(gh release delete nightly --cleanup-tag --yes --repo ${{ github.repository }} 2>&1) || [[ "${output}" == "release not found" ]]
-          gh release create nightly RasCAL* --prerelease --title "Nightly Build" --latest=false --repo ${{ github.repository }}
-        env:
-          GH_TOKEN: ${{ github.token }}
+#  deploy-nightly:
+#    if: github.ref == 'refs/heads/main'
+#    runs-on: ubuntu-latest
+#    needs: [windows-installer, linux-installer, macos-installer]
+#    permissions:
+#      contents: write
+#    steps:
+#      - name: Get artifacts
+#        uses: actions/download-artifact@v4
+#        with:
+#          merge-multiple: true
+#      - name: Create nightly release
+#        run: |
+#          output=$(gh release delete nightly --cleanup-tag --yes --repo ${{ github.repository }} 2>&1) || [[ "${output}" == "release not found" ]]
+#          gh release create nightly RasCAL* --prerelease --title "Nightly Build" --latest=false --repo ${{ github.repository }}
+#        env:
+#          GH_TOKEN: ${{ github.token }}
