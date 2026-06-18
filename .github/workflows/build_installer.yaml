@@ -107,12 +107,16 @@ jobs:
       - name: Build and Sign installer
         run: |
           cd packaging/macos/
+          
+          # default again user login keychain
+          security list-keychains -d user -s login.keychain
           # create variables
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
           # create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | sed s/\"//g)
+          security set-keychain-settings $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
           # import certificate to keychain
@@ -121,7 +125,6 @@ jobs:
           echo -n $PKG_SIGNING_CERTIFICATE_BASE64 | base64 -d -o  ./dev_id_install_certificate.p12
           security import dev_id_install_certificate.p12 -A -t cert -f pkcs12 -k $KEYCHAIN_PATH -P "$PKG_SIGNING_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
                     
           chmod 777 make.sh
           ./make.sh $GITHUB_REF_NAME $ARCH $DEV_TEAM_ID
