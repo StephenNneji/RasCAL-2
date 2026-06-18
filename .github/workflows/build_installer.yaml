@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-14]
+        platform: [macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v5
@@ -83,26 +83,26 @@ jobs:
             activate-environment: rascal2
             environment-file: environment.yaml
             auto-activate-base: false
-      - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
-        with:
-          release: R2023b
+#      - name: Set up MATLAB
+#        uses: matlab-actions/setup-matlab@v2
+#        with:
+#          release: R2023b
       - name: Make executable
         shell: bash -el {0}
         run: |
           conda init bash
           conda activate rascal2
-          if [ ${{ matrix.platform }} == "macos-14" ]; then
-            ARCH="arm64"
-            export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/runner/hostedtoolcache/MATLAB/2023.2.999/arm64/MATLAB.app/bin/maca64
-            python -m pip install --no-build-isolation /Users/runner/hostedtoolcache/MATLAB/2023.2.999/arm64/MATLAB.app/extern/engines/python
-          else
-            ARCH="x64"
-            export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64
-            python -m pip install --no-build-isolation /Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/extern/engines/python
-          fi
+#          if [ ${{ matrix.platform }} == "macos-14" ]; then
+#            ARCH="arm64"
+#            export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/runner/hostedtoolcache/MATLAB/2023.2.999/arm64/MATLAB.app/bin/maca64
+#            python -m pip install --no-build-isolation /Users/runner/hostedtoolcache/MATLAB/2023.2.999/arm64/MATLAB.app/extern/engines/python
+#          else
+#            ARCH="x64"
+#            export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/bin/maci64
+#            python -m pip install --no-build-isolation /Users/runner/hostedtoolcache/MATLAB/2023.2.999/x64/MATLAB.app/extern/engines/python
+#          fi
           python packaging/build_exe.py
-          chmod 777 packaging/bundle/rascal.app/Contents/Resources/matlab/engine/_arch.txt
+#          chmod 777 packaging/bundle/rascal.app/Contents/Resources/matlab/engine/_arch.txt
       - name: Build and Sign installer
         run: |
           cd packaging/macos/
