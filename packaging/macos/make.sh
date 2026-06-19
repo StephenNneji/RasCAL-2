@@ -18,6 +18,7 @@ fi
 
 # Sign code
 echo "Hello"
+echo  ${NAME}
 [[ ! -z "$DEV_TEAM_ID" ]] && echo "Not empty" || echo "Empty"
 [[ ! -z "$ARCH_NAME" ]] && echo "Not empty" || echo "Empty"
 echo "World"
