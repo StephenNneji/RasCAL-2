@@ -17,8 +17,8 @@ else
 fi
 
 # Sign code
-codesign -v --deep --force --options=runtime --entitlements ./entitlements.plist --sign ${DEV_TEAM_ID} --timestamp ${RASCAL_PATH}/Contents/Resources/*.dylib
-codesign -v --deep --force --options=runtime --entitlements ./entitlements.plist --sign ${DEV_TEAM_ID} --timestamp ${RASCAL_PATH}
+codesign -v --deep --force --timestamp --options=runtime --entitlements ./entitlements.plist --sign ${DEV_TEAM_ID} ${RASCAL_PATH}/Contents/Resources/*.dylib
+codesign -v --deep --force --timestamp --options=runtime --entitlements ./entitlements.plist --sign ${DEV_TEAM_ID} ${RASCAL_PATH}
 
 # Build Pkg
 sed -e "s/@VERSION_NAME@/${VER_NAME}/g" -e "s/@VERSION@/${VER}/g" distribution.xml.in > distribution.xml
