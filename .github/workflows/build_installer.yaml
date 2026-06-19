@@ -123,7 +123,35 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
           [[ ! -z "$DEV_TEAM_ID" ]] && echo "Not empty" || echo "Empty"
           chmod 777 make.sh
-          ./make.sh $GITHUB_REF_NAME $ARCH "$DEV_TEAM_ID"
+          #./make.sh $GITHUB_REF_NAME $ARCH "$DEV_TEAM_ID"
+          RASCAL_PATH="../bundle/rascal.app"
+          VER_NAME="$GITHUB_REF_NAME"
+          ARCH_NAME="$ARCH"
+          DEV_TEAM_ID="$DEV_TEAM_ID"
+          VER="main"
+
+          if [[ ${VER_NAME:0:1} == 'v' ]]; then
+              VER=${VER:1}
+          fi
+
+          if [[ ${VER} == 'main' ]]; then
+              NAME="RasCAL-2-macos-${ARCH_NAME}.pkg"
+          else
+              NAME="RasCAL-2-${VER}-macos-${ARCH_NAME}.pkg"
+          fi
+
+          # Sign code
+          echo "Hello"
+          [[ ! -z "$DEV_TEAM_ID" ]] && echo "Not empty" || echo "Empty"
+          [[ ! -z "$ARCH_NAME" ]] && echo "Not empty" || echo "Empty"
+          echo "World"
+          codesign -v --deep --force --timestamp --options=runtime --entitlements ./entitlements.plist --sign ${DEV_TEAM_ID} ${RASCAL_PATH}/Contents/Resources/*.dylib
+          codesign -v --deep --force --timestamp --options=runtime --entitlements ./entitlements.plist --sign ${DEV_TEAM_ID} ${RASCAL_PATH}
+          
+          # Build Pkg
+          sed -e "s/@VERSION_NAME@/${VER_NAME}/g" -e "s/@VERSION@/${VER}/g" distribution.xml.in > distribution.xml
+          pkgbuild --root ${RASCAL_PATH} --identifier com.rascal2.rascal.pkg --version ${VER} --install-location "/Applications/rascal.app" rascal.pkg
+          productbuild --sign ${DEV_TEAM_ID} --timestamp --distribution distribution.xml --resources . ${NAME}
         env:
           CODE_SIGNING_CERTIFICATE_BASE64: ${{ secrets.CODE_SIGNING_CERTIFICATE_BASE64 }}
           CODE_SIGNING_PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
