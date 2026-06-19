@@ -29,8 +29,7 @@ jobs:
          conda init powershell
          conda activate rascal2
          conda install -c nsis nsis=3.* accesscontrol
-         dir D:\hostedtoolcache\windows\MATLAB\2023.1.999\x64
-         python -m pip install --no-build-isolation 'D:\hostedtoolcache\windows\MATLAB\2023.1.999\x64\extern\engines\python'
+         # python -m pip install --no-build-isolation 'D:\hostedtoolcache\windows\MATLAB\2023.1.999\x64\extern\engines\python'
          python packaging/build_exe.py
          if ($env:GITHUB_REF_NAME -eq "main") {
            makensis /DNIGHTLY packaging/windows/build_installer.nsi
