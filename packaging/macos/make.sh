@@ -1,9 +1,9 @@
 #!/bin/bash
 
 RASCAL_PATH="../bundle/rascal.app"
-VER_NAME=$1
-ARCH_NAME=$2
-DEV_TEAM_ID=$3
+VER_NAME="$1"
+ARCH_NAME="$2"
+DEV_TEAM_ID="$3"
 [[ ! -z "$DEV_TEAM_ID" ]] && echo "Not empty" || echo "Empty"
 [[ ! -z "$3" ]] && echo "Not empty" || echo "Empty"
 VER="main"
