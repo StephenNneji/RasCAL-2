@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  windows-installer:
+ windows-installer:
    runs-on: windows-latest
    steps:
      - uses: actions/checkout@v5
@@ -23,10 +23,26 @@ jobs:
        uses: matlab-actions/setup-matlab@v2
        with:
          release: R2023a
-     - name: Run script
-       uses: matlab-actions/run-command@v3
+     - name: Make installer
+       shell: powershell
+       run: |
+         conda init powershell
+         conda activate rascal2
+         conda install -c nsis nsis=3.* accesscontrol
+         dir D:\hostedtoolcache\windows\MATLAB\2023.1.999\x64
+         python -m pip install --no-build-isolation 'D:\hostedtoolcache\windows\MATLAB\2023.1.999\x64\extern\engines\python'
+         python packaging/build_exe.py
+         if ($env:GITHUB_REF_NAME -eq "main") {
+           makensis /DNIGHTLY packaging/windows/build_installer.nsi
+         }
+         else {
+           makensis packaging/windows/build_installer.nsi
+         }
+     - name: Upload installer
+       uses: actions/upload-artifact@v4
        with:
-         command: matlabroot
+         name: windows installer
+         path: packaging/windows/*.exe
   macos-installer:
     strategy:
       fail-fast: false
@@ -79,8 +95,9 @@ jobs:
           security import ./dev_id_install_certificate.p12 -A -t cert -f pkcs12 -k $KEYCHAIN_PATH -P "$PKG_SIGNING_PASSWORD" -T /usr/bin/codesign
           security list-keychain -d user -s $KEYCHAIN_PATH
           [[ ! -z "$DEV_TEAM_ID" ]] && echo "Not empty" || echo "Empty"
+          ARCH="arm64"
           chmod 777 make.sh
-          ./make.sh "$GITHUB_REF_NAME" "$DEV_TEAM_ID" "$ARCH"
+          ./make.sh "$GITHUB_REF_NAME" "$ARCH" "$DEV_TEAM_ID"
         env:
           CODE_SIGNING_CERTIFICATE_BASE64: ${{ secrets.CODE_SIGNING_CERTIFICATE_BASE64 }}
           CODE_SIGNING_PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
