@@ -17,7 +17,9 @@ else
 fi
 
 # Sign code
-echo ${DEV_TEAM_ID}
+echo "Hello"
+echo [ -z "$DEV_TEAM_ID" ] && echo "Empty"
+echo "World"
 codesign -v --deep --force --timestamp --options=runtime --entitlements ./entitlements.plist --sign ${DEV_TEAM_ID} ${RASCAL_PATH}/Contents/Resources/*.dylib
 codesign -v --deep --force --timestamp --options=runtime --entitlements ./entitlements.plist --sign ${DEV_TEAM_ID} ${RASCAL_PATH}
 
