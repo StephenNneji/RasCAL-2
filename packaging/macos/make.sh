@@ -2,8 +2,8 @@
 
 RASCAL_PATH="../bundle/rascal.app"
 VER_NAME="$1"
-ARCH_NAME="$3"
-DEV_TEAM_ID="$2"
+ARCH_NAME="$2"
+DEV_TEAM_ID="$3"
 VER="main"
 
 if [[ ${VER_NAME:0:1} == 'v' ]]; then
