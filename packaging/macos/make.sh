@@ -18,7 +18,8 @@ fi
 
 # Sign code
 echo "Hello"
-echo [ -z "$DEV_TEAM_ID" ] && echo "Empty"
+[[ ! -z "$DEV_TEAM_ID" ]] && echo "Not empty" || echo "Empty"
+[[ ! -z "$RASCAL_PATH" ]] && echo "Not empty" || echo "Empty"
 echo "World"
 codesign -v --deep --force --timestamp --options=runtime --entitlements ./entitlements.plist --sign ${DEV_TEAM_ID} ${RASCAL_PATH}/Contents/Resources/*.dylib
 codesign -v --deep --force --timestamp --options=runtime --entitlements ./entitlements.plist --sign ${DEV_TEAM_ID} ${RASCAL_PATH}
