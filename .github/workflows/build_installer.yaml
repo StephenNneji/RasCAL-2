@@ -123,7 +123,7 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
           
           chmod 777 make.sh
-          ./make.sh $GITHUB_REF_NAME $ARCH $DEV_TEAM_ID
+          ./make.sh $GITHUB_REF_NAME $ARCH "$DEV_TEAM_ID"
 
         env:
           CODE_SIGNING_CERTIFICATE_BASE64: ${{ secrets.CODE_SIGNING_CERTIFICATE_BASE64 }}
