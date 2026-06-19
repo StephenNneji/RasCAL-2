@@ -121,9 +121,9 @@ jobs:
           echo -n $PKG_SIGNING_CERTIFICATE_BASE64 | base64 -d -o  ./dev_id_install_certificate.p12
           security import ./dev_id_install_certificate.p12 -A -t cert -f pkcs12 -k $KEYCHAIN_PATH -P "$PKG_SIGNING_PASSWORD" -T /usr/bin/codesign
           security list-keychain -d user -s $KEYCHAIN_PATH
-                    
+          [[ ! -z "$DEV_TEAM_ID" ]] && echo "Not empty" || echo "Empty"          
           chmod 777 make.sh
-          ./make.sh $GITHUB_REF_NAME $ARCH $DEV_TEAM_ID
+          ./make.sh $GITHUB_REF_NAME $ARCH ertyu
 
         env:
           CODE_SIGNING_CERTIFICATE_BASE64: ${{ secrets.CODE_SIGNING_CERTIFICATE_BASE64 }}
