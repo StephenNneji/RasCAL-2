@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
- windows-installer:
+  windows-installer:
    runs-on: windows-latest
    steps:
      - uses: actions/checkout@v5
