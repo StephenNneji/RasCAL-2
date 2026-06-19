@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest]
+        platform: [macos-14]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v5
