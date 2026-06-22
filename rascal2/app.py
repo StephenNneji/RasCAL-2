@@ -3,8 +3,8 @@ import multiprocessing
 
 from PyQt6 import QtWidgets
 
-from rascal2.config import MatlabHelper, handle_scaling, setup_logging
-from rascal2.settings import get_colour_scheme
+from rascal2.config import SETTINGS, MatlabHelper, handle_scaling, setup_logging
+from rascal2.settings import change_ui_style
 from rascal2.theme import THEMES, set_stylesheet
 from rascal2.ui.view import MainWindowView
 
@@ -21,7 +21,7 @@ def ui_execute(splash):
     app = QtWidgets.QApplication.instance()
     app.setStyle("Fusion")
     app.installEventFilter(THEMES)
-    app.styleHints().setColorScheme(get_colour_scheme())
+    change_ui_style(SETTINGS.style)
     set_stylesheet(app)
 
     window = MainWindowView()

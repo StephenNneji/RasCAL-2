@@ -19,24 +19,6 @@ from .presenter import MainWindowPresenter
 MAIN_WINDOW_TITLE = "RasCAL-2"
 
 
-class TitleProxyStyle(QtWidgets.QProxyStyle):
-    """Set style of Title bar."""
-
-    def drawComplexControl(self, control, option, painter, widget=None):
-        if control == QtWidgets.QStyle.ComplexControl.CC_TitleBar:
-            option.palette.setBrush(QtGui.QPalette.ColorRole.Window, option.palette.button().color())
-        super().drawComplexControl(control, option, painter, widget)
-
-
-class MdiSubWindow(QtWidgets.QMdiSubWindow):
-    """Class to handle MDI sub-windows."""
-
-    def __init__(self, parent=None, flags=QtCore.Qt.WindowType.Widget):
-        super().__init__(parent, flags)
-        style = TitleProxyStyle(self.style())
-        self.setStyle(style)
-
-
 class MainWindowView(QtWidgets.QMainWindow):
     """Creates the main view for the RasCAL application."""
 
@@ -341,8 +323,6 @@ class MainWindowView(QtWidgets.QMainWindow):
             window = self.mdi.addSubWindow(
                 widget, QtCore.Qt.WindowType.WindowMinMaxButtonsHint | QtCore.Qt.WindowType.WindowTitleHint
             )
-            # window = MdiSubWindow(self.mdi)
-            # window.setWidget(widget)
             window.setWindowTitle(title)
         self.reset_mdi_layout()
         self.startup_dlg = self.takeCentralWidget()

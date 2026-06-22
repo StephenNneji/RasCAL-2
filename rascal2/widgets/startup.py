@@ -2,6 +2,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from rascal2.dialogs.startup_dialog import LoadDialog, LoadR1Dialog, NewProjectDialog
 from rascal2.paths import path_for
+from rascal2.theme import get_correct_qt_color_scheme
 
 
 class StartUpWidget(QtWidgets.QWidget):
@@ -81,7 +82,7 @@ class StartUpWidget(QtWidgets.QWidget):
 
     def changeEvent(self, event):
         if event.type() == QtCore.QEvent.Type.PaletteChange:
-            scheme = QtWidgets.QApplication.styleHints().colorScheme()
+            scheme = get_correct_qt_color_scheme()
             if scheme == QtCore.Qt.ColorScheme.Dark:
                 self.banner_label.setPixmap(QtGui.QPixmap(path_for("banner-dark.png")))
                 self.footer_label.setPixmap(QtGui.QPixmap(path_for("footer-dark.png")))

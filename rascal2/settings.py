@@ -229,27 +229,22 @@ def update_recent_projects(path: str | None = None) -> list[str]:
     return new_recent_projects
 
 
-def get_colour_scheme():
-    """Get the currently selected colour scheme and converts it to relevant Qt colour scheme flag."""
-    colour_scheme = get_global_settings().value("General/style", "system")
-    match colour_scheme:
-        case "system":
-            colour_scheme_default = QtCore.Qt.ColorScheme.Unknown
-        case "light":
-            colour_scheme_default = QtCore.Qt.ColorScheme.Light
-        case "dark":
-            colour_scheme_default = QtCore.Qt.ColorScheme.Dark
-    return colour_scheme_default
+def change_ui_style(style: Styles) -> None:
+    """Change the style of the app GUI to the given style.
 
-
-def change_ui_style(style: Styles = Styles.System) -> None:
-    """Change the style of the app GUI to the given style."""
+    Parameters
+    ----------
+    style : Styles
+        The style to change to.
+    """
     app = QtWidgets.QApplication.instance()
     match style:
-        case "system":
-            colour_scheme = QtCore.Qt.ColorScheme.Unknown
         case "light":
             colour_scheme = QtCore.Qt.ColorScheme.Light
         case "dark":
             colour_scheme = QtCore.Qt.ColorScheme.Dark
-    app.styleHints().setColorScheme(colour_scheme)
+        case _:
+            colour_scheme = QtCore.Qt.ColorScheme.Unknown
+    style_hints = app.styleHints()
+    style_hints.setProperty("colour_scheme", colour_scheme)
+    style_hints.setColorScheme(colour_scheme)

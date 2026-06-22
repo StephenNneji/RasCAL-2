@@ -363,7 +363,8 @@ class ProjectFieldWidget(QtWidgets.QWidget):
             The row to be deleted.
 
         """
-        button = QtWidgets.QPushButton(icon=QtGui.QIcon(IconEngine("delete-light.png")))
+        # The QTableView button style stopped working in PyQT 6.9, added name as workaround.
+        button = QtWidgets.QPushButton(icon=QtGui.QIcon(IconEngine("delete-light.png")), objectName="TableButton")
         button.resize(button.sizeHint().width(), button.sizeHint().width())
         button.pressed.connect(lambda: self.delete_item(index))
 
