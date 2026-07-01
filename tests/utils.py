@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import numpy as np
 import ratapi.outputs
 
@@ -90,3 +92,38 @@ def check_bayes_fields_equal(actual_results, expected_results) -> None:
                 )
 
     assert (actual_results.chain == expected_results.chain).all()
+
+
+class TestSignal:
+    def __init__(self):
+        self.call = Mock()
+
+    def connect(self, call):
+        self.call = call
+
+    def emit(self, *args):
+        self.call(*args)
+
+
+class TestWorker:
+    side_effect = None
+
+    def __init__(self, call, args, side_effect=None):
+        self.finished = TestSignal()
+        self.job_failed = TestSignal()
+        self.job_succeeded = TestSignal()
+        self.call = call
+        self.args = args
+        self.side_effect = side_effect
+        self.add_failed_args = False
+
+    def start(self):
+        result = self.call(*self.args)
+        if self.side_effect is not None:
+            if not self.add_failed_args:
+                self.job_failed.emit(self.side_effect)
+            else:
+                self.job_failed.emit(self.side_effect, self.args)
+        else:
+            self.job_succeeded.emit(result)
+        self.finished.emit()

@@ -25,6 +25,7 @@ def ui_execute(splash):
     set_stylesheet(app)
 
     window = MainWindowView()
+    window.check_update_dialog.check(startup=True)
     window.show()
     splash.finish(window)
 

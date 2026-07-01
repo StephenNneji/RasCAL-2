@@ -5,6 +5,7 @@ import logging
 from PyQt6 import QtGui, QtWidgets
 
 from rascal2 import RASCAL2_VERSION
+from rascal2.config import LOGGER
 
 
 class CustomStreamHandler(logging.StreamHandler):
@@ -56,11 +57,11 @@ class TerminalWidget(QtWidgets.QWidget):
 
     def add_stream_handler(self):
         """Add terminal as a stream for the log handler."""
-        logger = logging.getLogger()
+        # logger = logging.getLogger()
         log_term_handler = CustomStreamHandler(stream=self)
         term_formatting = logging.Formatter("%(levelname)s - %(message)s")
         log_term_handler.setFormatter(term_formatting)
-        logger.addHandler(log_term_handler)
+        LOGGER.addHandler(log_term_handler)
 
     def write(self, text: str):
         """Append plain text to the terminal.
