@@ -82,18 +82,38 @@ def test_save_project(empty_results, model):
 
 
 @pytest.mark.parametrize(
-    "result_file",
+    ("result_file", "warning_count"),
     (
-        "results_normal_calculate.json",
-        "results_domains_dream.json",
-        "results_domains_ns.json",
+      ("results_normal_calculate.json", 5),
+      ("results_domains_dream.json", 10),
+      ("results_domains_ns.json", 10),
     ),
 )
-def test_validate_plot_data(result_file):
+def test_validate_plot_data_throws_warnings(result_file, warning_count):
     project = Project()
     result = Results.load(DATA_PATH / result_file)
     with warnings.catch_warnings(record=True) as records:
         validate_plot_data(project, result)
+        assert len(records) == warning_count
+
+
+@pytest.mark.parametrize(
+    ("result_file", "calc_type", "num_of_contrast"),
+    (
+      ("results_normal_calculate.json", Calculations.Normal, 2),
+      ("results_domains_dream.json", Calculations.Domains, 1),
+      ("results_domains_ns.json", Calculations.Domains, 1),
+    ),
+)
+def test_validate_plot_data(result_file, calc_type, num_of_contrast):
+    project = Project(calculation=calc_type)
+    for i in range(num_of_contrast):
+        project.contrasts.append(name=f"Contrast {i}")
+
+    result = Results.load(DATA_PATH / result_file)
+    with warnings.catch_warnings(record=True) as records:
+        validate_plot_data(project, result)
+        print([m.message for m in records])
         assert len(records) == 0
 
 
