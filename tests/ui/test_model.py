@@ -1,6 +1,7 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
+import warnings
 
 import numpy as np
 import pytest
@@ -8,8 +9,11 @@ from ratapi import Controls, Project, Results
 from ratapi.outputs import CalculationResults, ContrastParams
 from ratapi.utils.enums import Calculations
 
-from rascal2.ui.model import MainWindowModel
+from rascal2.ui.model import MainWindowModel, validate_plot_data
 from tests.utils import check_results_equal
+
+
+DATA_PATH = Path(__file__, "../../data/").resolve()
 
 
 @pytest.fixture
@@ -75,6 +79,22 @@ def test_save_project(empty_results, model):
     assert '"calculation": "domains' in project
     assert '"reflectivity": []' in results
     assert '"fitParams": []' in results
+
+
+@pytest.mark.parametrize(
+    "result_file",
+    (
+        "results_normal_calculate.json",
+        "results_domains_dream.json",
+        "results_domains_ns.json",
+    ),
+)
+def test_validate_plot_data(result_file):
+    project = Project()
+    result = Results.load(DATA_PATH / result_file)
+    with warnings.catch_warnings(record=True) as records:
+        validate_plot_data(project, result)
+        assert len(records) == 0
 
 
 def test_save_project_as_script(model):

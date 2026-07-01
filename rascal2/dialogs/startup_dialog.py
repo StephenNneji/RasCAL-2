@@ -173,11 +173,26 @@ class StartupDialog(QtWidgets.QDialog):
         if self.parent().centralWidget() is self.parent().startup_dlg:
             self.parent().startup_dlg.setVisible(True)
 
-    def project_start_success(self):
+    def project_start_success(self, warning):
         self.parent().presenter.initialise_ui()
+
         if not self.parent().toolbar.isEnabled():
             self.parent().toolbar.setEnabled(True)
         self.accept()
+
+        if warning is not None:
+            message = (
+                "The result JSON was not loaded because it is invalid. "
+                "The other project files were loaded successfully. "
+            )
+
+            message_box = QtWidgets.QMessageBox(self)
+            message_box.setStyleSheet("QMessageBox QTextEdit{color: red; font-family: monospace; font-weight:500;}")
+            message_box.setWindowTitle(self.windowTitle())
+            message_box.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+            message_box.setText(message)
+            message_box.setDetailedText("\n".join(warning))
+            message_box.exec()
 
     def project_start_failed(self, exception, args):
         folder_name = args[0]

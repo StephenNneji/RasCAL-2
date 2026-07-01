@@ -13,7 +13,7 @@ from rascal2.core.runner import LogData, RATRunner
 from rascal2.core.writer import write_result_to_zipped_csvs
 from rascal2.settings import update_recent_projects
 
-from .model import MainWindowModel
+from .model import MainWindowModel, validate_plot_data
 
 
 class MainWindowPresenter:
@@ -45,7 +45,7 @@ class MainWindowPresenter:
         self.initialise_ui()
 
     def load_project(self, load_path: str):
-        """Load an existing RAT project then initialise UI.
+        """Load an existing RAT project.
 
         Parameters
         ----------
@@ -53,10 +53,18 @@ class MainWindowPresenter:
             The path from which to load the project.
 
         """
+        warning = None
         self.model.load_project(load_path)
+        with warnings.catch_warnings(record=True) as records:
+            validate_plot_data(self.model.project, self.model.results)
+            if records:
+                self.model.results = None
+                warning = [str(record.message) for record in records]
         if self.model.results is None:
             self.model.results = self.quick_run()
         update_recent_projects(load_path)
+
+        return warning
 
     def load_r1_project(self, load_path: str):
         """Load a RAT project from a RasCAL-1 project file.
