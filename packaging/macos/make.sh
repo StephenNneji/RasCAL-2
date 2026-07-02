@@ -1,11 +1,11 @@
 #!/bin/bash
 
 RASCAL_PATH="../bundle/rascal.app"
-VER_NAME="$1"
-ARCH_NAME="$2"
-DEV_TEAM_ID="$3"
-API_CONNECT_ISSUER="$4"
-API_CONNECT_KEY_ID="$5"
+VER_NAME=$1
+ARCH_NAME=$2
+DEV_TEAM_ID=$3
+API_CONNECT_ISSUER=$4
+API_CONNECT_KEY_ID=$5
 VER="main"
 
 if [[ ${VER_NAME:0:1} == 'v' ]]; then
