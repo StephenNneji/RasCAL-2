@@ -99,7 +99,7 @@ jobs:
           ARCH="arm64"
           echo -n $API_CONNECT_KEY | base64 -d -o  ./auth_key.p8
           chmod 777 make.sh
-          ./make.sh "$GITHUB_REF_NAME" "$ARCH" "$DEV_TEAM_ID" "API_CONNECT_ISSUER" "API_CONNECT_KEY_ID" 
+          ./make.sh $GITHUB_REF_NAME $ARCH $DEV_TEAM_ID $API_CONNECT_ISSUER $API_CONNECT_KEY_ID 
         env:
           CODE_SIGNING_CERTIFICATE_BASE64: ${{ secrets.CODE_SIGNING_CERTIFICATE_BASE64 }}
           CODE_SIGNING_PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
