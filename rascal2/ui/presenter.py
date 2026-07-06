@@ -13,7 +13,7 @@ from rascal2.core.runner import LogData, RATRunner
 from rascal2.core.writer import write_result_to_zipped_csvs
 from rascal2.settings import update_recent_projects
 
-from .model import MainWindowModel, validate_plot_data, InvalidResultWarning
+from .model import InvalidResultWarning, MainWindowModel, validate_plot_data
 
 
 class MainWindowPresenter:
@@ -59,7 +59,9 @@ class MainWindowPresenter:
             validate_plot_data(self.model.project, self.model.results)
             if records:
                 self.model.results = None
-                warning = [str(record.message) for record in records if isinstance(record.message, InvalidResultWarning)]
+                warning = [
+                    str(record.message) for record in records if isinstance(record.message, InvalidResultWarning)
+                ]
         if self.model.results is None:
             self.model.results = self.quick_run()
         update_recent_projects(load_path)

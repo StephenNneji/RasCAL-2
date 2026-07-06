@@ -1,7 +1,7 @@
+import warnings
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
-import warnings
 
 import numpy as np
 import pytest
@@ -11,7 +11,6 @@ from ratapi.utils.enums import Calculations
 
 from rascal2.ui.model import MainWindowModel, validate_plot_data
 from tests.utils import check_results_equal
-
 
 DATA_PATH = Path(__file__, "../../data/").resolve()
 
@@ -84,9 +83,9 @@ def test_save_project(empty_results, model):
 @pytest.mark.parametrize(
     ("result_file", "warning_count"),
     (
-      ("results_normal_calculate.json", 5),
-      ("results_domains_dream.json", 10),
-      ("results_domains_ns.json", 10),
+        ("results_normal_calculate.json", 5),
+        ("results_domains_dream.json", 10),
+        ("results_domains_ns.json", 10),
     ),
 )
 def test_validate_plot_data_throws_warnings(result_file, warning_count):
@@ -100,9 +99,9 @@ def test_validate_plot_data_throws_warnings(result_file, warning_count):
 @pytest.mark.parametrize(
     ("result_file", "calc_type", "num_of_contrast"),
     (
-      ("results_normal_calculate.json", Calculations.Normal, 2),
-      ("results_domains_dream.json", Calculations.Domains, 1),
-      ("results_domains_ns.json", Calculations.Domains, 1),
+        ("results_normal_calculate.json", Calculations.Normal, 2),
+        ("results_domains_dream.json", Calculations.Domains, 1),
+        ("results_domains_ns.json", Calculations.Domains, 1),
     ),
 )
 def test_validate_plot_data(result_file, calc_type, num_of_contrast):
