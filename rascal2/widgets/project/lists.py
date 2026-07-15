@@ -674,7 +674,7 @@ class ContrastWidget(AbstractProjectListWidget):
                                 widget.setCurrentIndex(-1)
                                 self.model.set_data(i, field, [])
                         else:
-                            widget.setCurrentText("")
+                            widget.setCurrentIndex(-1)
                         widget.currentTextChanged.connect(lambda: self.model.set_data(i, field, widget.currentData()))
                         return widget
                 # all other cases are comboboxes with data from other widget tables

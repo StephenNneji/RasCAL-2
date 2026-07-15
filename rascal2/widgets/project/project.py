@@ -545,7 +545,7 @@ class ProjectWidget(QtWidgets.QWidget):
 
                 if missing_params:
                     action = (
-                        "Update the missing entry with a valid value"
+                        "Please update the missing entry with a valid value"
                         if len(missing_params) == 1
                         else "Please update the missing entries with valid values"
                     )
