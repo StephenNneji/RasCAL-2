@@ -1,4 +1,5 @@
 import os
+import traceback
 from pathlib import Path
 
 from PyQt6 import QtCore, QtWidgets
@@ -184,7 +185,17 @@ class StartupDialog(QtWidgets.QDialog):
         error = str(exception).strip().replace("\n", "")
         message = f"The Project ({folder_name}) could not be opened because:\n\n{error}"
         LOGGER.error(message, exc_info=exception)
-        QtWidgets.QMessageBox.critical(self, self.windowTitle(), message)
+
+        message_box = QtWidgets.QMessageBox(self)
+        message_box.setStyleSheet("QMessageBox QTextEdit{color: red; font-family: monospace; font-weight:500;}")
+        message_box.setWindowTitle(self.windowTitle())
+        message_box.setIcon(QtWidgets.QMessageBox.Icon.Critical)
+        message_box.setText(message)
+
+        reverse_tb = "\n".join(reversed(traceback.format_tb(exception.__traceback__)))
+        message_box.setDetailedText(reverse_tb)
+
+        message_box.exec()
 
 
 class NewProjectDialog(StartupDialog):
@@ -253,7 +264,6 @@ class DisplayWidget(QtWidgets.QWidget):
         title_widget = QtWidgets.QLabel(title)
         title_widget.setObjectName("title")
         desc_widget = QtWidgets.QLabel(desc)
-        desc_widget.setObjectName("desc")
         layout.addWidget(title_widget)
         layout.addWidget(desc_widget)
         self.setLayout(layout)

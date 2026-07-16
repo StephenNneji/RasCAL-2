@@ -1,5 +1,6 @@
 """Delegates for items in Qt tables."""
 
+from enum import Enum
 from typing import Literal
 
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -32,6 +33,9 @@ class ValidatedInputDelegate(QtWidgets.QStyledItemDelegate):
         if self.open_on_show:
             widget.editor.open_on_show = True
             widget.editor.text_changed.connect(self.commit_and_close_editor)
+
+        if issubclass(self.field_info.annotation, Enum):
+            widget.editor.activated.connect(self.commit_and_close_editor)
 
         self.widget = widget
         # Using the BaseInputWidget directly did not style properly,
@@ -147,6 +151,7 @@ class ProjectFieldDelegate(QtWidgets.QStyledItemDelegate):
             names = [""] + names
         widget.addItems(names)
         widget.setCurrentText(index.data(QtCore.Qt.ItemDataRole.DisplayRole))
+        widget.currentTextChanged.connect(self.commit_and_close_editor)
 
         return widget
 
@@ -157,6 +162,11 @@ class ProjectFieldDelegate(QtWidgets.QStyledItemDelegate):
     def setModelData(self, editor, model, index):
         data = editor.currentText()
         model.setData(index, data, QtCore.Qt.ItemDataRole.EditRole)
+
+    def commit_and_close_editor(self):
+        editor = self.sender()
+        self.commitData.emit(editor)
+        self.closeEditor.emit(editor)
 
 
 class SignalSourceDelegate(QtWidgets.QStyledItemDelegate):
