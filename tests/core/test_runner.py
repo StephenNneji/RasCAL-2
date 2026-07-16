@@ -2,6 +2,7 @@
 
 import contextlib
 import os
+from multiprocessing import Event
 from queue import Queue  # we need a non-multiprocessing queue because mocks cannot be serialised
 from unittest.mock import MagicMock, patch
 
@@ -33,16 +34,33 @@ def mock_rat_main(*args, **kwargs):
     return 1, 2, 3
 
 
+def close_processes(runner):
+    # Non serialised queue does not have a close attribute so have to mock it out
+    if runner.process is not None:
+        runner.process.join()
+    runner.queue.close = MagicMock()
+    runner.arg_queue.close = MagicMock()
+    runner.stop_processes()
+
+
 @patch("rascal2.core.runner.MatlabHelper", autospec=True)
 @patch("rascal2.core.runner.Process")
-def test_start(mock_process, mock_matlab):
+@patch("rascal2.core.runner.RATRunner.get_new_process")
+def test_start(mock_process_go_exit, mock_process, mock_matlab):
     """Test that `start` creates and starts a process and timer."""
     mock_matlab.return_value = MagicMock()
-    runner = RATRunner(make_rat_input(), "", True)
+    mock_go = MagicMock()
+    mock_process_go_exit.return_value = MagicMock(), (mock_go, MagicMock())
+    runner = RATRunner(start_runners_early=False, num_processes=1)
+    runner.process = None
+    runner.get_runner_matlab_engine = MagicMock()
+    runner.set_runner_args(make_rat_input(), "", True, os.getcwd())
     runner.start()
 
-    runner.process.start.assert_called_once()
+    mock_go.set.assert_called_once()
     assert runner.timer.isActive()
+
+    close_processes(runner)
 
 
 @patch("rascal2.core.runner.MatlabHelper", autospec=True)
@@ -50,11 +68,16 @@ def test_start(mock_process, mock_matlab):
 def test_interrupt(mock_process, mock_matlab):
     """Test that `interrupt` kills the process and stops the timer."""
     mock_matlab.return_value = MagicMock()
-    runner = RATRunner([], "", True)
+    runner = RATRunner(start_runners_early=False, num_processes=1)
+    runner.process = MagicMock()
+    runner.clear_process = MagicMock()
+    runner.set_runner_args([], "", True, os.getcwd())
     runner.interrupt()
 
     runner.process.kill.assert_called_once()
     assert not runner.timer.isActive()
+
+    close_processes(runner)
 
 
 @pytest.mark.parametrize(
@@ -73,7 +96,10 @@ def test_interrupt(mock_process, mock_matlab):
 def test_check_queue(mock_process, mock_matlab, queue_items):
     """Test that queue data is appropriately assigned."""
     mock_matlab.return_value = MagicMock()
-    runner = RATRunner([], "", True)
+    runner = RATRunner(start_runners_early=False, num_processes=1)
+    runner.process = MagicMock()
+    runner.get_runner_matlab_engine = MagicMock()
+    runner.set_runner_args([], "", True, os.getcwd())
     runner.queue = Queue()
 
     for item in queue_items:
@@ -95,17 +121,24 @@ def test_check_queue(mock_process, mock_matlab, queue_items):
         assert isinstance(runner.error, ValueError)
         assert str(runner.error) == "Runner error!"
 
+    close_processes(runner)
+
 
 @patch("rascal2.core.runner.MatlabHelper", autospec=True)
 @patch("rascal2.core.runner.Process")
 def test_empty_queue(mock_process, mock_matlab):
     """Test that nothing happens if the queue is empty."""
     mock_matlab.return_value = MagicMock()
-    runner = RATRunner(make_rat_input(), "", True)
+    runner = RATRunner(start_runners_early=False, num_processes=1)
+    runner.process = MagicMock()
+    runner.set_runner_args(make_rat_input(), "", True, os.getcwd())
+
     runner.check_queue()
 
     assert len(runner.events) == 0
     assert runner.results is None
+
+    close_processes(runner)
 
 
 @pytest.mark.parametrize("display", [True, False])
@@ -114,7 +147,16 @@ def test_empty_queue(mock_process, mock_matlab):
 def test_run(display):
     """Test that a run puts the correct items in the queue."""
     queue = Queue()
-    run(queue, make_rat_input(), "", display, None, None)
+    engine_ready = Queue()
+    engine_output = Queue()
+    args_queue = Queue()
+    args_queue.put((make_rat_input(), "", display, os.getcwd()))
+    go_event, exit_event = (Event(), Event())
+    go_event.set()
+    go_event.clear = lambda: exit_event.set()
+    with patch("rascal2.core.runner.init_matlab_engine"), patch("rascal2.core.runner.stop_matlab_engine"):
+        run(queue, args_queue, go_event, exit_event, engine_ready, engine_output)
+
     expected_display = [
         LogData(20, "Starting RAT"),
         0.2,
@@ -145,9 +187,20 @@ def test_run_error():
         """RATMain mock that raises an error."""
         raise ValueError("RAT Main Error!")
 
-    queue = Queue()
-    with patch("ratapi.rat_core.RATMain", new=erroring_ratmain):
-        run(queue, make_rat_input(), "", True, None, None)
+    with (
+        patch("ratapi.rat_core.RATMain", new=erroring_ratmain),
+        patch("rascal2.core.runner.init_matlab_engine"),
+        patch("rascal2.core.runner.stop_matlab_engine"),
+    ):
+        queue = Queue()
+        engine_ready = Queue()
+        engine_output = Queue()
+        args_queue = Queue()
+        args_queue.put((make_rat_input(), "", True, os.getcwd()))
+        go_event, exit_event = (Event(), Event())
+        go_event.set()
+        go_event.clear = lambda: exit_event.set()
+        run(queue, args_queue, go_event, exit_event, engine_ready, engine_output)
 
     queue.put(None)
     queue_contents = list(iter(queue.get, None))
@@ -172,9 +225,61 @@ def test_run_examples(example):
     rat_inputs = rat.inputs.make_input(project, rat.Controls())
 
     queue = Queue()
-    run(queue, rat_inputs, "calculate", False, None, None)
+    args_queue = Queue()
+    args_queue.put((rat_inputs, "calculate", False, os.getcwd()))
+    engine_ready = Queue()
+    engine_output = Queue()
+    go_event, exit_event = (Event(), Event())
+    go_event.set()
+    go_event.clear = lambda: exit_event.set()
+    with patch("rascal2.core.runner.init_matlab_engine"), patch("rascal2.core.runner.stop_matlab_engine"):
+        run(queue, args_queue, go_event, exit_event, engine_ready, engine_output)
 
     output = queue.get()
 
     assert isinstance(output[0], rat.rat_core.ProblemDefinition)
     assert isinstance(output[1], rat.outputs.Results)
+
+
+@patch("rascal2.core.runner.MatlabHelper", autospec=True)
+@patch("rascal2.core.runner.Process")
+@patch("rascal2.core.runner.RATRunner.get_new_process")
+def test_start_reuses_process(mock_process_go_exit, mock_process, mock_matlab):
+    """Test that when running `start` a second time, it will reuse the previous process."""
+    mock_matlab.return_value = MagicMock()
+    mock_go = MagicMock()
+    mock_process_go_exit.return_value = MagicMock(), (mock_go, MagicMock())
+    runner = RATRunner(start_runners_early=False, num_processes=1)
+    runner.process = None
+    runner.get_runner_matlab_engine = MagicMock()
+    runner.get_new_process = MagicMock(return_value=(MagicMock(), (MagicMock(), MagicMock())))
+    runner.set_runner_args(make_rat_input(), "", True, os.getcwd())
+    runner.start()
+    runner.get_new_process.assert_called_once()
+    runner.start()
+    runner.get_new_process.assert_called_once()
+    close_processes(runner)
+
+
+@patch("rascal2.core.runner.MatlabHelper", autospec=True)
+@patch("rascal2.core.runner.Process")
+@patch("rascal2.core.runner.RATRunner.get_new_process")
+def test_interrupt_creates_new_process(mock_process_go_exit, mock_process, mock_matlab):
+    """Test that when interrupting a process, it will use a new process on next run."""
+    mock_matlab.return_value = MagicMock()
+    mock_go = MagicMock()
+    mock_process_go_exit.return_value = MagicMock(), (mock_go, MagicMock())
+    runner = RATRunner(start_runners_early=False, num_processes=1)
+    runner.process = None
+    runner.get_runner_matlab_engine = MagicMock()
+    runner.get_new_process = MagicMock(return_value=(MagicMock(), (MagicMock(), MagicMock())))
+    runner.set_runner_args(make_rat_input(), "", True, os.getcwd())
+    runner.start()
+    runner.get_new_process.assert_called_once()
+    assert runner.process is not None
+    runner.interrupt()
+    assert runner.process is None
+    runner.start()
+    assert runner.process is not None
+    assert runner.get_new_process.call_count == 2
+    close_processes(runner)

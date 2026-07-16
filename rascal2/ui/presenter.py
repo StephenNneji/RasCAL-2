@@ -5,6 +5,7 @@ from typing import Any
 
 import ratapi as rat
 import ratapi.wrappers
+from PyQt6.QtCore import QCoreApplication
 
 from rascal2.config import LOGGER, SETTINGS, MatlabHelper
 from rascal2.core import commands
@@ -14,6 +15,8 @@ from rascal2.core.writer import write_result_to_zipped_csvs
 from rascal2.settings import update_recent_projects
 
 from .model import MainWindowModel
+
+START_PROCESSES = bool(os.getenv("START_PROCESSES", "True"))
 
 
 class MainWindowPresenter:
@@ -29,6 +32,11 @@ class MainWindowPresenter:
         self.view = view
         self.model = MainWindowModel()
         self.worker = None
+        self.runner = RATRunner(self, start_runners_early=START_PROCESSES)
+        self.runner.finished.connect(self.handle_results)
+        self.runner.stopped.connect(self.handle_interrupt)
+        self.runner.event_received.connect(self.handle_event)
+        self.runner.start_processes()
 
     def create_project(self, name: str, save_path: str):
         """Create a new RAT project and controls object then initialise UI.
@@ -227,13 +235,10 @@ class MainWindowPresenter:
         self.view.plot_widget.bayes_plots_button.setVisible(False)
 
         self.model.controls.initialise_IPC()
+        working_dir = os.getcwd()
         rat_inputs = rat.inputs.make_input(self.model.project, self.model.controls)
         display_on = self.model.controls.display != rat.utils.enums.Display.Off
-
-        self.runner = RATRunner(rat_inputs, self.model.controls.procedure, display_on)
-        self.runner.finished.connect(self.handle_results)
-        self.runner.stopped.connect(self.handle_interrupt)
-        self.runner.event_received.connect(self.handle_event)
+        self.runner.set_runner_args(rat_inputs, self.model.controls.procedure, display_on, working_dir)
         self.view.terminal_widget.write("Initializing RAT Process...")
         self.runner.start()
 
@@ -249,6 +254,7 @@ class MainWindowPresenter:
         )
         self.view.handle_results(self.runner.results)
         self.model.controls.delete_IPC()
+        self.runner.clear_queues()
 
     def handle_interrupt(self):
         """Handle a RAT run being interrupted."""
@@ -274,6 +280,7 @@ class MainWindowPresenter:
                 self.view.plot_widget.plot_with_blit(event)
             case LogData():
                 LOGGER.log(event.level, event.msg)
+        QCoreApplication.processEvents()
 
     def edit_project(self, updated_project: dict, preview: bool = True) -> None:
         """Edit the Project with a dictionary of attributes.
