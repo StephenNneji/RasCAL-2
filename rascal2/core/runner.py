@@ -1,6 +1,7 @@
 """QObject for running rat."""
 
 import os
+import sys
 from dataclasses import dataclass
 from logging import INFO
 from multiprocessing import Event, Process, Queue
@@ -195,6 +196,7 @@ def run(queue: Queue, arg_queue: Queue, go_event, exit_event, engine_ready, engi
             queue.put(LogData(INFO, "Starting RAT"))
 
         try:
+            sys.path.append(working_dir)
             engine_future = init_matlab_engine(problem_definition, engine_ready, engine_output, queue)
             problem_definition, output_results, bayes_results = rat.rat_core.RATMain(problem_definition, cpp_controls)
             results = rat.outputs.make_results(procedure, output_results, bayes_results)
@@ -202,6 +204,8 @@ def run(queue: Queue, arg_queue: Queue, go_event, exit_event, engine_ready, engi
             queue.put(err)
             go_event.clear()
             continue
+        finally:
+            sys.path.remove(working_dir)
 
         if display:
             queue.put(LogData(INFO, "Finished RAT"))
