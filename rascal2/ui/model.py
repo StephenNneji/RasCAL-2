@@ -1,6 +1,7 @@
 import os
 import shutil
 import sys
+import warnings
 from json import JSONDecodeError
 from pathlib import Path
 
@@ -9,6 +10,10 @@ import ratapi.outputs
 from PyQt6 import QtCore
 
 from rascal2.paths import EXAMPLES_PATH, EXAMPLES_TEMP_PATH
+
+
+class InvalidResultWarning(Warning):
+    """Warning for invalid calculation results."""
 
 
 def copy_example_project(load_path):
@@ -37,6 +42,106 @@ def copy_example_project(load_path):
             shutil.copytree(load_path, temp_dir, dirs_exist_ok=True)
             load_path = temp_dir
     return str(load_path)
+
+
+def validate_plot_data(project, results):
+    """Validate plot data.
+
+    Parameters
+    ----------
+    project : ratapi.Project
+        The project
+    results : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
+        The calculation results.
+    """
+    if results is None:
+        return
+
+    num_of_contrasts = len(project.contrasts)
+    num_of_domains = 1 if project.calculation == "normal" else 2
+
+    sub_rough_size = len(results.contrastParams.subRoughs)
+    if sub_rough_size != num_of_contrasts:
+        warnings.warn(
+            "The contrastParams.subRoughs entry in results has an incorrect size. "
+            f"The size ({sub_rough_size}) should be equal to the number of contrast ({num_of_contrasts}).",
+            InvalidResultWarning,
+            stacklevel=1,
+        )
+
+    for attr in ["reflectivity", "shiftedData", "sldProfiles", "resampledLayers"]:
+        entry = getattr(results, attr)
+        num_rows = len(entry)
+        if num_rows != num_of_contrasts:
+            warnings.warn(
+                f"The {attr} entry in results has an incorrect number of rows. "
+                f"The number of rows ({num_rows}) should be equal to the number of contrast ({num_of_contrasts}).",
+                InvalidResultWarning,
+                stacklevel=1,
+            )
+
+        for i in range(num_rows):
+            if isinstance(entry[i], list):
+                if len(entry[i]) != num_of_domains:
+                    warnings.warn(
+                        f"The {attr} entry in results has an incorrect number of columns. "
+                        f"Row {i} has {len(entry[i])} columns instead of {num_of_domains}.",
+                        InvalidResultWarning,
+                        stacklevel=1,
+                    )
+                for j in range(len(entry[i])):
+                    if len(entry[i][j].shape) != 2 or entry[i][j].shape[1] < 2:
+                        warnings.warn(
+                            f"The {attr} entry (row {i}, column {j}) in results has incorrect dimensions.",
+                            InvalidResultWarning,
+                            stacklevel=1,
+                        )
+            else:
+                if len(entry[i].shape) != 2 or entry[i].shape[1] < 2:
+                    warnings.warn(
+                        f"The {attr} entry (row {i}) in results has incorrect dimensions.",
+                        InvalidResultWarning,
+                        stacklevel=1,
+                    )
+
+    if isinstance(results, ratapi.outputs.BayesResults):
+        for attr in ["reflectivity", "sld"]:
+            entry = getattr(results.predictionIntervals, attr)
+            dim_source = results.sldProfiles if attr == "sld" else results.reflectivity
+            num_rows = len(entry)
+            if num_rows != num_of_contrasts:
+                warnings.warn(
+                    f"The predictionIntervals.{attr} entry in results has an incorrect number of rows. "
+                    f"The number of rows ({num_rows}) should match the number of contrast ({num_of_contrasts}).",
+                    InvalidResultWarning,
+                    stacklevel=1,
+                )
+
+            for i in range(num_rows):
+                if isinstance(entry[i], list):
+                    if len(entry[i]) != num_of_domains:
+                        warnings.warn(
+                            f"The predictionIntervals.{attr} entry in results has an incorrect number of columns. "
+                            f"Row {i} has {len(entry[i])} columns instead of {num_of_domains}.",
+                            InvalidResultWarning,
+                            stacklevel=1,
+                        )
+
+                    for j in range(len(entry[i])):
+                        if entry[i][j].shape != (5, dim_source[i][j].shape[0]):
+                            warnings.warn(
+                                f"The predictionIntervals.{attr} entry (row {i}, column {j}) "
+                                "in results has incorrect dimensions.",
+                                InvalidResultWarning,
+                                stacklevel=1,
+                            )
+                else:
+                    if entry[i].shape != (5, dim_source[i].shape[0]):
+                        warnings.warn(
+                            f"The predictionIntervals.{attr} entry (row {i}) in results has incorrect dimensions.",
+                            InvalidResultWarning,
+                            stacklevel=1,
+                        )
 
 
 class MainWindowModel(QtCore.QObject):
