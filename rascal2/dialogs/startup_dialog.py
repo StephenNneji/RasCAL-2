@@ -7,8 +7,8 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from rascal2.config import LOGGER
 from rascal2.core.worker import Worker
 from rascal2.paths import EXAMPLES_PATH
-from rascal2.theme import IconEngine
 from rascal2.settings import update_recent_projects
+from rascal2.theme import IconEngine
 
 # global variable for required project files
 PROJECT_FILES = ["controls.json", "project.json"]
