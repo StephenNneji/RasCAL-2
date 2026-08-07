@@ -147,22 +147,6 @@ StartUpWidget QToolButton#ImportR1Button{
     StartUpDialog Styles
 *****************************/
 
-StartupDialog #CancelButton {
-    icon: url(@Path/cancel-dark.png);
-}
-
-StartupDialog #BrowseButton {
-    icon: url(@Path/browse-light.png);
-}
-
-StartupDialog #CreateButton {
-    icon: url(@Path/create-light.png);
-}
-
-StartupDialog #LoadButton {
-    icon: url(@Path/load-light.png);
-}
-
 StartupDialog > QLabel {
     font-weight: bold;
 }
@@ -170,8 +154,6 @@ StartupDialog > QLabel {
 StartupDialog QLineEdit[error="true"] {
     border: 1px solid #E34234;
 }
-
-StartupDialog QListWidget::item{color:green;}
 
 StartupDialog QListWidget::item:hover {
     background-color: @Highlight;
@@ -414,6 +396,10 @@ QMenuBar::item:pressed {
   color: black;
 }
 
+QMenu::item:selected {
+  color: @HighlightedText;
+}
+
 /*****************************
    ProjectListWidget Styles
 *****************************/
@@ -433,7 +419,7 @@ AbstractProjectListWidget QTableView {
 
 AbstractProjectListWidget QTableView::item:selected:!active{
     background-color: @Highlight;
-    color: @HighlightText;
+    color: @HighlightedText;
 }
 
 #CountHeader::section {

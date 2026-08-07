@@ -79,7 +79,6 @@ class BayesPlotsDialog(QtWidgets.QDialog):
         self.resize_timer = 0
 
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
-        self.setWindowFlag(QtCore.Qt.WindowType.WindowMaximizeButtonHint, True)
 
         layout = QtWidgets.QVBoxLayout()
         self.plot_tabs = QtWidgets.QTabWidget()
