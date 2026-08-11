@@ -16,8 +16,6 @@ from rascal2.settings import update_recent_projects
 
 from .model import InvalidResultWarning, MainWindowModel, validate_plot_data
 
-START_PROCESSES = bool(os.getenv("START_PROCESSES", "True"))
-
 
 class MainWindowPresenter:
     """Facilitates interaction between View and Model.
@@ -32,11 +30,11 @@ class MainWindowPresenter:
         self.view = view
         self.model = MainWindowModel()
         self.worker = None
-        self.runner = RATRunner(self, start_runners_early=START_PROCESSES)
+        self.runner = RATRunner(self)
         self.runner.finished.connect(self.handle_results)
         self.runner.stopped.connect(self.handle_interrupt)
         self.runner.event_received.connect(self.handle_event)
-        self.runner.start_processes()
+        self.runner.process.start()
 
     def create_project(self, name: str, save_path: str):
         """Create a new RAT project and controls object then initialise UI.
@@ -201,13 +199,12 @@ class MainWindowPresenter:
 
     def interrupt_terminal(self):
         """Send an interrupt signal to the RAT runner."""
-        if self.model.controls.procedure in [rat.utils.enums.Procedures.Simplex, rat.utils.enums.Procedures.DE]:
-            self.model.controls.sendStopEvent()
-        else:
-            if not self.view.show_confirm_stop_calculation_dialog():
-                return
-            if self.runner.process.is_alive():
-                self.runner.interrupt()
+        if (
+            self.model.controls.procedure not in [rat.utils.enums.Procedures.Simplex, rat.utils.enums.Procedures.DE]
+            and not self.view.show_confirm_stop_calculation_dialog()
+        ):
+            return
+        self.model.controls.sendStopEvent()
 
     def quick_run(self, project=None):
         """Run rat calculation with calculate procedure on the given project.
