@@ -74,7 +74,8 @@ class AbstractModelEdit(QtGui.QUndoCommand):
                     LOGGER.error(message, exc_info=ex)
                     self.presenter.view.terminal_widget.write(message)
             self.presenter.model.update_results(self.new_result)
-            self.presenter.view.controls_widget.update_chi_squared(self.new_result.calculationResults.sumChi)
+            sum_chi = "" if self.new_result is None else self.new_result.calculationResults.sumChi
+            self.presenter.view.controls_widget.update_chi_squared(sum_chi)
         else:
             self.new_result = self.old_result
 

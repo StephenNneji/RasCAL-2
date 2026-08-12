@@ -344,6 +344,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.plot_widget.clear()
         self.terminal_widget.clear()
         self.terminal_widget.write_startup()
+        self.terminal_widget.progress_bar.setVisible(False)
 
     def reset_mdi_layout(self):
         """Reset MDI layout to the default."""
