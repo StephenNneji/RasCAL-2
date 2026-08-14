@@ -3,11 +3,12 @@ import platform
 import sys
 from contextlib import suppress
 
-from PyQt6 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from rascal2.config import LOGGER, SETTINGS, MatlabHelper
 from rascal2.paths import MATLAB_ARCH_FILE
 from rascal2.settings import SettingsGroups, change_ui_style
+from rascal2.theme import IconEngine
 from rascal2.widgets.inputs import get_validated_input
 
 
@@ -152,7 +153,7 @@ class MatlabSetupTab(QtWidgets.QWidget):
         self.matlab_path.setPlaceholderText("Select MATLAB directory")
         self.matlab_path.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
 
-        browse_button = QtWidgets.QPushButton("Browse", objectName="BrowseButton")
+        browse_button = QtWidgets.QPushButton(QtGui.QIcon(IconEngine("browse-light.png")), "Browse")
         browse_button.clicked.connect(self.open_folder_selector)
         form_layout.addWidget(self.matlab_path, 0, 0, 1, 4)
         form_layout.addWidget(browse_button, 0, 4, 1, 1)

@@ -126,7 +126,11 @@ jobs:
           security import ./dev_id_install_certificate.p12 -A -t cert -f pkcs12 -k $KEYCHAIN_PATH -P "$PKG_SIGNING_PASSWORD" -T /usr/bin/codesign
           security list-keychain -d user -s $KEYCHAIN_PATH
           
-          ARCH="arm64"
+          if [ ${{ matrix.platform }} == "macos-14" ]; then
+            ARCH="arm64"
+          else
+            ARCH="x64"
+          fi
           echo -n $API_CONNECT_KEY | base64 -d -o  ./auth_key.p8
           chmod 777 ../bundle/rascal.app/Contents/Resources/matlab/engine/_arch.txt
           chmod 777 make.sh

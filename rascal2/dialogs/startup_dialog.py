@@ -2,12 +2,13 @@ import os
 import traceback
 from pathlib import Path
 
-from PyQt6 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from rascal2.config import LOGGER
 from rascal2.core.worker import Worker
 from rascal2.paths import EXAMPLES_PATH
 from rascal2.settings import update_recent_projects
+from rascal2.theme import IconEngine
 
 # global variable for required project files
 PROJECT_FILES = ["controls.json", "project.json"]
@@ -84,7 +85,7 @@ class StartupDialog(QtWidgets.QDialog):
         list[QtWidgets.QWidget]
             A list of the widgets to be added to the bottom of the dialog, from left to right.
         """
-        self.cancel_button = QtWidgets.QPushButton("Cancel", objectName="CancelButton")
+        self.cancel_button = QtWidgets.QPushButton(QtGui.QIcon(IconEngine("cancel-light.png")), "Cancel")
         self.cancel_button.clicked.connect(self.reject)
 
         return [self.cancel_button]
@@ -107,7 +108,7 @@ class StartupDialog(QtWidgets.QDialog):
         self.project_folder.setPlaceholderText("Select project folder")
         self.project_folder.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
 
-        browse_button = QtWidgets.QPushButton("Browse", objectName="BrowseButton")
+        browse_button = QtWidgets.QPushButton(QtGui.QIcon(IconEngine("browse-light.png")), "Browse")
         browse_button.clicked.connect(self.open_folder_selector)
 
         self.project_folder_error = QtWidgets.QLabel("", objectName="ErrorLabel")
@@ -237,7 +238,7 @@ class NewProjectDialog(StartupDialog):
         super().create_form(form_layout)
 
     def create_buttons(self) -> list[QtWidgets.QWidget]:
-        create_button = QtWidgets.QPushButton("Create", objectName="CreateButton")
+        create_button = QtWidgets.QPushButton(QtGui.QIcon(IconEngine("create-light.png")), "Create")
         create_button.clicked.connect(self.create_project)
 
         return [create_button] + super().create_buttons()
@@ -381,7 +382,7 @@ class LoadDialog(StartupDialog):
             item.setSizeHint(item_widget.sizeHint())
 
     def create_buttons(self) -> list[QtWidgets.QWidget]:
-        load_button = QtWidgets.QPushButton("Load", objectName="LoadButton")
+        load_button = QtWidgets.QPushButton(QtGui.QIcon(IconEngine("load-light.png")), "Load")
         load_button.clicked.connect(self.load_project)
 
         return [load_button] + super().create_buttons()
@@ -450,7 +451,7 @@ class LoadR1Dialog(StartupDialog):
         self.project_folder.setPlaceholderText("Select RasCAL-1 file")
 
     def create_buttons(self):
-        load_button = QtWidgets.QPushButton("Load", objectName="LoadButton")
+        load_button = QtWidgets.QPushButton(QtGui.QIcon(IconEngine("load-light.png")), "Load")
         load_button.clicked.connect(self.load_project)
 
         return [load_button] + super().create_buttons()
