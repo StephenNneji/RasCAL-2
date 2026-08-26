@@ -48,23 +48,6 @@ def test_start(mock_process, mock_matlab):
     assert runner.timer.isActive()
 
 
-# @patch("rascal2.core.runner.MatlabHelper", autospec=True)
-# @patch("rascal2.core.runner.Process")
-# def test_interrupt(mock_process, mock_matlab):
-#     """Test that `interrupt` kills the process and stops the timer."""
-#     mock_matlab.return_value = MagicMock()
-#     runner = RATRunner()
-#     runner.process = MagicMock()
-#     runner.clear_process = MagicMock()
-#     runner.set_runner_args([], "", True, os.getcwd())
-#     runner.interrupt()
-#
-#     runner.process.kill.assert_called_once()
-#     assert not runner.timer.isActive()
-#
-#     close_processes(runner)
-
-
 @pytest.mark.parametrize(
     "queue_items",
     [
@@ -221,44 +204,3 @@ def test_run_examples(example):
 
     assert isinstance(output[0], rat.rat_core.ProblemDefinition)
     assert isinstance(output[1], rat.outputs.Results)
-
-
-# @patch("rascal2.core.runner.MatlabHelper", autospec=True)
-# @patch("rascal2.core.runner.Process")
-# def test_start_reuses_process(mock_process, mock_matlab):
-#     """Test that when running `start` a second time, it will reuse the previous process."""
-#     mock_matlab.return_value = MagicMock()
-#     mock_go = MagicMock()
-#     #mock_process_go_exit.return_value = MagicMock(), (mock_go, MagicMock())
-#     runner = RATRunner()
-#     runner.process = None
-#     runner.get_runner_matlab_engine = MagicMock()
-#     runner.set_runner_args(make_rat_input(), "", True, os.getcwd())
-#     runner.start()
-#     #runner.get_new_process.assert_called_once()
-#     runner.start()
-#     #runner.get_new_process.assert_called_once()
-#     close_processes(runner)
-
-
-# @patch("rascal2.core.runner.MatlabHelper", autospec=True)
-# @patch("rascal2.core.runner.Process")
-# def test_interrupt_creates_new_process(mock_process, mock_matlab):
-#     """Test that when interrupting a process, it will use a new process on next run."""
-#     mock_matlab.return_value = MagicMock()
-#     mock_go = MagicMock()
-#     #mock_process_go_exit.return_value = MagicMock(), (mock_go, MagicMock())
-#     runner = RATRunner()
-#     runner.process = None
-#     runner.get_runner_matlab_engine = MagicMock()
-#     #runner.get_new_process = MagicMock(return_value=(MagicMock(), (MagicMock(), MagicMock())))
-#     runner.set_runner_args(make_rat_input(), "", True, os.getcwd())
-#     runner.start()
-#     #runner.get_new_process.assert_called_once()
-#     assert runner.process is not None
-#     runner.interrupt()
-#     assert runner.process is None
-#     runner.start()
-#     assert runner.process is not None
-#     assert runner.get_new_process.call_count == 2
-#     close_processes(runner)

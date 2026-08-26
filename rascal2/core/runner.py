@@ -58,18 +58,6 @@ class RATRunner(QtCore.QObject):
         self.go_event.set()
         self.timer.start()
 
-    # def interrupt(self):
-    #     """Interrupt the running process."""
-    #     self.timer.stop()
-    #     self.process.kill()
-    #     self.stopped.emit()
-    #     self.go_event.clear()
-    #     self.clear_process()
-
-    # def clear_process(self):
-    #     """Clear the current process."""
-    #     self.process = None
-
     def check_queue(self):
         """Check for new data in the queue."""
         if self.process is None or not self.process.is_alive():
