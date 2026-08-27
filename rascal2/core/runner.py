@@ -12,6 +12,12 @@ from PyQt6 import QtCore
 from rascal2.config import MatlabHelper, get_matlab_engine
 
 
+def clear_queue(queue):
+    queue.put(None)
+    for _ in iter(queue.get, None):
+        pass
+
+
 class RATRunner(QtCore.QObject):
     """Class for running rat."""
 
@@ -28,6 +34,8 @@ class RATRunner(QtCore.QObject):
 
         # this queue handles both event data and results
         self.queue = Queue()
+        self.msg_queue = Queue()
+        self.plot_queue = Queue()
         self.arg_queue = Queue()
         self.go_event = Event()
         self.exit_event = Event()
@@ -37,6 +45,8 @@ class RATRunner(QtCore.QObject):
             args=(
                 self.queue,
                 self.arg_queue,
+                self.msg_queue,
+                self.plot_queue,
                 self.go_event,
                 self.exit_event,
                 matlab_helper.ready_event,
@@ -49,6 +59,7 @@ class RATRunner(QtCore.QObject):
         self.events = []
 
     def set_runner_args(self, rat_inputs, procedure, display_on: bool, working_dir: str):
+        self.clear_queues_and_events()
         self.arg_queue.put((rat_inputs, procedure, display_on, working_dir))
 
     def start(self):
@@ -58,30 +69,68 @@ class RATRunner(QtCore.QObject):
         self.go_event.set()
         self.timer.start()
 
+    def _handle_plot_event(self):
+        item = None
+        while not self.plot_queue.empty():
+            item = self.plot_queue.get()
+        else:
+            if item is not None:
+                self.events.append(item)
+                self.event_received.emit()
+
+    def _handle_msg_event(self):
+        text = ""
+        while not self.msg_queue.empty():
+            item = self.msg_queue.get()
+            if isinstance(item, str):
+                text += item[:-1] if item.endswith("\n\n") else item
+            if isinstance(item, LogData):
+                if text:
+                    self.events.append(text)
+                    self.event_received.emit()
+                    text = ""
+                self.events.append(item)
+                self.event_received.emit()
+        if text:
+            self.events.append(text)
+            self.event_received.emit()
+
+    def handle_msg_and_plot_event(self):
+        self._handle_plot_event()
+        self._handle_msg_event()
+
     def check_queue(self):
         """Check for new data in the queue."""
         if self.process is None or not self.process.is_alive():
             self.timer.stop()
 
+        self.handle_msg_and_plot_event()
         self.queue.put(None)
         for item in iter(self.queue.get, None):
             if isinstance(item, tuple):
                 self.updated_problem, self.results = item
                 self.go_event.clear()
-                self.finished.emit()
+                self.handle_msg_and_plot_event()
+                if is_empty_bayes_result(self.results):
+                    self.stopped.emit()
+                else:
+                    self.finished.emit()
                 self.timer.stop()
             elif isinstance(item, Exception):
                 self.error = item
                 self.go_event.clear()
+                self.handle_msg_and_plot_event()
                 self.stopped.emit()
                 self.timer.stop()
             else:  # else, assume item is an event
                 self.events.append(item)
                 self.event_received.emit()
 
-    def clear_queues(self):
-        self.queue.empty()
-        self.arg_queue.empty()
+    def clear_queues_and_events(self):
+        clear_queue(self.queue)
+        clear_queue(self.arg_queue)
+        clear_queue(self.msg_queue)
+        clear_queue(self.plot_queue)
         self.events.clear()
         self.go_event.clear()
         self.exit_event.clear()
@@ -91,8 +140,7 @@ class RATRunner(QtCore.QObject):
         if self.process.is_alive():
             self.process.kill()
         self.process = None
-        self.queue.empty()
-        self.clear_queues()
+        self.clear_queues_and_events()
 
 
 def init_matlab_engine(problem_definition, engine_ready, engine_output, queue):
@@ -117,7 +165,13 @@ def stop_matlab_engine(engine_future):
         engine_future.result().exit()
 
 
-def run(queue: Queue, arg_queue: Queue, go_event, exit_event, engine_ready, engine_output):
+def is_empty_bayes_result(result):
+    return isinstance(result, rat.BayesResults) and result.chain.shape == (1, 2)
+
+
+def run(
+    queue: Queue, arg_queue: Queue, msg_queue: Queue, plot_queue, go_event, exit_event, engine_ready, engine_output
+):
     """Run RAT and put the result into the queue.
 
     Parameters
@@ -139,10 +193,10 @@ def run(queue: Queue, arg_queue: Queue, go_event, exit_event, engine_ready, engi
         problem_definition, cpp_controls = rat_inputs
 
         if display:
-            rat.events.register(rat.events.EventTypes.Message, queue.put)
+            rat.events.register(rat.events.EventTypes.Message, msg_queue.put)
             rat.events.register(rat.events.EventTypes.Progress, queue.put)
-            rat.events.register(rat.events.EventTypes.Plot, queue.put)
-            queue.put(LogData(INFO, "Starting RAT"))
+            rat.events.register(rat.events.EventTypes.Plot, plot_queue.put)
+            msg_queue.put(LogData(INFO, "Starting RAT"))
 
         try:
             sys.path.append(working_dir)
@@ -157,7 +211,8 @@ def run(queue: Queue, arg_queue: Queue, go_event, exit_event, engine_ready, engi
             sys.path.remove(working_dir)
 
         if display:
-            queue.put(LogData(INFO, "Finished RAT"))
+            msg = "RAT run interrupted!" if is_empty_bayes_result(results) else "Finished RAT"
+            msg_queue.put(LogData(INFO, msg))
             rat.events.clear()
 
         queue.put((problem_definition, results))

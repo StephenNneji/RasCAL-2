@@ -246,7 +246,6 @@ class MainWindowPresenter:
         rat_inputs = rat.inputs.make_input(self.model.project, self.model.controls)
         display_on = self.model.controls.display != rat.utils.enums.Display.Off
         self.runner.set_runner_args(rat_inputs, self.model.controls.procedure, display_on, working_dir)
-        self.view.terminal_widget.write("Initializing RAT Process...")
         self.runner.start()
 
     def handle_results(self):
@@ -261,13 +260,10 @@ class MainWindowPresenter:
         )
         self.view.handle_results(self.runner.results)
         self.model.controls.delete_IPC()
-        self.runner.clear_queues()
 
     def handle_interrupt(self):
         """Handle a RAT run being interrupted."""
-        if self.runner.error is None:
-            LOGGER.info("RAT run interrupted!")
-        else:
+        if self.runner.error is not None:
             LOGGER.error("RAT run failed with exception.\n", exc_info=self.runner.error)
         self.view.handle_results()
         self.model.controls.delete_IPC()
@@ -279,6 +275,7 @@ class MainWindowPresenter:
             case str():
                 self.view.terminal_widget.write(event)
                 chi_squared = get_live_chi_squared(event, str(self.model.controls.procedure))
+
                 if chi_squared is not None:
                     self.view.controls_widget.update_chi_squared(chi_squared)
             case rat.events.ProgressEventData():
@@ -342,4 +339,7 @@ def get_live_chi_squared(item: str, procedure: str) -> str | None:
     if procedure not in chi_squared_patterns:
         return None
     # match returns None if no match found, so whether one is found can be checked via 'if match'
-    return match.group(1) if (match := chi_squared_patterns[procedure].search(item)) else None
+    for line in reversed(item.splitlines()):
+        if match := chi_squared_patterns[procedure].search(line):
+            return match.group(1)
+    return None
