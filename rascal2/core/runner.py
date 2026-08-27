@@ -180,13 +180,21 @@ def run(queue: Queue, arg_queue: Queue, go_event, exit_event, engine_ready, engi
 
     """
     engine_future = None
+    print(1)
     while True:
+        print(2)
         go_event.wait()
+        print(3)
         if exit_event.is_set():
+            print(4)
             stop_matlab_engine(engine_future)
+            print(5)
             return
+        print(6)
         rat_inputs, procedure, display, working_dir = arg_queue.get()
+        print(7)
         os.chdir(working_dir)
+        print(8)
         problem_definition, cpp_controls = rat_inputs
 
         if display:
@@ -194,18 +202,28 @@ def run(queue: Queue, arg_queue: Queue, go_event, exit_event, engine_ready, engi
             rat.events.register(rat.events.EventTypes.Progress, queue.put)
             rat.events.register(rat.events.EventTypes.Plot, queue.put)
             queue.put(LogData(INFO, "Starting RAT"))
+            print(9)
 
         try:
+            print(10, working_dir)
             sys.path.append(working_dir)
+            print(11)
             engine_future = init_matlab_engine(problem_definition, engine_ready, engine_output, queue)
+            print(12)
             problem_definition, output_results, bayes_results = rat.rat_core.RATMain(problem_definition, cpp_controls)
+            print(13)
             results = rat.outputs.make_results(procedure, output_results, bayes_results)
+            print(14)
         except Exception as err:
             queue.put(err)
+            print(15)
             go_event.clear()
+            print(16)
             continue
+            print(17)
         finally:
             sys.path.remove(working_dir)
+            print(18)
 
         if display:
             queue.put(LogData(INFO, "Finished RAT"))
