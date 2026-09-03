@@ -1,5 +1,6 @@
 """The Plot MDI widget."""
 
+import copy
 from abc import abstractmethod
 from inspect import isclass
 
@@ -390,7 +391,47 @@ class AbstractPlotWidget(QtWidgets.QWidget):
         if accepted:
             sx = self.figure.get_figwidth() * self.figure.dpi
             dpi = self.figure.dpi if sx > 1920 else 1920 // self.figure.get_figwidth()
-            self.figure.savefig(filepath, facecolor=SETTINGS.export_background_colour, dpi=dpi)
+            scheme = get_correct_qt_color_scheme()
+            if scheme == QtCore.Qt.ColorScheme.Light:
+                self.figure.savefig(filepath, facecolor=SETTINGS.export_background_colour, dpi=dpi)
+            else:
+                old_colours = matplotlib.rcParams["axes.prop_cycle"].by_key()["color"]
+                with matplotlib.style.context("default"):
+                    edge_colour = matplotlib.rcParams["axes.edgecolor"]
+                    face_colour = matplotlib.rcParams["axes.facecolor"]
+                    new_colours = matplotlib.rcParams["axes.prop_cycle"].by_key()["color"]
+                    colour_converter = dict(zip(old_colours, new_colours, strict=False))
+                    temp_fig = copy.deepcopy(self.figure)
+                    axes = temp_fig.axes
+                    for ax in axes:
+                        if not ax.get_visible():
+                            continue
+                        if ax.containers:
+                            for container in ax.containers:
+                                if isinstance(container, matplotlib.container.ErrorbarContainer):
+                                    _, __, (vertical_lines,) = container.lines
+                                    vertical_lines.set_color(
+                                        colour_converter[
+                                            matplotlib.colors.rgb2hex(vertical_lines.get_color(), keep_alpha=False)
+                                        ]
+                                    )
+                        ax.patch.set_facecolor(face_colour)
+                        for spine in ax.spines.values():
+                            spine.set_edgecolor(edge_colour)
+                        ax.tick_params(which="both", axis="both", color="black", labelcolor=edge_colour)
+                        ax.xaxis.label.set_color(edge_colour)
+                        ax.yaxis.label.set_color(edge_colour)
+                        ax.set_title(ax.get_title(loc="left"), color=edge_colour, loc="left")
+                        if ax.get_legend() is not None:
+                            ax.legend(facecolor="white", labelcolor=edge_colour)
+                            for line in ax.get_legend().get_lines():
+                                old_line_colour = line.get_color()
+                                line.set_color(colour_converter[old_line_colour])
+                        for line in ax.get_lines():
+                            old_line_colour = line.get_color()
+                            line.set_color(colour_converter[old_line_colour])
+
+                    temp_fig.savefig(filepath, facecolor=SETTINGS.export_background_colour, dpi=dpi)
 
     def changeEvent(self, event):
         if self.toolbar is not None and event.type() == QtCore.QEvent.Type.PaletteChange:
