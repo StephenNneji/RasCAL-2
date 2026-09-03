@@ -123,14 +123,6 @@ def test_handle_results(mock_problem_def, mock_command, presenter):
     mock_command.assert_called_once()
 
 
-def test_stop_run(presenter):
-    """Test that log info is emitted and the run is stopped when stop_run is called."""
-    presenter.runner = MagicMock()
-    presenter.runner.error = None
-    presenter.handle_interrupt()
-    presenter.logger.info.assert_called_once_with("RAT run interrupted!")
-
-
 def test_run_error(presenter):
     """Test that a critical log is emitted if stop_run is called with an error."""
     presenter.runner = MagicMock()

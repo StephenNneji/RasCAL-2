@@ -13,6 +13,13 @@ from rascal2.config import MatlabHelper, get_matlab_engine
 
 
 def clear_queue(queue):
+    """Clear multiprocessing queue.
+
+    Parameters
+    ----------
+    queue : multiprocessing.Queue
+        multiprocessing queue.
+    """
     queue.put(None)
     for _ in iter(queue.get, None):
         pass
@@ -32,11 +39,19 @@ class RATRunner(QtCore.QObject):
         self.timer.setInterval(1)
         self.timer.timeout.connect(self.check_queue)
 
-        # this queue handles both event data and results
+        # this queue handles both progress event data and results
         self.queue = Queue()
         self.msg_queue = Queue()
         self.plot_queue = Queue()
         self.arg_queue = Queue()
+        self.create_process()
+        self.updated_problem = None
+        self.results = None
+        self.error = None
+        self.events = []
+
+    def create_process(self):
+        """Create process and multiprocessing event."""
         self.go_event = Event()
         self.exit_event = Event()
         matlab_helper = MatlabHelper()
@@ -53,23 +68,35 @@ class RATRunner(QtCore.QObject):
                 matlab_helper.engine_output,
             ),
         )
-        self.updated_problem = None
-        self.results = None
-        self.error = None
-        self.events = []
 
     def set_runner_args(self, rat_inputs, procedure, display_on: bool, working_dir: str):
+        """Send arguments to the running process.
+
+        Parameters
+        ----------
+        rat_inputs: tuple
+            Problem and controls for the run.
+        procedure: Procedures
+            Procedure to run.
+        display_on: bool
+            Indicates if displaying is allowed.
+        working_dir: str
+            working directory of the project.
+        """
         self.clear_queues_and_events()
         self.arg_queue.put((rat_inputs, procedure, display_on, working_dir))
 
     def start(self):
         """Start the calculation."""
         if not self.process.is_alive():
+            # recreate the proces if it got killed somehow
+            self.create_process()
             self.process.start()
         self.go_event.set()
         self.timer.start()
 
     def _handle_plot_event(self):
+        """Handle for plot events."""
         item = None
         while not self.plot_queue.empty():
             item = self.plot_queue.get()
@@ -79,6 +106,7 @@ class RATRunner(QtCore.QObject):
                 self.event_received.emit()
 
     def _handle_msg_event(self):
+        """Handle for message events."""
         text = ""
         while not self.msg_queue.empty():
             item = self.msg_queue.get()
@@ -96,6 +124,7 @@ class RATRunner(QtCore.QObject):
             self.event_received.emit()
 
     def handle_msg_and_plot_event(self):
+        """Handle for message and plot events."""
         self._handle_plot_event()
         self._handle_msg_event()
 
@@ -127,6 +156,7 @@ class RATRunner(QtCore.QObject):
                 self.event_received.emit()
 
     def clear_queues_and_events(self):
+        """Clear the queues and events used by the runner."""
         clear_queue(self.queue)
         clear_queue(self.arg_queue)
         clear_queue(self.msg_queue)
@@ -136,6 +166,7 @@ class RATRunner(QtCore.QObject):
         self.exit_event.clear()
 
     def stop(self):
+        """Stop the runner."""
         self.event_received.disconnect()
         if self.process.is_alive():
             self.process.kill()
@@ -143,12 +174,29 @@ class RATRunner(QtCore.QObject):
         self.clear_queues_and_events()
 
 
-def init_matlab_engine(problem_definition, engine_ready, engine_output, queue):
-    """Initialise the Matlab engine if using a Matlab custom file and returns the engine future if available."""
+def init_matlab_engine(problem_definition, engine_ready, engine_output, msg_queue):
+    """Initialise the Matlab engine if using a Matlab custom file and returns the engine future if available.
+
+    Parameters
+    ----------
+    problem_definition : RAT.rat_core.ProblemDefinition
+        The problem input used in the compiled RAT code.
+    engine_ready : multiprocessing.Event
+        An event to inform listeners that MATLAB is ready.
+    engine_output : multiprocessing.Manager.list
+        A list with the name of MATLAB engine instance or an exception from the MatlabHelper.
+    msg_queue : multiprocessing.Queue
+        A queue for messages.
+
+    Returns
+    -------
+    output : matlab.engine.futureresult.FutureResult
+        MATLAB engine future or Exception from MatlabHelper.
+    """
     engine_future = rat.wrappers.MatlabWrapper.loader
     if engine_future is None and any([file["language"] == "matlab" for file in problem_definition.customFiles.files]):
         if not engine_output:
-            queue.put(LogData(INFO, "Attempting to start Matlab..."))
+            msg_queue.put(LogData(INFO, "Attempting to start Matlab..."))
 
         result = get_matlab_engine(engine_ready, engine_output)
         if isinstance(result, Exception):
@@ -160,12 +208,25 @@ def init_matlab_engine(problem_definition, engine_ready, engine_output, queue):
 
 
 def stop_matlab_engine(engine_future):
-    """Exit the Matlab engine future if present."""
+    """Exit the Matlab engine future if present.
+
+    Parameters
+    ----------
+    engine_future : Union[matlab.engine.futureresult.FutureResult, None]
+        MATLAB engine future or Exception from MatlabHelper.
+    """
     if engine_future is not None:
         engine_future.result().exit()
 
 
 def is_empty_bayes_result(result):
+    """Check if result is an empty BayesResults.
+
+    Parameters
+    ----------
+    result : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
+        The calculation results.
+    """
     return isinstance(result, rat.BayesResults) and result.chain.shape == (1, 2)
 
 
@@ -180,7 +241,18 @@ def run(
         The interprocess queue for the RATRunner.
     arg_queue :
         A queue of arguments used to initialize the RAT process, passed from the Main Presenter
-
+    msg_queue : multiprocessing.Queue
+        A queue for messages.
+    plot_queue : multiprocessing.Queue
+        A queue for messages.
+    go_event : multiprocessing.Event
+        An event to inform run function to proceed.
+    exit_event : multiprocessing.Event
+        An event to inform run function to exit.
+    engine_ready : multiprocessing.Event
+        An event to inform listeners that MATLAB is ready.
+    engine_output : multiprocessing.Manager.list
+        A list with the name of MATLAB engine instance or an exception from the MatlabHelper.
     """
     engine_future = None
     while True:
@@ -200,7 +272,7 @@ def run(
 
         try:
             sys.path.append(working_dir)
-            engine_future = init_matlab_engine(problem_definition, engine_ready, engine_output, queue)
+            engine_future = init_matlab_engine(problem_definition, engine_ready, engine_output, msg_queue)
             problem_definition, output_results, bayes_results = rat.rat_core.RATMain(problem_definition, cpp_controls)
             results = rat.outputs.make_results(procedure, output_results, bayes_results)
         except Exception as err:

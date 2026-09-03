@@ -246,6 +246,7 @@ class MainWindowPresenter:
         rat_inputs = rat.inputs.make_input(self.model.project, self.model.controls)
         display_on = self.model.controls.display != rat.utils.enums.Display.Off
         self.runner.set_runner_args(rat_inputs, self.model.controls.procedure, display_on, working_dir)
+        self.view.terminal_widget.write("Initializing RAT Process...")
         self.runner.start()
 
     def handle_results(self):
@@ -275,7 +276,6 @@ class MainWindowPresenter:
             case str():
                 self.view.terminal_widget.write(event)
                 chi_squared = get_live_chi_squared(event, str(self.model.controls.procedure))
-
                 if chi_squared is not None:
                     self.view.controls_widget.update_chi_squared(chi_squared)
             case rat.events.ProgressEventData():
