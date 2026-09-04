@@ -529,7 +529,7 @@ class MainWindowView(QtWidgets.QMainWindow):
 
         no_show_check_box = QtWidgets.QCheckBox("Do not show this again")
         message_box.setCheckBox(no_show_check_box)
-        no_show_check_box.toggled.connect(lambda val: setattr(self.settings, "show_stop_calculation_warning", not val))
+        no_show_check_box.toggled.connect(lambda val: setattr(SETTINGS, "show_stop_calculation_warning", not val))
         message_box.exec()
         SETTINGS.set_global_settings()
         return message_box.clickedButton() == yes_button
