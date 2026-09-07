@@ -1,5 +1,6 @@
 """QObject for running rat."""
 
+from io import StringIO
 import os
 import sys
 from dataclasses import dataclass
@@ -194,7 +195,12 @@ def init_matlab_engine(problem_definition, engine_ready, engine_output, msg_queu
         MATLAB engine future or Exception from MatlabHelper.
     """
     engine_future = rat.wrappers.MatlabWrapper.loader
-    if engine_future is None and any([file["language"] == "matlab" for file in problem_definition.customFiles.files]):
+    files = (
+        problem_definition["custom_files"]
+        if isinstance(problem_definition, dict)
+        else problem_definition.customFiles.files
+    )
+    if engine_future is None and any([file["language"] == "matlab" for file in files]):
         if not engine_output:
             msg_queue.put(LogData(INFO, "Attempting to start Matlab..."))
 
@@ -227,7 +233,7 @@ def is_empty_bayes_result(result):
     result : Union[ratapi.outputs.Results, ratapi.outputs.BayesResults]
         The calculation results.
     """
-    return isinstance(result, rat.BayesResults) and result.chain.shape == (1, 2)
+    return isinstance(result, rat.BayesResults) and result.chain.size == 2
 
 
 def run(
@@ -272,9 +278,20 @@ def run(
 
         try:
             sys.path.append(working_dir)
-            engine_future = init_matlab_engine(problem_definition, engine_ready, engine_output, msg_queue)
-            problem_definition, output_results, bayes_results = rat.rat_core.RATMain(problem_definition, cpp_controls)
-            results = rat.outputs.make_results(procedure, output_results, bayes_results)
+            engine_future = init_matlab_engine(problem_definition, engine_ready, engine_output, queue)
+
+            if isinstance(cpp_controls, dict):
+                ipc_path = cpp_controls.pop("ipc_path")
+                matlab_rat_path = cpp_controls.pop("matlab_rat_path")
+                problem, results = rat.matlab.run_matlab_directly(
+                    problem_definition, cpp_controls, matlab_rat_path, ipc_path, stderr=StringIO(), stdout=StringIO()
+                )
+                problem_definition = rat.inputs.make_problem(problem)
+            else:
+                problem_definition, output_results, bayes_results = rat.rat_core.RATMain(
+                    problem_definition, cpp_controls
+                )
+                results = rat.outputs.make_results(procedure, output_results, bayes_results)
         except Exception as err:
             queue.put(err)
             go_event.clear()

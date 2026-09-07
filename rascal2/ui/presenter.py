@@ -12,7 +12,7 @@ from rascal2.core import commands
 from rascal2.core.enums import UnsavedReply
 from rascal2.core.runner import LogData, RATRunner
 from rascal2.core.writer import write_result_to_zipped_csvs
-from rascal2.settings import update_recent_projects
+from rascal2.settings import update_recent_projects, get_global_settings
 
 from .model import InvalidResultWarning, MainWindowModel, validate_plot_data
 
@@ -243,8 +243,14 @@ class MainWindowPresenter:
 
         self.model.controls.initialise_IPC()
         working_dir = os.getcwd()
-        rat_inputs = rat.inputs.make_input(self.model.project, self.model.controls)
         display_on = self.model.controls.display != rat.utils.enums.Display.Off
+        rat_inputs = rat.inputs.make_input(self.model.project, self.model.controls)
+
+        matlab_rat_path = get_global_settings().value("matlab_rat_path", "")
+        if any([file.language == "matlab" for file in self.model.project.custom_files]) and matlab_rat_path:
+            # Run in MATLAB RAT
+            rat_inputs = self.model.project.to_dict(), self.model.controls.model_dump()
+            rat_inputs[1].update({"ipc_path": self.model.controls._IPCFilePath, "matlab_rat_path": matlab_rat_path})
         self.runner.set_runner_args(rat_inputs, self.model.controls.procedure, display_on, working_dir)
         self.view.terminal_widget.write("Initializing RAT Process...")
         self.runner.start()
