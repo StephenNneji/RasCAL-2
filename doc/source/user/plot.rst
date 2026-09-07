@@ -22,7 +22,7 @@ bottom of the window.
    :align: center
 
 The plot window provides more options for customising the plots in a side panel, the |options| button toggles the
-visibility of the side panel which can be hidden to amke the plots slightly bigger. The side panel contains the
+visibility of the side panel which can be hidden to make the plots slightly bigger. The side panel contains the
 following options:
 
 1. **X-Axis**: sets the X-Axis of the reflectivity curve to linear or log scale.
