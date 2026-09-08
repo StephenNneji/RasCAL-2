@@ -1,9 +1,9 @@
 """QObject for running rat."""
 
-from io import StringIO
 import os
 import sys
 from dataclasses import dataclass
+from io import StringIO
 from logging import INFO
 from multiprocessing import Event, Process, Queue
 

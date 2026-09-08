@@ -9,7 +9,6 @@ from rascal2.config import LOGGER, SETTINGS, MatlabHelper
 from rascal2.paths import MATLAB_ARCH_FILE
 from rascal2.settings import SettingsGroups, change_ui_style, get_global_settings
 from rascal2.theme import IconEngine
-
 from rascal2.widgets.inputs import get_validated_input
 
 
@@ -39,8 +38,6 @@ class SettingsDialog(QtWidgets.QDialog):
         self.tab_widget.addTab(SettingsTab(self, SettingsGroups.General), SettingsGroups.General)
         self.tab_widget.addTab(SettingsTab(self, SettingsGroups.Plotting), SettingsGroups.Plotting)
         self.tab_widget.addTab(self.matlab_tab, "Matlab")
-        self.tab_widget.setTabVisible(0, parent.presenter.model.save_path != "")
-        self.tab_widget.setTabVisible(1, parent.presenter.model.save_path != "")
 
         self.reset_button = QtWidgets.QPushButton("Reset to Defaults", self)
         self.reset_button.clicked.connect(self.reset_default_settings)
