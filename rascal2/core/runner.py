@@ -96,7 +96,12 @@ class RATRunner(QtCore.QObject):
             ),
         )
 
-    def set_runner_args(self, rat_inputs, display_on: bool, working_dir: str, need_matlab: bool):
+    def set_runner_args(
+        self,
+        rat_inputs,
+        display_on: bool,
+        working_dir: str,
+    ):
         """Send arguments to the running process.
 
         Parameters
@@ -107,11 +112,9 @@ class RATRunner(QtCore.QObject):
             Indicates if displaying is allowed.
         working_dir: str
             working directory of the project.
-        need_matlab: bool
-            indicates MATLAB is needed for run.
         """
         self.clear_queues_and_events()
-        self.arg_queue.put((rat_inputs, display_on, working_dir, need_matlab))
+        self.arg_queue.put((rat_inputs, display_on, working_dir))
 
     def start(self):
         """Start the calculation."""
@@ -201,11 +204,13 @@ class RATRunner(QtCore.QObject):
         self.clear_queues_and_events()
 
 
-def init_matlab_engine(engine_ready, engine_output, msg_queue):
+def init_matlab_engine(problem_definition, engine_ready, engine_output, msg_queue):
     """Initialise the Matlab engine if using a Matlab custom file and returns the engine future if available.
 
     Parameters
     ----------
+    problem_definition : RAT.rat_core.ProblemDefinition
+        The problem input used in the compiled RAT code.
     engine_ready : multiprocessing.Event
         An event to inform listeners that MATLAB is ready.
     engine_output : multiprocessing.Manager.list
@@ -219,7 +224,12 @@ def init_matlab_engine(engine_ready, engine_output, msg_queue):
         MATLAB engine future or Exception from MatlabHelper.
     """
     engine_future = rat.wrappers.MatlabWrapper.loader
-    if engine_future is None:
+    files = (
+        problem_definition["custom_files"]
+        if isinstance(problem_definition, dict)
+        else problem_definition.customFiles.files
+    )
+    if engine_future is None and any([file["language"] == "matlab" for file in files]):
         if not engine_output:
             msg_queue.put(LogData(INFO, "Attempting to start Matlab..."))
 
@@ -290,7 +300,7 @@ def run(
         if exit_event.is_set():
             stop_matlab_engine(engine_future)
             return
-        rat_inputs, display, working_dir, need_matlab = arg_queue.get()
+        rat_inputs, display, working_dir = arg_queue.get()
         os.chdir(working_dir)
         problem_definition, cpp_controls = rat_inputs
 
@@ -302,8 +312,7 @@ def run(
 
         try:
             sys.path.append(working_dir)
-            if need_matlab:
-                engine_future = init_matlab_engine(engine_ready, engine_output, queue)
+            engine_future = init_matlab_engine(problem_definition, engine_ready, engine_output, queue)
 
             if isinstance(cpp_controls, dict):
                 ipc_path = cpp_controls.pop("ipc_path")

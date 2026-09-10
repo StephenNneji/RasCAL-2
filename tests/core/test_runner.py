@@ -42,7 +42,7 @@ def test_start(mock_process, mock_matlab):
     mock_matlab.return_value = MagicMock()
     runner = RATRunner()
     runner.go_event = MagicMock()
-    runner.set_runner_args(make_rat_input(), True, os.getcwd(), False)
+    runner.set_runner_args(make_rat_input(), True, os.getcwd())
     runner.start()
 
     runner.go_event.set.assert_called_once()
@@ -69,7 +69,7 @@ def test_check_queue(mock_process, mock_matlab, queue_items):
     runner = RATRunner()
     runner.queue = Queue()
     runner.arg_queue = Queue()
-    runner.set_runner_args([], True, os.getcwd(), False)
+    runner.set_runner_args([], True, os.getcwd())
     runner.queue = Queue()
 
     for item in queue_items:
@@ -100,7 +100,7 @@ def test_empty_queue(mock_process, mock_matlab):
     runner = RATRunner()
     runner.queue = Queue()
     runner.arg_queue = Queue()
-    runner.set_runner_args(make_rat_input(), True, os.getcwd(), False)
+    runner.set_runner_args(make_rat_input(), True, os.getcwd())
 
     runner.check_queue()
 
@@ -119,7 +119,7 @@ def test_run(display):
     args_queue = Queue()
     msg_queue = Queue()
     plot_queue = Queue()
-    args_queue.put((make_rat_input(), display, os.getcwd(), False))
+    args_queue.put((make_rat_input(), display, os.getcwd()))
     go_event, exit_event = (Event(), Event())
     go_event.set()
     go_event.clear = lambda: exit_event.set()
@@ -171,7 +171,7 @@ def test_run_error():
         args_queue = Queue()
         msg_queue = Queue()
         plot_queue = Queue()
-        args_queue.put((make_rat_input(), True, os.getcwd(), False))
+        args_queue.put((make_rat_input(), True, os.getcwd()))
         go_event, exit_event = (Event(), Event())
         go_event.set()
         go_event.clear = lambda: exit_event.set()
@@ -204,7 +204,7 @@ def test_run_examples(example):
 
     queue = Queue()
     args_queue = Queue()
-    args_queue.put((rat_inputs, False, os.getcwd(), False))
+    args_queue.put((rat_inputs, False, os.getcwd()))
     plot_queue = Queue()
     msg_queue = Queue()
     engine_ready = Queue()
