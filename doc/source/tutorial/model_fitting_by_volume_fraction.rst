@@ -10,7 +10,7 @@ neutron reflectometry. Two solution isotopic contrasts (|D2O|; red, and |H2O|; b
 scattering length density (SLD) profiles (D) across the surface. The resolved structural parameters are ultimately
 used to resolve the component volume fraction vs. distance profile across the surface:
 
-.. figure:: ../images/tutorial/dmpc_bilayer.png
+.. figure:: /images/tutorial/dmpc_bilayer.png
   :alt: Illustration of structure of DMPC bilayer
 
 The simultaneous fitting of these same two solution isotopic contrast data sets (|H2O| and |D2O|) was used to resolve the
@@ -44,7 +44,7 @@ To test your fitting skills
    Additionally we should fit the tails thickness, headgroup thickness, and a single bilayer roughness parameter (to
    account for undulations across the bilayer). Add these to the **Parameters** tab using the bounds shown below.
 
-   .. figure:: ../images/tutorial/dmpc_bilayer_project_parameters.png
+   .. figure:: /images/tutorial/dmpc_bilayer_project_parameters.png
      :alt: DMPC bilayer project parameters
 
 8. Now we need to edit the custom model to add the DMPC bilayer structure. Go to the General tab and click Edit. Now

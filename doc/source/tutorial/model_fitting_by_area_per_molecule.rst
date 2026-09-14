@@ -17,7 +17,7 @@ therefore only a single parameter for both the head and tail groups needs to be 
 at the surface. Below is a diagrammatic representation of this concept:
 
 
-.. figure:: ../images/tutorial/area_per_molecule.png
+.. figure:: /images/tutorial/area_per_molecule.png
   :alt: Illustration of area per molecule change
 
 In the example we will use the molecular volumes of the head and tail components of DMPC to construct a model which

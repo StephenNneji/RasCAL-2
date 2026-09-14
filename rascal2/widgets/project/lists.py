@@ -137,6 +137,7 @@ class AbstractProjectListWidget(QtWidgets.QWidget):
         self.list.setShowGrid(False)
         self.list.setMinimumWidth(70)
         self.list.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.list.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
 
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)

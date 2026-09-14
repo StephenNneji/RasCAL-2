@@ -16,7 +16,7 @@ The spacing between reflectivity curves in the plot can be adjusted using the sl
 drag and release the slider to change the spacing. The maximum spacing is achieved when the slider is dragged to the
 bottom of the window.
 
-.. image:: ../images/plots_window.png
+.. image:: /images/plots_window.png
    :scale: 80
    :alt: Plots Window
    :align: center
@@ -31,7 +31,7 @@ following options:
 4. **Show Grid**: toggles a grid in both plots.
 5. **Show Legend**: toggles the legend in both plots.
 
-.. image:: ../images/plots_window_settings.png
+.. image:: /images/plots_window_settings.png
    :scale: 80
    :alt: Plots Window Settings
    :align: center
@@ -48,7 +48,7 @@ sections:
 1. **Shaded Plot**: This displays a shaded plot with a 65% or 95% confidence interval for the Bayesian analysis. The
 confidence interval can be changed using the dropdown in the left side panel.
 
-.. image:: ../images/bayes_results_shaded_plot.png
+.. image:: /images/bayes_results_shaded_plot.png
    :scale: 60
    :alt: Bayes Results Dialog showing Shaded Plot
    :align: center
@@ -57,7 +57,7 @@ confidence interval can be changed using the dropdown in the left side panel.
 left side panel, the desired parameters to plot can be selected, plot smoothing can be applied or removed, and estimated
 density can be plotted using 3 different methods (normal, log-normal, and KDE).
 
-.. image:: ../images/bayes_results_posteriors.png
+.. image:: /images/bayes_results_posteriors.png
    :scale: 60
    :alt: Bayes Results Dialog showing Parameter Values
    :align: center
@@ -65,7 +65,7 @@ density can be plotted using 3 different methods (normal, log-normal, and KDE).
 3. **Diagnostics**: This displays the MCMC chain for selected parameters from the Bayesian analysis. In the left side
 panel, the desired parameters to plot can be selected, and the maximum number of points to plot can also be adjusted.
 
-.. image:: ../images/bayes_results_diagnostics.png
+.. image:: /images/bayes_results_diagnostics.png
    :scale: 60
    :alt: Bayes Results Dialog showing Parameter Values
    :align: center
@@ -76,12 +76,12 @@ used to draw the plot as needed. Clicking the **Update Plot** button will start 
 the button text will show render progress, and the plots will be displayed when rendering is completed. The desired
 parameters to plot can also be selected in the side panel, and plot smoothing can be applied or removed.
 
-.. image:: ../images/bayes_results_corner_plot_empty.png
+.. image:: /images/bayes_results_corner_plot_empty.png
    :scale: 60
    :alt: Bayes Results Dialog showing Parameter Values
    :align: center
 
-.. image:: ../images/bayes_results_corner_plot.png
+.. image:: /images/bayes_results_corner_plot.png
    :scale: 60
    :alt: Bayes Results Dialog showing Parameter Values
    :align: center
@@ -90,7 +90,7 @@ parameters to plot can also be selected in the side panel, and plot smoothing ca
 5. **Parameter Values**: This displays the mean, 65% and 95% confidence interval values for the fitted parameters in
 the Bayesian analysis.
 
-.. image:: ../images/bayes_results_parameter_values.png
+.. image:: /images/bayes_results_parameter_values.png
    :scale: 60
    :alt: Bayes Results Dialog showing Parameter Values
    :align: center
@@ -107,14 +107,14 @@ The plot will be saved as png file with a white background by default, the backg
 by changing the **Export Background Colour** option to **none** in Settings dialog
 
 
-.. |options| image:: ../images/settings.png
+.. |options| image:: /images/settings.png
             :scale: 10
 
-.. |reset| image:: ../images/refresh.png
+.. |reset| image:: /images/refresh.png
             :scale: 10
 
-.. |pan| image:: ../images/pan.png
+.. |pan| image:: /images/pan.png
             :scale: 10
 
-.. |zoom| image:: ../images/zoom.png
+.. |zoom| image:: /images/zoom.png
             :scale: 10

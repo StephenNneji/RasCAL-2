@@ -3,7 +3,7 @@ Controls Window
 The fitting controls window allows the user select and configure a fit procedure, start/stop a fit, and view
 the final chi-squared from a fit.
 
-.. image:: ../images/controls_window.png
+.. image:: /images/controls_window.png
    :scale: 80
    :alt: Fitting Controls Window
    :align: center
@@ -26,7 +26,7 @@ finishes without being stopped.
 .. note:: A calculation cannot be started while editing the project, the control window will be
    disabled until the project is saved.
 
-.. image:: ../images/controls_window_running.png
+.. image:: /images/controls_window_running.png
    :scale: 80
    :alt: Fitting Controls Window with Active Run
    :align: center
