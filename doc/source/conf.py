@@ -44,6 +44,7 @@ html_theme_options = {
     "logo": {
         "text": "RasCAL-2",
     },
+    "secondary_sidebar_items": [],
     "icon_links": [
         {
             "name": "GitHub",

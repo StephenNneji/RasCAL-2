@@ -9,9 +9,9 @@ is a different custom file entry, each custom file has the following properties:
 * **Function Name**: The name of the function to call in the custom file.
 * **Language**: The language of the custom file is written in. These are supported:
 
-  * python (``*.py``)
-  * matlab (``*\.m``)
-  * cpp dynamic library (``*.dll``, ``*.so``, ``*.dylib``)
+  * python (**\*.py**)
+  * matlab (**\*.m**)
+  * cpp dynamic library (**\*.dll**, **\*.so**, **\*.dylib**)
 
 .. image:: /images/custom_file_tab.png
    :scale: 60

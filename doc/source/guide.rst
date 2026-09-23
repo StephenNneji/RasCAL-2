@@ -3,7 +3,7 @@ User Guide
 
 
 .. toctree::
-   :maxdepth: 2
+   :titlesonly:
 
    user/overview
    user/interface
