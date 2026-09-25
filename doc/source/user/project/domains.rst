@@ -3,7 +3,7 @@ Domains
 A domains calculations relies on grouping the layers into domains, then grouping the defined domains into contrasts,
 according to a domain ratio parameter. A domain ratio can be defined in the domains tab then referenced in a contrast.
 For a standard layers project, the domains or domain contrast can also be created in the domains tab and referenced in
-the contrast, Custom Layer and Custom XY projects are expected to group the doma ins in their associated custom
+the contrast, Custom Layer and Custom XY projects are expected to group the domains in their associated custom
 functions.
 
 The domains tab will only be visible when the **Calculation** is set to **domains**. It contains a parameter table for
