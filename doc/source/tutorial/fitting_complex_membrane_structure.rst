@@ -11,7 +11,7 @@ This structure contains an asymmetric distribution of lipids with an inner leafl
 phospholipid (in this case d62-dipalmitoylphosphatidylcholine) and an outer leaflet of bacterial lipopolysaccharides
 which are hydrogenous (or 99.98% protium labelled). The figure below gives some details of this structure:
 
-.. figure:: ../images/tutorial/complex_membrane_structure.png
+.. figure:: /images/tutorial/complex_membrane_structure.png
   :alt: Complex Protein-Bound Membrane Structure
 
   Neutron reflectivity profiles and model data fits (A–C) and the scattering length density profiles these fits
@@ -29,7 +29,7 @@ of lipid tail and sugar head-group (core oligosaccharide) region.
 
 Upon opening the Part 5 Complex model folder the following data sets and fits will load in RasCal:
 
-.. figure:: ../images/tutorial/complex_model_in_rascal.png
+.. figure:: /images/tutorial/complex_model_in_rascal.png
   :alt: Complex Model Project opened in RasCAL-2
 
 You will see six NR data sets which describe an asymmetric membrane structure across the silicon-water interface.
@@ -40,14 +40,14 @@ to the surface and, as can be seen, are not well fitted to a model which does no
 
 ColN is a cigar shaped protein:
 
-.. figure:: ../images/tutorial/cigar_shaped_protein.png
+.. figure:: /images/tutorial/cigar_shaped_protein.png
   :alt: Antibacterial protein colicin-N (ColN)
 
 This prolate shape means that a; with a single layer of protein on the surface of the membrane the thickness of that
 layer will be between 40 and 75 :math:`\mathring{A}` and b; that from that thickness we can determine the angle of the
 protein relative to the membrane surface:
 
-.. figure:: ../images/tutorial/coin_surface_normal.png
+.. figure:: /images/tutorial/coin_surface_normal.png
   :alt: Illustration of angle of ColN relative to the surface normal
 
 Using RasCal we will fit the angle of ColN relative to the surface normal and convert this value in the RasCal custom

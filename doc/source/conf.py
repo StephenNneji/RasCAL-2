@@ -44,6 +44,7 @@ html_theme_options = {
     "logo": {
         "text": "RasCAL-2",
     },
+    "secondary_sidebar_items": [],
     "icon_links": [
         {
             "name": "GitHub",
@@ -59,4 +60,9 @@ rst_epilog = """
 .. |tutorial data| raw:: html
 
    <a href="https://indico.stfc.ac.uk/event/792/contributions/4939/attachments/1739/7049/Virtual%20Reflectometry%20School%202026.zip" target="_blank">tutorial data</a>
+.. |add| image:: /images/create.png
+          :scale: 10
+
+.. |delete| image:: /images/delete.png
+             :scale: 10
 """

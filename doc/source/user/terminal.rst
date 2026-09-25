@@ -5,7 +5,7 @@ be displayed when modifying a project, running a fit, or when an unexpected issu
 in the terminal cannot be modified but can be selected and copied, the text will be cleared automatically when a
 new fit is started but can be cleared manually by clicking *Tools > Clear Terminal* in the menu.
 
-.. image:: ../images/terminal_window.png
+.. image:: /images/terminal_window.png
    :scale: 80
    :alt: Terminal Window
    :align: center
@@ -19,7 +19,7 @@ a setting summary and show the progress of the fit in a progress bar at the bott
   The amount of information printed during a fit can be customised using the  `display` or `updateFreq` options
   in the controls window.
 
-.. image:: ../images/terminal_window_run_info.png
+.. image:: /images/terminal_window_run_info.png
    :scale: 80
    :alt: Terminal Window showing Run Information
    :align: center
@@ -28,7 +28,7 @@ If an error occurs during project validation or a fit, an error message would be
 sometimes the message could contain extra debug information which shows the line of code where the error occurred,
 this debug information is useful for finding problems with custom files.
 
-.. image:: ../images/terminal_window_error.png
+.. image:: /images/terminal_window_error.png
    :scale: 80
    :alt: Terminal Window showing Error Message
    :align: center

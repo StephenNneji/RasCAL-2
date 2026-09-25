@@ -6,7 +6,7 @@ The Silicon-Water Interface
 The silicon water interface is a common surface used in NR studies. For these experiments, the reflection occurs
 within a silicon substrate.
 
-.. figure:: ../images/tutorial/solid_liquid_flow_cell.png
+.. figure:: /images/tutorial/solid_liquid_flow_cell.png
   :alt: Neutron Reflectometry in a solid-liquid flow cell
 
   Neutron Reflectometry in a solid-liquid flow cell. Note: the neutron beam is reflected inside of the substrate.
@@ -20,20 +20,20 @@ You will begin the tutorial by fitting a bare SiO2 coated silicon-D2O interface 
 
 Start RasCAL-2, the software will load and show the following screen:
 
-.. figure:: ../images/tutorial/rascal_startup.png
+.. figure:: /images/tutorial/rascal_startup.png
   :alt: RasCAL-2 Startup Screen
 
 Click on **Import Existing Project** and browse to the tutorial data folder named **Rascal 2 Practical Student** and
 select the folder named **Part 1 Si_D2O Interface** and select open, then click the Load button (see below)
 
-.. figure:: ../images/tutorial/loading_rascal_project.png
+.. figure:: /images/tutorial/loading_rascal_project.png
   :alt: Loading Project in RasCAL-2
 
 **Setting up the model to fit**
 
 After the RasCAL-2 project has loaded you will see the following:
 
-.. figure:: ../images/tutorial/rascal_project_opened.png
+.. figure:: /images/tutorial/rascal_project_opened.png
   :alt: Project loaded in RasCAL-2
 
 .. hint:: Rearrange the different windows in the software as you see fit
@@ -62,12 +62,12 @@ Therefore, we begin fitting by setting the correct experimental parameters.
 
 1. Click **Edit Project** on the Project window and you will now be able to edit the model window:
 
-   .. figure:: ../images/tutorial/edit_rascal_project.png
+   .. figure:: /images/tutorial/edit_rascal_project.png
      :alt: Editing the tutorial project
 
 2. Click on the parameters tab and add the following four parameters with the following bounds:
 
-   .. figure:: ../images/tutorial/add_parameters_to_project.png
+   .. figure:: /images/tutorial/add_parameters_to_project.png
      :alt: Add parameters to the tutorial project
 
    Set the value, lower and upper bounds for each parameter as shown below. These parameters will be fitted except
@@ -83,13 +83,13 @@ Therefore, we begin fitting by setting the correct experimental parameters.
 3. Next on the **Layers** tab **Add New Layer** and then populate the layer with each parameter in the correct place
    and naming the layer appropriately:
 
-   .. figure:: ../images/tutorial/add_layer_to_project.png
+   .. figure:: /images/tutorial/add_layer_to_project.png
      :alt: Add layer to the tutorial project
 
 4. In the **Contrasts** tab select the only contrast (labelled **Si D2O**) and at the bottom of the tab add your layer
    to the model section between the **Bulk in** and **Bulk out**:
 
-   .. figure:: ../images/tutorial/update_contrast_in_project.png
+   .. figure:: /images/tutorial/update_contrast_in_project.png
      :alt: Update contrast in the tutorial project
 
    Now click **Accept Changes** and the model should be updated with your new layer. Now rerun the fit.

@@ -7,7 +7,7 @@ Introduction
 ------------
 In this tutorial, you will fit layer models to experimental reflectivity datasets
 and use these fits to gain quantitative information about the molecular structure of material
-across a buried interface. To do this you will use the :ref:`RasCal 2 software <install>` which calculates slab
+across a buried interface. To do this you will use the :doc:`RasCal 2 software </install>` which calculates slab
 layer models using Abeles matrix formalism, which is conceptually very similar to Parratt’s
 recursive formalism which is also used in reflectometry data analysis.
 
@@ -18,7 +18,7 @@ are due to interference between these reflected waves.
 
 More information on the mathematics of Parratt’s recursive formalism is available in |PhysRev_95_359|.
 
-.. figure:: ../images/tutorial/slab_layer_model.png
+.. figure:: /images/tutorial/slab_layer_model.png
   :alt: slab layer model
 
   The "slab" layer model is used to calculate model reflectivity data by both the Abele’s matrix formalism
