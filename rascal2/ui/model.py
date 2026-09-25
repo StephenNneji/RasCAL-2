@@ -5,6 +5,7 @@ import warnings
 from json import JSONDecodeError
 from pathlib import Path
 
+import numpy as np
 import ratapi as rat
 import ratapi.outputs
 from PyQt6 import QtCore
@@ -262,7 +263,8 @@ class MainWindowModel(QtCore.QObject):
         save_path : str
             The save path of the project.
         """
-        self.project.write_script(script=save_path)
+        with np.printoptions(threshold=np.inf):
+            self.project.write_script(script=save_path)
 
     def is_project_example(self):
         return Path(self.save_path).is_relative_to(EXAMPLES_TEMP_PATH)

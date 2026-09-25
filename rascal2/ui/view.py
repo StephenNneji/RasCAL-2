@@ -134,10 +134,9 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.save_as_action.setEnabled(False)
         self.disabled_elements.append(self.save_as_action)
 
-        self.save_as_script_action = QtGui.QAction("Save Project as &Script...", self)
-        self.save_as_script_action.setStatusTip("Save project as a script.")
-        self.save_as_script_action.setIcon(QtGui.QIcon(path_for("save-project.png")))
-        self.save_as_script_action.triggered.connect(lambda: self.presenter.save_project(as_script=True))
+        self.save_as_script_action = QtGui.QAction("Export as &Script...", self)
+        self.save_as_script_action.setStatusTip("Export project as a script.")
+        self.save_as_script_action.triggered.connect(self.presenter.save_as_script)
         self.save_as_script_action.setEnabled(False)
         self.disabled_elements.append(self.save_as_script_action)
 
@@ -157,7 +156,7 @@ class MainWindowView(QtWidgets.QMainWindow):
         self.undo_view_action.setEnabled(False)
         self.disabled_elements.append(self.undo_view_action)
 
-        self.export_fits_action = QtGui.QAction("Export Fits", self)
+        self.export_fits_action = QtGui.QAction("Export Fits...", self)
         self.export_fits_action.setStatusTip("Export Result Data as CSV in a zip file.")
         self.export_fits_action.triggered.connect(self.presenter.export_fits)
         self.export_fits_action.setEnabled(False)
@@ -235,8 +234,8 @@ class MainWindowView(QtWidgets.QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction(self.save_project_action)
         file_menu.addAction(self.save_as_action)
-        file_menu.addAction(self.save_as_script_action)
         file_menu.addSeparator()
+        file_menu.addAction(self.save_as_script_action)
         file_menu.addAction(self.export_fits_action)
         file_menu.addSeparator()
         file_menu.addAction(self.settings_action)

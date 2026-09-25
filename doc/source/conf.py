@@ -54,6 +54,11 @@ html_theme_options = {
     ],
 }
 
+html_sidebars = {
+    "index": [],
+    "install": [],
+    "example": [],
+}
 
 rst_epilog = """
 .. |Angstrom| replace:: :math:`\mathring{A}`
@@ -65,4 +70,7 @@ rst_epilog = """
 
 .. |delete| image:: /images/delete.png
              :scale: 10
+             
+.. |options| image:: /images/settings.png
+            :scale: 10
 """

@@ -107,9 +107,6 @@ The plot will be saved as png file with a white background by default, the backg
 by changing the **Export Background Colour** option to **none** in Settings dialog
 
 
-.. |options| image:: /images/settings.png
-            :scale: 10
-
 .. |reset| image:: /images/refresh.png
             :scale: 10
 

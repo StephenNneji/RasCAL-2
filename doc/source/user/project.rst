@@ -55,6 +55,8 @@ The project tabs help organise the components of a project, the following tabs e
 * :doc:`project/domains`
 * :doc:`project/contrasts`
 
+.. _about_sliders:
+
 Changing Fitted Parameter Values
 --------------------------------
 Fitted parameters defined in the different project tabs can be modified in a single place using the slider view.
