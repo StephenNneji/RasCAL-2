@@ -1,7 +1,7 @@
 Examples
 ========
 A few examples are available in RasCAL-2 which demonstrate the supported model and calculation types. These
-example projects are created from the |Python RAT examples| where more explanations about each example can be found.
+example projects are created from the |RAT examples| where more explanations about each example can be found.
 
 To open an example:
 
@@ -25,6 +25,6 @@ open the copied project in RasCAL-2. The following examples are available in the
 6. **domains custom XY**: Incoherent summing ('domains') from custom XY model.
 7. **absorption**: Shows absorption (imaginary SLD) effect usually seen below the critical edge.
 
-.. |Python RAT Examples| raw:: html
+.. |RAT Examples| raw:: html
 
    <a href="https://rascalsoftware.github.io/RAT-Docs/1.0/python_examples/index.html" target="_blank">RAT API Examples</a>

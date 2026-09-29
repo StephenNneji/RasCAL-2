@@ -157,8 +157,22 @@ class MainWindowPresenter:
             self.view.undo_stack.setClean()
         return True
 
-    def save_as_script(self):
-        """Save the project as a Python script.
+    def ask_to_save_project(self):
+        """Warn the user of unsaved changes."""
+        proceed = True
+
+        if not self.view.undo_stack.isClean():
+            message = "The project has been modified. Do you want to save changes?"
+            reply = self.view.show_unsaved_dialog(message)
+            if reply == UnsavedReply.Save:
+                proceed = self.save_project()
+            elif reply == UnsavedReply.Cancel:
+                proceed = False
+
+        return proceed
+
+    def export_as_script(self):
+        """Export the project as a Python script.
 
         Returns
         -------
@@ -182,20 +196,6 @@ class MainWindowPresenter:
         except OSError as err:
             LOGGER.error(f"Failed to save script to {save_file}.\n", exc_info=err)
         return True
-
-    def ask_to_save_project(self):
-        """Warn the user of unsaved changes."""
-        proceed = True
-
-        if not self.view.undo_stack.isClean():
-            message = "The project has been modified. Do you want to save changes?"
-            reply = self.view.show_unsaved_dialog(message)
-            if reply == UnsavedReply.Save:
-                proceed = self.save_project()
-            elif reply == UnsavedReply.Cancel:
-                proceed = False
-
-        return proceed
 
     def export_fits(self):
         """Export results into multiple csv files in a zip file."""
