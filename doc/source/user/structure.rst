@@ -5,7 +5,7 @@ custom files required to run a calculation. A folder based project structure mea
 copying the project folder.
 
 .. warning:: If you plan to share a project folder with custom files and/or run it on different machines, ensure that
-   RasCAL-2 ia allowed to copy the custom files if it was outside the project folder (This is the default behaviour),
+   RasCAL-2 is allowed to copy the custom files if it was outside the project folder (This is the default behaviour),
    otherwise it will use an absolute path which could make the project fail to run.
 
 The primary files in a project folder are:

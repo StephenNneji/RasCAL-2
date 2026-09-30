@@ -27,7 +27,7 @@ main menu. The settings dialog has 3 tabs:
 
 2. **Plotting**: Setting related to plots.
 
-   .. image:: /images/settings_general.png
+   .. image:: /images/settings_plot.png
       :scale: 80
       :alt: Plot Settings
       :align: center
@@ -43,8 +43,8 @@ main menu. The settings dialog has 3 tabs:
       :align: center
 
    * **Current Matlab Directory**: This tells RasCAL-2 where the Matlab installation for custom files is located. On
-     Windows and Linux, this should be the folder path e.g *C:\Program Files\MATLAB\R2023a* while on MacOS should be
+     Windows and Linux, this should be the folder path e.g *C:\\Program Files\\MATLAB\\R2023a* while on MacOS should be
      the app e.g */Applications/MATLAB_R2023b.app*. The minimum supported MATLAB is 2023b.
    * **Matlab RAT directory**: This tells RasCAL-2 to use the provided Matlab RAT files when running a Matlab custom
      file. This could provide improved performance by avoiding switching in and out of Matlab code. Download and use
-     the latest version of RAT, set this to the path of the RAT folder e.g *C:\RAT*.
+     the latest version of RAT, set this to the path of the RAT folder e.g *C:\\RAT*.

@@ -16,8 +16,8 @@ operations. At the center of the screen are options for creating or loading a Ra
 
 Menus and Toolbar
 -----------------
-RasCAL-2 provides access to some actions in a menu bar under the tile bar. These actions are grouped in to 5
-groups explained. Clicking on a menu item will perform its associated action.
+RasCAL-2 provides access to some actions in a menu bar under the tile bar. These actions are grouped into 5
+groups explained below. Clicking on a menu item will perform its associated action.
 
 .. note:: On startup, some menu items like the **Windows** menu will be disabled. These menu items will be enabled
    after a project is created or loaded.
@@ -39,7 +39,7 @@ groups explained. Clicking on a menu item will perform its associated action.
 3. **Windows**
     * **Tile Windows**: Arrange windows in a tile formation.
     * **Reset to Default**: Reset the windows locations and sizes to the user saved defaults.
-    * **Save Current Window Positions**:
+    * **Save Current Window Positions**: Save the current positions and sizes of the windows as the user default.
 4. **Tools**
     * **Show Sliders/Hide Sliders**: Show or hide slider view in the project window. see :ref:`about_sliders`.
     * **Clear Terminal**: Clears the text in the terminal window.
