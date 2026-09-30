@@ -1,12 +1,9 @@
 import json
 import os
 import shutil
-import sys
 from urllib.parse import urljoin
 
-sys.path.insert(0, os.path.abspath(".."))
-
-from rascal2 import RASCAL2_VERSION
+from version import get_doc_version
 
 
 DOCS_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -14,11 +11,8 @@ BUILD_PATH = os.path.join(DOCS_PATH, 'build', 'html')
 ROOT_PATH = os.path.join(DOCS_PATH, "..", "..")
 
 url = os.environ.get('DOC_URL', '')
-version = str(RASCAL2_VERSION)
-if len(sys.argv) > 1 and sys.argv[1].strip().endswith(version):
-    doc_version = version
-else:
-    doc_version = "dev"
+doc_version = get_doc_version()
+
 WEB_PATH = os.path.join(ROOT_PATH, "web", doc_version)
 
 if os.path.isdir(WEB_PATH):

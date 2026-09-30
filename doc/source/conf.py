@@ -8,16 +8,23 @@
 import os
 import sys
 import datetime
+from urllib.parse import urljoin
 
-sys.path.insert(0, os.path.abspath("../.."))
+sys.path.insert(0, os.path.abspath(".."))
 
-from rascal2 import RASCAL2_VERSION
+from version import get_doc_version
 
+
+DOCS_PATH = os.path.abspath(os.path.dirname(__file__))
+BUILD_PATH = os.path.join(DOCS_PATH, 'build', 'html')
+ROOT_PATH = os.path.join(DOCS_PATH, "..", "..")
+
+url = os.environ.get('DOC_URL', '')
 
 project = 'RasCAL-2'
 copyright = u"2024-{}, ISIS Neutron and Muon Source".format(datetime.date.today().year)
 author = 'ISIS Neutron and Muon Source'
-version = RASCAL2_VERSION
+version = get_doc_version()
 # The full version, including alpha/beta/rc tags.
 release = version
 # -- General configuration ---------------------------------------------------
@@ -52,6 +59,10 @@ html_theme_options = {
             "icon": "fa-brands fa-github",
         },
     ],
+    'navbar_start': ['navbar-logo', 'version-switcher'],
+    'switcher': {'json_url': urljoin(url, 'switcher.json'),
+                 'version_match': version,
+                 'check_switcher': False, },
 }
 
 html_sidebars = {

@@ -12,6 +12,7 @@ jobs:
   build:
     env:
       DOC_URL: "https://rascalsoftware.github.io/RasCAL-2/"
+      DOC_VERSION: "dev"
     runs-on: ubuntu-latest
 
     steps:
@@ -32,8 +33,11 @@ jobs:
     - name: Build and Deploy Docs
       run: |
         cd main/doc
+        if [ ${{ github.ref_type }} == "tag" ]; then
+          export DOC_VERSION=${{github.ref_name}}
+        fi
         make html
-        python deploy.py ${{github.ref}}
+        python deploy.py
         cd ../../web
         git config user.name github-actions
         git config user.email github-actions@github.com
