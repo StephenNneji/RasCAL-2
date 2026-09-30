@@ -23,16 +23,16 @@ def write_result_to_zipped_csvs(filename, results):
             for i, array in enumerate(getattr(results, list_field)):
                 text_buffer = StringIO()
                 np.savetxt(text_buffer, array, fmt=fmt, delimiter=delimiter)
-                f.writestr(f"{list_field}_contrast{i}.csv", text_buffer.getvalue())
+                f.writestr(f"{list_field}_contrast_{i + 1}.csv", text_buffer.getvalue())
 
         for list_field in results_fields["double_list_fields"]:
             actual_list = getattr(results, list_field)
             for i in range(len(actual_list)):
                 for j, array in enumerate(actual_list[i]):
-                    domain = "" if len(actual_list[i]) == 1 else f"_domain{j}"
+                    domain = "" if len(actual_list[i]) == 1 else f"_domain_{j + 1}"
                     text_buffer = StringIO()
                     np.savetxt(text_buffer, array, fmt=fmt, delimiter=delimiter)
-                    f.writestr(f"{list_field}_contrast{i}{domain}.csv", text_buffer.getvalue())
+                    f.writestr(f"{list_field}_contrast_{i + 1}{domain}.csv", text_buffer.getvalue())
 
         contrast_param_fields = [
             "scalefactors",
@@ -57,16 +57,16 @@ def write_result_to_zipped_csvs(filename, results):
                 for i, array in enumerate(getattr(subclass, field)):
                     text_buffer = StringIO()
                     np.savetxt(text_buffer, array, fmt=fmt, delimiter=delimiter)
-                    f.writestr(f"Bayes/{inner_class}_{field}_contrast{i}.csv", text_buffer.getvalue())
+                    f.writestr(f"Bayes/{inner_class}_{field}_contrast_{i + 1}.csv", text_buffer.getvalue())
 
             for field in bayes_results_fields["double_list_fields"][inner_class]:
                 actual_list = getattr(subclass, field)
                 for i in range(len(actual_list)):
                     for j, array in enumerate(actual_list[i]):
-                        domain = "" if len(actual_list[i]) == 1 else f"_domain{j}"
+                        domain = "" if len(actual_list[i]) == 1 else f"_domain_{j + 1}"
                         text_buffer = StringIO()
                         np.savetxt(text_buffer, array, fmt=fmt, delimiter=delimiter)
-                        f.writestr(f"Bayes/{inner_class}_{field}_contrast{i}{domain}.csv", text_buffer.getvalue())
+                        f.writestr(f"Bayes/{inner_class}_{field}_contrast_{i + 1}{domain}.csv", text_buffer.getvalue())
 
             for field in bayes_results_fields["array_fields"][inner_class]:
                 array = getattr(subclass, field)

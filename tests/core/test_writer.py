@@ -42,7 +42,7 @@ def test_write_zipped_csv(result_file):
                     if part == "Bayes":
                         continue
                     if part.isdigit():
-                        prop = prop[int(part)]
+                        prop = prop[int(part) - 1]
                     else:
                         # underscore should be removed from r_stat
                         part = part if part != "Rstat" else "R_stat"

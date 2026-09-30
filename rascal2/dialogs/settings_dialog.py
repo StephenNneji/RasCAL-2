@@ -158,21 +158,21 @@ class MatlabSetupTab(QtWidgets.QWidget):
         if not getattr(sys, "frozen", False):
             browse_button.setEnabled(False)
             desc_text = (
-                "<b>The current matlab path can only be changed when running in bundle.<br/>"
+                "<b>The current Matlab path can only be changed when running in bundle.<br/>"
                 "For non-bundle, You can change which Matlab to use by pip installing a "
                 "different version <br/>of matlabengine.</b>"
             )
             matlab_dir_label.setText(f"{matlab_dir_label.text()}<br/>{desc_text}")
 
         desc_label = QtWidgets.QLabel(
-            "MATLAB RAT Directory (Optional):<br/>"
-            "<i>Running fully in MATLAB can provide more performance for custom files.</i>"
+            "Matlab RAT directory (Optional):<br/>"
+            "<i>Running fully in Matlab can provide more performance for custom files.</i>"
         )
         form_layout.addWidget(desc_label, 3, 0, 1, 6)
         self.rat_path = QtWidgets.QLineEdit(self)
         self.rat_path.setText(get_global_settings().value("matlab_rat_path", ""))
         self.rat_path.setReadOnly(True)
-        self.rat_path.setPlaceholderText("Select MATLAB RAT directory")
+        self.rat_path.setPlaceholderText("Select Matlab RAT directory")
         self.rat_path.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
 
         browse_button = QtWidgets.QPushButton("Browse")

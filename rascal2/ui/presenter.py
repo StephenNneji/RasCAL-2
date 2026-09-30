@@ -122,16 +122,13 @@ class MainWindowPresenter:
             self.model.controls.model_validate({setting: value})
             self.view.undo_stack.push(commands.EditControls({setting: value}, self))
 
-    def save_project(self, save_as: bool = False, as_script: bool = False):
+    def save_project(self, save_as: bool = False):
         """Save the model.
 
         Parameters
         ----------
         save_as : bool
             Whether we are saving to the existing save path or to a specified folder.
-
-        as_script: bool
-            Whether we are saving the project as a script or not.
 
         Returns
         -------
@@ -151,14 +148,7 @@ class MainWindowPresenter:
             if not to_path:
                 return False
         try:
-            if as_script:
-                filename = self.model.project.name.replace(" ", "_")
-                save_file = self.view.get_save_file("Save Project as Script", filename, "*.py")
-                if not save_file:
-                    return
-                self.model.save_project_as_script(save_file)
-            else:
-                self.model.save_project(to_path)
+            self.model.save_project(to_path)
         except OSError as err:
             LOGGER.error(f"Failed to save project to {to_path}.\n", exc_info=err)
         else:
@@ -180,6 +170,32 @@ class MainWindowPresenter:
                 proceed = False
 
         return proceed
+
+    def export_as_script(self):
+        """Export the project as a Python script.
+
+        Returns
+        -------
+         : bool
+            Indicates if the project was saved.
+        """
+        if self.view.project_widget.stacked_widget.currentIndex() != 0:
+            # User is still editing the project
+            self.view.show_message(
+                "The project window is still editing, please accept changes or cancel before saving to file."
+            )
+            return False
+
+        filename = self.model.project.name.replace(" ", "_")
+        save_file = self.view.get_save_file("Save Project as Script", filename, "*.py")
+        if not save_file:
+            return False
+
+        try:
+            self.model.save_project_as_script(save_file)
+        except OSError as err:
+            LOGGER.error(f"Failed to save script to {save_file}.\n", exc_info=err)
+        return True
 
     def export_fits(self):
         """Export results into multiple csv files in a zip file."""
