@@ -49,6 +49,10 @@ def write_result_to_zipped_csvs(filename, results):
         if not isinstance(results, BayesResults):
             return
 
+        text_buffer = StringIO()
+        np.savetxt(text_buffer, results.chain, fmt=fmt, delimiter=delimiter)
+        f.writestr("Bayes/chain.csv", text_buffer.getvalue())
+
         procedure_field = "nestedSamplerOutput" if results.from_procedure() == "ns" else "dreamOutput"
         for inner_class in ["predictionIntervals", "confidenceIntervals", procedure_field]:
             subclass = getattr(results, inner_class)
